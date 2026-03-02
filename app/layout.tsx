@@ -8,6 +8,11 @@ const geist = Geist({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "RaT Studios — Software with Personality",
   description: "RaT Studios builds thoughtful software products. Currently: StitchLogic, the iOS app for quilters.",
+  icons: {
+    icon: "/favicon.svg",
+    shortcut: "/favicon.svg",
+    apple: "/favicon.svg",
+  },
   openGraph: {
     title: "RaT Studios",
     description: "Software with personality. Currently building StitchLogic for quilters.",
