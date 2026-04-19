@@ -1,0 +1,56 @@
+{
+  "generatedAt": "2026-04-18T16:50:56.533Z",
+  "baseUrl": "https://www.ratstudios.ai",
+  "ok": false,
+  "summary": {
+    "passed": 3,
+    "failed": 1,
+    "total": 4
+  },
+  "routes": [
+    {
+      "path": "/admin",
+      "label": "Admin dashboard",
+      "ok": true,
+      "status": 200,
+      "durationMs": 127,
+      "matchedTexts": [
+        "RaT Studios admin"
+      ],
+      "missingTexts": []
+    },
+    {
+      "path": "/admin/issues",
+      "label": "Issues",
+      "ok": true,
+      "status": 200,
+      "durationMs": 404,
+      "matchedTexts": [
+        "Tracked issues"
+      ],
+      "missingTexts": []
+    },
+    {
+      "path": "/admin/ideas",
+      "label": "Ideas queue",
+      "ok": true,
+      "status": 200,
+      "durationMs": 48,
+      "matchedTexts": [
+        "Opportunity research queue"
+      ],
+      "missingTexts": []
+    },
+    {
+      "path": "/admin/ideas/self-storage-management-software",
+      "label": "Self-storage idea",
+      "ok": false,
+      "status": 500,
+      "durationMs": 135,
+      "matchedTexts": [],
+      "missingTexts": [
+        "Self-storage management software"
+      ]
+    }
+  ]
+}

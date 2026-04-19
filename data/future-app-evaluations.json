@@ -1,0 +1,162 @@
+{
+  "apps": [
+    {
+      "id": "future-app-lawn-route-kids",
+      "slug": "lawn-route-kids",
+      "name": "Lawn Route Kids",
+      "bucket": "Home services operations",
+      "stage": "intake",
+      "status": "New founder-submitted concept waiting on evaluation",
+      "owner": "Bub",
+      "summary": "Simple app for a small lawn mowing business to track customers, track mowing days, and create invoices after each job.",
+      "problemStatement": "Small lawn mowing operators, including kids running neighborhood businesses, need a dead-simple way to track customers, know which days each lawn was serviced, and create invoices without juggling paper, texts, or memory.",
+      "targetUsers": [
+        "Kids running a neighborhood lawn mowing business",
+        "Parents helping manage a small service business",
+        "Solo lawn mowing operators with simple recurring routes"
+      ],
+      "priorResearchNotes": [
+        "Founder need came from Richard's kids' real lawn mowing workflow.",
+        "Core jobs to be done are customer tracking, service-day tracking, and invoicing.",
+        "The value is simplicity first, not bloated field-service software."
+      ],
+      "currentBlocker": "Needs first evaluation brief and wedge definition",
+      "nextMilestone": "Decide whether this should stay a kid-business simple invoicing app or expand into a broader micro lawn-service product",
+      "nextSteps": [
+        "Interview the two current kid operators about exact workflow pain",
+        "Define the minimum workflow from customer list to completed mow to invoice sent",
+        "Compare against overbuilt field-service tools to confirm the simplicity wedge"
+      ],
+      "progressNotes": [
+        "Added directly from Richard's founder note in Telegram.",
+        "This should be evaluated as a deliberately simple product, not a generic FSM clone."
+      ],
+      "evaluation": {
+        "status": "not_started",
+        "updatedAt": null,
+        "overallWeightedScore": null,
+        "confidence": null,
+        "recommendation": null,
+        "decisionSummary": null,
+        "nextAction": "run_evaluation",
+        "bestWedge": "Ultra-simple mowing route, service log, and invoice flow for very small operators.",
+        "bestInitialCustomer": "Kids and families running neighborhood lawn mowing businesses with 5 to 50 recurring customers.",
+        "topReasonsToPursue": [
+          "The workflow pain is real and firsthand.",
+          "Existing field-service software is probably too bloated for this use case.",
+          "A simple product could win on ease and speed."
+        ],
+        "topReasonsForCaution": [
+          "Very small operators may not pay much.",
+          "This may be a feature wedge inside a larger micro-service business category.",
+          "The market may split between kids/families and professional lawn operators."
+        ],
+        "verifiedFindings": [
+          "Customer tracking, mowing-day tracking, and invoicing are the core founder-stated needs."
+        ],
+        "assumptions": [
+          "Small mowing operators want something much simpler than full field-service suites.",
+          "Recurring service-day tracking is important enough to drive adoption."
+        ],
+        "unknowns": [
+          "Whether families and small pros are the same buyer segment.",
+          "Whether invoicing alone is enough of a wedge or if scheduling/payment collection must be included."
+        ],
+        "killCriteria": [
+          "If users are satisfied with spreadsheets and Venmo-level workflows.",
+          "If willingness to pay is too low even for a very simple product."
+        ],
+        "reportSections": []
+      },
+      "createdAt": "2026-04-18T23:28:00.000Z",
+      "updatedAt": "2026-04-18T23:28:00.000Z"
+    },
+    {
+      "id": "future-app-internal-studio-ops-layer",
+      "slug": "internal-studio-ops-layer",
+      "name": "Internal studio ops layer",
+      "bucket": "Operations",
+      "stage": "evaluation_in_progress",
+      "status": "Needs full future-app evaluation brief",
+      "owner": "Bub",
+      "summary": "Internal operating system for RaT Studios across product health, issues, growth, users, revenue, and roadmap visibility.",
+      "problemStatement": "RaT Studios needs a coherent operating layer across current apps, future bets, issues, growth, and decision-making instead of fragmented status views.",
+      "targetUsers": [
+        "Internal studio operators",
+        "Founders managing portfolio decisions"
+      ],
+      "priorResearchNotes": [
+        "Admin structure is live but still maturing into a true operating system.",
+        "Need better source feeds for marketing, users, and revenue."
+      ],
+      "currentBlocker": "No decision-grade evaluation brief yet",
+      "nextMilestone": "Generate first evaluation brief with naming, market, pricing, and risk analysis",
+      "nextSteps": [
+        "Normalize concept into future-app evaluation input",
+        "Run naming and competitor research",
+        "Score the opportunity and decide whether it moves toward planning"
+      ],
+      "progressNotes": [
+        "Future apps page is live but still hardcoded",
+        "Need a real evaluation pipeline instead of static portfolio cards"
+      ],
+      "evaluation": {
+        "status": "not_started",
+        "updatedAt": null,
+        "overallWeightedScore": null,
+        "confidence": null,
+        "recommendation": null,
+        "decisionSummary": null,
+        "nextAction": "run_evaluation",
+        "bestWedge": "Internal founder operating system for portfolio visibility, issue routing, verification, and app-level decision support.",
+        "bestInitialCustomer": "RaT Studios itself as the design partner and first operational user.",
+        "topReasonsToPursue": [
+          "Direct internal access makes validation cheap and fast.",
+          "The operating pain is real and already active.",
+          "A working internal layer could later become a productized ops system."
+        ],
+        "topReasonsForCaution": [
+          "Could stay too custom to RaT Studios.",
+          "Source integrations may sprawl before value is proven.",
+          "Internal usefulness does not automatically equal outside demand."
+        ],
+        "verifiedFindings": [
+          "The admin operating layer already exists in production.",
+          "Issue workflow, ideas workflow, and future-app views are live but fragmented."
+        ],
+        "assumptions": [
+          "A reusable studio ops pattern could exist beyond RaT Studios.",
+          "Future operators would pay for a unified portfolio execution layer."
+        ],
+        "unknowns": [
+          "Whether outside studios have the same operating pain.",
+          "What minimum feature set proves repeatable external value."
+        ],
+        "killCriteria": [
+          "If the system only works as a custom internal dashboard with no repeatable pattern.",
+          "If integration complexity grows faster than operator value."
+        ],
+        "reportSections": [
+          {
+            "title": "Executive summary",
+            "body": "This future app needs decision-grade validation around whether the internal RaT Studios operating layer is a one-off internal tool or the start of a repeatable product. The opportunity is promising because the pain is real and the founders are already living it, but internal usefulness alone is not enough."
+          },
+          {
+            "title": "Verified findings",
+            "body": "The current admin system already handles ideas, issues, dashboards, and future apps in production. The pain is not theoretical. The missing piece is whether the operating pattern generalizes outside this exact studio context."
+          },
+          {
+            "title": "Assumptions and unknowns",
+            "body": "Assumption: small studios and operator-led software shops also want a unified product-and-ops command layer. Unknown: whether that demand is strong enough to justify productization rather than continued internal tooling."
+          },
+          {
+            "title": "Recommendation",
+            "body": "Keep this in future apps and run a proper evaluation brief before treating it like a product bet. The next action is not building more features blindly. The next action is validating whether the pattern is externally repeatable."
+          }
+        ]
+      },
+      "createdAt": "2026-04-18T22:25:00.000Z",
+      "updatedAt": "2026-04-18T22:25:00.000Z"
+    }
+  ]
+}
