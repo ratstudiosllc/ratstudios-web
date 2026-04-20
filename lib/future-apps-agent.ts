@@ -81,6 +81,42 @@ function saveStore(store: FutureAppsStore) {
   fs.writeFileSync(DATA_PATH, `${JSON.stringify(store, null, 2)}\n`, "utf8");
 }
 
+function normalizeFutureAppInput(input: {
+  slug: string;
+  name: string;
+  summary: string;
+  problemStatement: string;
+  targetUsers: string[];
+  priorResearchNotes: string[];
+  bucket: string;
+  owner?: string;
+}) {
+  const slug = input.slug.trim();
+  const name = input.name.trim();
+  const summary = input.summary.trim();
+  const problemStatement = input.problemStatement.trim();
+  const bucket = input.bucket.trim() || "Uncategorized";
+  const targetUsers = input.targetUsers.map((value) => value.trim()).filter(Boolean);
+  const priorResearchNotes = input.priorResearchNotes.map((value) => value.trim()).filter(Boolean);
+
+  if (!slug) throw new Error("Future app slug is required");
+  if (!name) throw new Error("Future app name is required");
+  if (!summary) throw new Error("Future app summary is required");
+  if (!problemStatement) throw new Error("Future app problem statement is required");
+  if (targetUsers.length === 0) throw new Error("Future app target users are required");
+
+  return {
+    slug,
+    name,
+    summary,
+    problemStatement,
+    targetUsers,
+    priorResearchNotes,
+    bucket,
+    owner: input.owner?.trim() || "Bub",
+  };
+}
+
 export function listFutureApps() {
   return loadStore().apps.sort((a, b) => {
     const stageRank: Record<FutureAppStage, number> = {
@@ -130,22 +166,23 @@ export function createFutureAppFromIdea(input: {
   bucket: string;
   owner?: string;
 }) {
+  const normalized = normalizeFutureAppInput(input);
   const store = loadStore();
-  const existing = store.apps.find((app) => app.slug === input.slug);
+  const existing = store.apps.find((app) => app.slug === normalized.slug);
   if (existing) return existing;
   const now = new Date().toISOString();
   const record: FutureAppRecord = {
-    id: `future-app-${input.slug}`,
-    slug: input.slug,
-    name: input.name,
-    bucket: input.bucket,
+    id: `future-app-${normalized.slug}`,
+    slug: normalized.slug,
+    name: normalized.name,
+    bucket: normalized.bucket,
     stage: "intake",
     status: "Promoted from ideas and waiting on evaluation",
-    owner: input.owner ?? "Bub",
-    summary: input.summary,
-    problemStatement: input.problemStatement,
-    targetUsers: input.targetUsers,
-    priorResearchNotes: input.priorResearchNotes,
+    owner: normalized.owner,
+    summary: normalized.summary,
+    problemStatement: normalized.problemStatement,
+    targetUsers: normalized.targetUsers,
+    priorResearchNotes: normalized.priorResearchNotes,
     currentBlocker: "Needs future-app evaluation run",
     nextMilestone: "Generate first decision-grade evaluation brief",
     nextSteps: [
@@ -180,7 +217,13 @@ export function createFutureAppFromIdea(input: {
   };
   store.apps.unshift(record);
   saveStore(store);
-  return record;
+
+  const created = getFutureAppById(normalized.slug);
+  if (!created) {
+    throw new Error(`Future app ${normalized.slug} was not persisted`);
+  }
+
+  return created;
 }
 
 export function runFutureAppEvaluation(id: string) {
