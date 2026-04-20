@@ -1,7 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { ADMIN_SESSION_COOKIE } from "@/lib/admin-gate";
-import { isAllowedAdminEmail } from "@/lib/admin-auth";
+import { isAllowedAdminUser } from "@/lib/admin-auth";
 
 const PUBLIC_PATHS = [
   "/",
@@ -67,7 +67,7 @@ export async function proxy(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user || !isAllowedAdminEmail(user.email)) {
+  if (!user || !isAllowedAdminUser(user.email ?? "")) {
     if (pathname.startsWith("/api/admin/")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
