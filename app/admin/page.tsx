@@ -300,18 +300,10 @@ export default async function AdminPage() {
               <LayoutDashboard className="h-3.5 w-3.5" />
               Studio dashboard
             </div>
-            <h1 className="mt-4 text-3xl font-semibold text-neutral-950">RaT Studios admin</h1>
+            <h1 className="mt-4 text-3xl font-semibold text-orange-500">RaT Studios Admin</h1>
             <p className="mt-2 max-w-3xl text-sm text-neutral-500">
               Studio overview first, then clean app lanes underneath. Current apps, future pipeline, issue visibility, and operating placeholders all live in one coherent structure.
             </p>
-          </div>
-          <div className="flex flex-wrap gap-3">
-            <Link href="/admin/marketing" className="rounded-xl border border-black/10 bg-white px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-black/[0.03]">
-              Marketing
-            </Link>
-            <Link href="/" className="rounded-xl bg-neutral-950 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800">
-              Back to site
-            </Link>
           </div>
         </div>
 
