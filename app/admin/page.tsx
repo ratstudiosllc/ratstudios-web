@@ -294,16 +294,29 @@ export default async function AdminPage() {
   return (
     <div className="min-h-screen bg-[#faf7f2] text-neutral-900">
       <div className="mx-auto max-w-[1500px] px-6 py-8">
-        <div className="flex flex-col gap-4 rounded-[32px] border border-black/5 bg-white px-6 py-6 shadow-sm lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <div className="inline-flex items-center gap-2 rounded-full bg-neutral-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-neutral-600">
-              <LayoutDashboard className="h-3.5 w-3.5" />
-              Studio dashboard
-            </div>
-            <h1 className="mt-4 text-3xl font-semibold text-orange-500">RaT Studios Admin</h1>
-            <p className="mt-2 max-w-3xl text-sm text-neutral-500">
-              Studio overview first, then clean app lanes underneath. Current apps, future pipeline, issue visibility, and operating placeholders all live in one coherent structure.
-            </p>
+        <div className="rounded-[32px] border border-black/5 bg-white px-6 py-6 shadow-sm">
+          <h1 className="text-3xl font-semibold text-orange-500">RaT Studios Admin</h1>
+          <div className="mt-5 flex flex-wrap gap-3">
+            <Link href="/admin/current-apps" className="inline-flex items-center gap-2 rounded-2xl border border-black/10 bg-[#fcfaf7] px-4 py-3 text-sm font-medium text-neutral-800 transition hover:bg-white hover:border-black/20">
+              <Layers3 className="h-4 w-4 text-orange-500" />
+              Current Apps
+            </Link>
+            <Link href="/admin/ideas" className="inline-flex items-center gap-2 rounded-2xl border border-black/10 bg-[#fcfaf7] px-4 py-3 text-sm font-medium text-neutral-800 transition hover:bg-white hover:border-black/20">
+              <Sparkles className="h-4 w-4 text-orange-500" />
+              Ideas
+            </Link>
+            <Link href="/admin/future-apps" className="inline-flex items-center gap-2 rounded-2xl border border-black/10 bg-[#fcfaf7] px-4 py-3 text-sm font-medium text-neutral-800 transition hover:bg-white hover:border-black/20">
+              <Megaphone className="h-4 w-4 text-orange-500" />
+              Future Apps
+            </Link>
+            <Link href="/admin/issues" className="inline-flex items-center gap-2 rounded-2xl border border-black/10 bg-[#fcfaf7] px-4 py-3 text-sm font-medium text-neutral-800 transition hover:bg-white hover:border-black/20">
+              <Wrench className="h-4 w-4 text-orange-500" />
+              Issues
+            </Link>
+            <Link href="/admin/org-chart" className="inline-flex items-center gap-2 rounded-2xl border border-black/10 bg-[#fcfaf7] px-4 py-3 text-sm font-medium text-neutral-800 transition hover:bg-white hover:border-black/20">
+              <Building2 className="h-4 w-4 text-orange-500" />
+              Org Chart
+            </Link>
           </div>
         </div>
 
