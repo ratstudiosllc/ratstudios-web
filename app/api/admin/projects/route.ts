@@ -10,7 +10,7 @@ export async function GET() {
       total_runs: number;
       active_runs: number;
       failures_today: number;
-      total_cost: number;
+      total_cost: number | null;
     }>>((acc, run) => {
       const key = run.project_id;
       if (!acc[key]) {
@@ -26,7 +26,9 @@ export async function GET() {
       acc[key].total_runs += 1;
       if (["running", "retrying", "queued"].includes(run.status)) acc[key].active_runs += 1;
       if (run.status === "failed") acc[key].failures_today += 1;
-      acc[key].total_cost += run.estimated_cost_usd;
+      if (acc[key].total_cost != null) {
+        acc[key].total_cost = run.estimated_cost_usd == null ? null : acc[key].total_cost + run.estimated_cost_usd;
+      }
       return acc;
     }, {})
   );

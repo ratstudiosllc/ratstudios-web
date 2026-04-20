@@ -15,6 +15,7 @@ export type AlertStatus = "open" | "resolved";
 export type UserRole = "Admin" | "Operator" | "Viewer" | "ProjectOwner";
 export type TriggerType = "schedule" | "manual" | "api" | "webhook";
 export type Priority = "low" | "normal" | "high" | "urgent";
+export type MetricAvailability = "live" | "inferred" | "unavailable";
 
 export interface OpsCurrentStep {
   step_index: number;
@@ -43,7 +44,7 @@ export interface OpsRun {
   retry_count: number;
   tokens_input: number;
   tokens_output: number;
-  estimated_cost_usd: number;
+  estimated_cost_usd: number | null;
   current_step: OpsCurrentStep | null;
   failure_category: string | null;
   failure_message: string | null;
@@ -91,17 +92,38 @@ export interface WorkerHeartbeat {
   last_heartbeat_at: string;
 }
 
+export interface OpsMetricCard {
+  key:
+    | "runsToday"
+    | "activeRuns"
+    | "successRate"
+    | "failedRuns"
+    | "stuckRuns"
+    | "humanApprovalsPending"
+    | "avgCompletionTime"
+    | "costToday";
+  label: string;
+  value: number | null;
+  formattedValue: string;
+  availability: MetricAvailability;
+  definition: string;
+  note: string;
+  updatedAt: string | null;
+}
+
 export interface OpsKpis {
   runsToday: number;
-  successRate: number;
+  successRate: number | null;
   failuresToday: number;
-  avgDurationMs: number;
-  medianDurationMs: number;
+  avgDurationMs: number | null;
+  medianDurationMs: number | null;
   activeRuns: number;
+  stuckRuns: number;
   queueDepth: number;
   retriesToday: number;
-  totalCostToday: number;
+  totalCostToday: number | null;
   totalTokensToday: number;
+  humanApprovalsPending: number | null;
 }
 
 export interface OpsFilters {
@@ -119,6 +141,7 @@ export interface OpsFilters {
 
 export interface OpsRunsResponse {
   kpis: OpsKpis;
+  metricCards: OpsMetricCard[];
   runs: OpsRun[];
   alerts: OpsAlert[];
   heartbeats: WorkerHeartbeat[];
@@ -228,19 +251,23 @@ async function runOpenClawJson(args: string[]) {
 }
 
 function emptyOpsRunsResponse(): OpsRunsResponse {
+  const generatedAt = new Date().toISOString();
   return {
     kpis: {
       runsToday: 0,
-      successRate: 0,
+      successRate: null,
       failuresToday: 0,
-      avgDurationMs: 0,
-      medianDurationMs: 0,
+      avgDurationMs: null,
+      medianDurationMs: null,
       activeRuns: 0,
+      stuckRuns: 0,
       queueDepth: 0,
       retriesToday: 0,
-      totalCostToday: 0,
+      totalCostToday: null,
       totalTokensToday: 0,
+      humanApprovalsPending: null,
     },
+    metricCards: [],
     runs: [],
     alerts: [],
     heartbeats: [],
@@ -256,7 +283,7 @@ function emptyOpsRunsResponse(): OpsRunsResponse {
       owners: [],
       statuses: [],
     },
-    generatedAt: new Date().toISOString(),
+    generatedAt,
     transport: {
       realtimePreferred: "sse",
       pollingFallbackSeconds: 10,
@@ -277,8 +304,9 @@ function inferProject(session: OpenClawSession) {
 function inferStatus(session: OpenClawSession): RunStatus {
   if (session.abortedLastRun) return "failed";
   const ageMs = session.ageMs ?? Number.MAX_SAFE_INTEGER;
+  const hasFreshTokenSnapshot = session.totalTokensFresh !== false;
   if (ageMs < 5 * 60 * 1000) return "running";
-  if (ageMs < 30 * 60 * 1000) return "completed";
+  if (!hasFreshTokenSnapshot && ageMs < 30 * 60 * 1000) return "running";
   return "completed";
 }
 
@@ -303,6 +331,10 @@ function buildTaskTitle(session: OpenClawSession) {
   return tail.replace(/_/g, " ");
 }
 
+function estimateCostUsd(inputTokens: number, outputTokens: number) {
+  return Number((((inputTokens + outputTokens) / 1_000_000) * 2.5).toFixed(2));
+}
+
 function mapSessionToRun(session: OpenClawSession): OpsRun {
   const updated_at = new Date(session.updatedAt).toISOString();
   const ageMs = session.ageMs ?? 0;
@@ -313,6 +345,7 @@ function mapSessionToRun(session: OpenClawSession): OpsRun {
   const totalTokens = session.totalTokens ?? 0;
   const inputTokens = session.inputTokens ?? Math.round(totalTokens * 0.65);
   const outputTokens = session.outputTokens ?? Math.max(0, totalTokens - inputTokens);
+  const hasFreshUsage = session.totalTokensFresh === true && session.totalTokens != null;
   return {
     id: session.sessionId || session.key,
     project: project.name,
@@ -330,11 +363,11 @@ function mapSessionToRun(session: OpenClawSession): OpsRun {
     created_at: createdAt,
     started_at: status === "queued" ? null : createdAt,
     updated_at,
-    duration_ms: status === "running" ? ageMs : Math.max(0, Math.min(ageMs, 30 * 60 * 1000)),
+    duration_ms: ageMs,
     retry_count: session.abortedLastRun ? 1 : 0,
     tokens_input: inputTokens,
     tokens_output: outputTokens,
-    estimated_cost_usd: Number(((inputTokens + outputTokens) / 1_000_000 * 2.5).toFixed(2)),
+    estimated_cost_usd: hasFreshUsage ? estimateCostUsd(inputTokens, outputTokens) : null,
     current_step: status === "running"
       ? { step_index: 1, title: "Active OpenClaw session", status: "running" }
       : null,
@@ -395,8 +428,112 @@ async function loadStatus(): Promise<OpenClawStatusResponse | null> {
   }
 }
 
+function formatMetricValue(key: OpsMetricCard["key"], value: number | null) {
+  if (value == null) return "Not yet wired";
+  if (key === "successRate") return `${value}%`;
+  if (key === "avgCompletionTime") {
+    if (value <= 0) return "0m";
+    const totalMinutes = Math.round(value / 60000);
+    if (totalMinutes < 60) return `${totalMinutes}m`;
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    return minutes ? `${hours}h ${minutes}m` : `${hours}h`;
+  }
+  if (key === "costToday") return `$${value.toFixed(2)}`;
+  return String(value);
+}
+
+function buildMetricCards(kpis: OpsKpis, generatedAt: string): OpsMetricCard[] {
+  return [
+    {
+      key: "runsToday",
+      label: "Runs today",
+      value: kpis.runsToday,
+      formattedValue: formatMetricValue("runsToday", kpis.runsToday),
+      availability: "live",
+      definition: "Distinct runtime sessions created today from the OpenClaw session snapshot.",
+      note: "Live from current session inventory.",
+      updatedAt: generatedAt,
+    },
+    {
+      key: "activeRuns",
+      label: "Active runs",
+      value: kpis.activeRuns,
+      formattedValue: formatMetricValue("activeRuns", kpis.activeRuns),
+      availability: "live",
+      definition: "Sessions currently inferred to still be in progress from fresh runtime activity.",
+      note: "Backed by live session freshness and status snapshot.",
+      updatedAt: generatedAt,
+    },
+    {
+      key: "successRate",
+      label: "Success rate",
+      value: kpis.successRate,
+      formattedValue: formatMetricValue("successRate", kpis.successRate),
+      availability: "inferred",
+      definition: "Completed sessions divided by today’s visible sessions in the current runtime snapshot.",
+      note: "Inference only. OpenClaw does not yet expose explicit terminal success events per run.",
+      updatedAt: generatedAt,
+    },
+    {
+      key: "failedRuns",
+      label: "Failed runs",
+      value: kpis.failuresToday,
+      formattedValue: formatMetricValue("failedRuns", kpis.failuresToday),
+      availability: "live",
+      definition: "Sessions marked failed today because the runtime reports an aborted last run.",
+      note: "Live for aborted runs only. Other failure modes may not be surfaced yet.",
+      updatedAt: generatedAt,
+    },
+    {
+      key: "stuckRuns",
+      label: "Stuck runs",
+      value: kpis.stuckRuns,
+      formattedValue: formatMetricValue("stuckRuns", kpis.stuckRuns),
+      availability: "inferred",
+      definition: "Runs still marked active after 30 minutes without clearing.",
+      note: "Heuristic until runtime exposes a real stuck or blocked state.",
+      updatedAt: generatedAt,
+    },
+    {
+      key: "humanApprovalsPending",
+      label: "Human approvals pending",
+      value: kpis.humanApprovalsPending,
+      formattedValue: formatMetricValue("humanApprovalsPending", kpis.humanApprovalsPending),
+      availability: "unavailable",
+      definition: "Count of runs waiting on a human approval queue.",
+      note: "Not shown because no approval queue API is wired into this admin surface yet.",
+      updatedAt: null,
+    },
+    {
+      key: "avgCompletionTime",
+      label: "Avg completion time",
+      value: kpis.avgDurationMs,
+      formattedValue: formatMetricValue("avgCompletionTime", kpis.avgDurationMs),
+      availability: "inferred",
+      definition: "Average age of today’s completed visible sessions.",
+      note: "Useful directional signal, but not a true run lifecycle duration yet.",
+      updatedAt: generatedAt,
+    },
+    {
+      key: "costToday",
+      label: "Cost today",
+      value: kpis.totalCostToday,
+      formattedValue: formatMetricValue("costToday", kpis.totalCostToday),
+      availability: kpis.totalCostToday == null ? "unavailable" : "inferred",
+      definition: "Estimated spend from token counts visible in the runtime snapshot.",
+      note: kpis.totalCostToday == null
+        ? "Not shown because at least one visible session lacks fresh token usage data."
+        : "Estimated only. This is not invoice-grade billing data.",
+      updatedAt: kpis.totalCostToday == null ? null : generatedAt,
+    },
+  ];
+}
+
 export async function getOpsRuns(filters: OpsFilters = {}): Promise<OpsRunsResponse> {
   const [sessions, status] = await Promise.all([loadSessions(), loadStatus()]);
+  if (!sessions.length) return emptyOpsRunsResponse();
+
   const runs = sessions.map(mapSessionToRun);
   const filtered = applyFilters(runs, filters);
   const page = Math.max(1, filters.page ?? 1);
@@ -406,9 +543,32 @@ export async function getOpsRuns(filters: OpsFilters = {}): Promise<OpsRunsRespo
   const today = new Date();
   const isToday = (value: string) => new Date(value).toDateString() === today.toDateString();
   const todaysRuns = runs.filter((run) => isToday(run.created_at));
-  const completedDurations = todaysRuns.filter((run) => run.status === "completed").map((run) => run.duration_ms);
+  const completedRunsToday = todaysRuns.filter((run) => run.status === "completed");
+  const completedDurations = completedRunsToday.map((run) => run.duration_ms);
   const queueDepth = status?.tasks?.queued ?? runs.filter((run) => run.status === "queued").length;
   const activeRuns = runs.filter((run) => ["running", "retrying"].includes(run.status)).length;
+  const stuckRuns = runs.filter((run) => run.status === "running" && run.duration_ms >= 30 * 60 * 1000).length;
+  const allTodaysRunsHaveCost = todaysRuns.every((run) => run.estimated_cost_usd != null);
+  const totalCostToday = todaysRuns.length && allTodaysRunsHaveCost
+    ? Number(todaysRuns.reduce((sum, run) => sum + (run.estimated_cost_usd ?? 0), 0).toFixed(2))
+    : null;
+
+  const kpis: OpsKpis = {
+    runsToday: todaysRuns.length,
+    successRate: todaysRuns.length ? Number(((completedRunsToday.length / todaysRuns.length) * 100).toFixed(1)) : null,
+    failuresToday: todaysRuns.filter((run) => run.status === "failed").length,
+    avgDurationMs: completedDurations.length ? Math.round(completedDurations.reduce((sum, value) => sum + value, 0) / completedDurations.length) : null,
+    medianDurationMs: completedDurations.length ? median(completedDurations) : null,
+    activeRuns,
+    stuckRuns,
+    queueDepth,
+    retriesToday: todaysRuns.reduce((sum, run) => sum + run.retry_count, 0),
+    totalCostToday,
+    totalTokensToday: todaysRuns.reduce((sum, run) => sum + run.tokens_input + run.tokens_output, 0),
+    humanApprovalsPending: null,
+  };
+
+  const generatedAt = new Date().toISOString();
   const alerts: OpsAlert[] = runs.filter((run) => run.status === "failed").slice(0, 10).map((run) => ({
     id: `alert_${run.id}`,
     status: "open",
@@ -428,23 +588,13 @@ export async function getOpsRuns(filters: OpsFilters = {}): Promise<OpsRunsRespo
       queue_depth: queueDepth,
       active_run_id: runs.find((run) => run.status === "running")?.id ?? null,
       active_step_title: runs.find((run) => run.status === "running")?.current_step?.title ?? null,
-      last_heartbeat_at: new Date().toISOString(),
+      last_heartbeat_at: generatedAt,
     },
   ];
 
   return {
-    kpis: {
-      runsToday: todaysRuns.length,
-      successRate: todaysRuns.length ? Number(((todaysRuns.filter((run) => run.status === "completed").length / todaysRuns.length) * 100).toFixed(1)) : 0,
-      failuresToday: todaysRuns.filter((run) => run.status === "failed").length,
-      avgDurationMs: completedDurations.length ? Math.round(completedDurations.reduce((sum, value) => sum + value, 0) / completedDurations.length) : 0,
-      medianDurationMs: median(completedDurations),
-      activeRuns,
-      queueDepth,
-      retriesToday: todaysRuns.reduce((sum, run) => sum + run.retry_count, 0),
-      totalCostToday: Number(todaysRuns.reduce((sum, run) => sum + run.estimated_cost_usd, 0).toFixed(2)),
-      totalTokensToday: todaysRuns.reduce((sum, run) => sum + run.tokens_input + run.tokens_output, 0),
-    },
+    kpis,
+    metricCards: buildMetricCards(kpis, generatedAt),
     runs: paged,
     alerts,
     heartbeats,
@@ -460,7 +610,7 @@ export async function getOpsRuns(filters: OpsFilters = {}): Promise<OpsRunsRespo
       owners: [...new Set(runs.map((run) => run.owner))],
       statuses: [...new Set(runs.map((run) => run.status))],
     },
-    generatedAt: new Date().toISOString(),
+    generatedAt,
     transport: {
       realtimePreferred: "sse",
       pollingFallbackSeconds: 10,

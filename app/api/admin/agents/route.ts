@@ -13,7 +13,7 @@ export async function GET() {
       active_runs: number;
       failure_rate_7d: number;
       median_duration_7d: number;
-      avg_cost_7d: number;
+      avg_cost_7d: number | null;
       owner: string;
       status: string;
       queue_depth: number;

@@ -3,19 +3,15 @@ import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import {
   Activity,
   AlertCircle,
-  Building2,
   CheckCircle2,
   Clock3,
   DollarSign,
-  Layers3,
-  Megaphone,
   PauseCircle,
   PlayCircle,
   ShieldAlert,
-  Sparkles,
   Wrench,
 } from "lucide-react";
-import { getOpsRuns } from "@/lib/ops-admin";
+import { getOpsRuns, type MetricAvailability, type OpsMetricCard } from "@/lib/ops-admin";
 
 export const revalidate = 0;
 
@@ -24,13 +20,19 @@ function cn(...values: Array<string | false | null | undefined>) {
 }
 
 function getFreshnessMeta(dateString?: string | null) {
-  if (!dateString) return { label: "Unknown freshness", tone: "bg-neutral-100 text-neutral-700" };
+  if (!dateString) return { label: "Not live", tone: "bg-neutral-100 text-neutral-700" };
   const date = new Date(dateString);
   if (Number.isNaN(date.getTime())) return { label: "Unknown freshness", tone: "bg-neutral-100 text-neutral-700" };
   const diffMinutes = Math.floor((Date.now() - date.getTime()) / 60000);
   if (diffMinutes <= 15) return { label: "Live", tone: "bg-emerald-100 text-emerald-800" };
   if (diffMinutes <= 60) return { label: `${diffMinutes}m old`, tone: "bg-amber-100 text-amber-800" };
   return { label: `${Math.floor(diffMinutes / 60)}h old`, tone: "bg-red-100 text-red-800" };
+}
+
+function getAvailabilityMeta(availability: MetricAvailability) {
+  if (availability === "live") return { label: "Live", tone: "bg-emerald-100 text-emerald-800" };
+  if (availability === "inferred") return { label: "Inferred", tone: "bg-amber-100 text-amber-800" };
+  return { label: "Not wired", tone: "bg-neutral-100 text-neutral-700" };
 }
 
 function formatMountain(dateString?: string | null) {
@@ -49,7 +51,7 @@ function formatMountain(dateString?: string | null) {
   }).format(date);
 }
 
-function formatDuration(ms: number) {
+function formatDuration(ms: number | null) {
   if (!ms) return "0m";
   const totalMinutes = Math.round(ms / 60000);
   if (totalMinutes < 60) return `${totalMinutes}m`;
@@ -58,33 +60,44 @@ function formatDuration(ms: number) {
   return minutes ? `${hours}h ${minutes}m` : `${hours}h`;
 }
 
-function KpiCard({
-  label,
-  value,
-  helper,
-  icon,
-  updatedAt,
-}: {
-  label: string;
-  value: string;
-  helper: string;
-  icon: React.ReactNode;
-  updatedAt?: string | null;
-}) {
-  const freshness = getFreshnessMeta(updatedAt);
+function iconForMetric(key: OpsMetricCard["key"]) {
+  switch (key) {
+    case "runsToday":
+      return <Activity className="h-5 w-5" />;
+    case "activeRuns":
+      return <PlayCircle className="h-5 w-5" />;
+    case "successRate":
+      return <CheckCircle2 className="h-5 w-5" />;
+    case "failedRuns":
+      return <AlertCircle className="h-5 w-5" />;
+    case "stuckRuns":
+      return <PauseCircle className="h-5 w-5" />;
+    case "humanApprovalsPending":
+      return <ShieldAlert className="h-5 w-5" />;
+    case "avgCompletionTime":
+      return <Clock3 className="h-5 w-5" />;
+    case "costToday":
+      return <DollarSign className="h-5 w-5" />;
+  }
+}
+
+function KpiCard({ metric }: { metric: OpsMetricCard }) {
+  const freshness = getFreshnessMeta(metric.updatedAt);
+  const availability = getAvailabilityMeta(metric.availability);
   return (
     <div className="rounded-3xl border border-black/5 bg-white p-5 shadow-sm">
       <div className="flex items-start justify-between gap-3">
         <div>
           <div className="flex flex-wrap items-center gap-2">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-neutral-500">{label}</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-neutral-500">{metric.label}</p>
+            <span className={cn("rounded-full px-2 py-1 text-[11px] font-semibold", availability.tone)}>{availability.label}</span>
             <span className={cn("rounded-full px-2 py-1 text-[11px] font-semibold", freshness.tone)}>{freshness.label}</span>
           </div>
-          <p className="mt-2 text-3xl font-semibold text-neutral-950">{value}</p>
-          <p className="mt-1 text-sm text-neutral-500">{helper}</p>
-          <p className="mt-3 text-xs text-neutral-400">Updated {formatMountain(updatedAt)}</p>
+          <p className="mt-2 text-3xl font-semibold text-neutral-950">{metric.formattedValue}</p>
+          <p className="mt-1 text-sm text-neutral-500">{metric.note}</p>
+          <p className="mt-3 text-xs text-neutral-400">{metric.updatedAt ? `Updated ${formatMountain(metric.updatedAt)}` : metric.definition}</p>
         </div>
-        <div className="rounded-2xl bg-black/[0.04] p-3 text-neutral-700">{icon}</div>
+        <div className="rounded-2xl bg-black/[0.04] p-3 text-neutral-700">{iconForMetric(metric.key)}</div>
       </div>
     </div>
   );
@@ -92,71 +105,28 @@ function KpiCard({
 
 export default async function AgentKpisPage() {
   const data = await getOpsRuns();
-  const generatedAt = data.generatedAt;
-  const todayRuns = data.runs.filter((run) => new Date(run.created_at).toDateString() === new Date().toDateString());
-  const stuckRuns = data.runs.filter((run) => run.status === "running" && run.duration_ms >= 30 * 60 * 1000);
-  const failedRuns = data.runs.filter((run) => run.status === "failed");
-  const approvalsPending = 0;
-
-  const kpis = [
-    {
-      label: "Runs today",
-      value: String(data.kpis.runsToday),
-      helper: "Runs created today across tracked agent sessions",
-      icon: <Activity className="h-5 w-5" />,
-    },
-    {
-      label: "Active runs",
-      value: String(data.kpis.activeRuns),
-      helper: "Runs currently in progress right now",
-      icon: <PlayCircle className="h-5 w-5" />,
-    },
-    {
-      label: "Success rate",
-      value: `${data.kpis.successRate}%`,
-      helper: "Completed runs divided by runs created today",
-      icon: <CheckCircle2 className="h-5 w-5" />,
-    },
-    {
-      label: "Failed runs",
-      value: String(failedRuns.length),
-      helper: "Tracked sessions currently marked failed",
-      icon: <AlertCircle className="h-5 w-5" />,
-    },
-    {
-      label: "Stuck runs",
-      value: String(stuckRuns.length),
-      helper: "Running longer than 30 minutes without clearing",
-      icon: <PauseCircle className="h-5 w-5" />,
-    },
-    {
-      label: "Human approvals pending",
-      value: String(approvalsPending),
-      helper: "Approval queue is not wired yet, so this is honest zero for now",
-      icon: <ShieldAlert className="h-5 w-5" />,
-    },
-    {
-      label: "Avg completion time",
-      value: formatDuration(data.kpis.avgDurationMs),
-      helper: "Average duration of completed runs created today",
-      icon: <Clock3 className="h-5 w-5" />,
-    },
-    {
-      label: "Cost today",
-      value: `$${data.kpis.totalCostToday.toFixed(2)}`,
-      helper: "Estimated run cost from token usage today",
-      icon: <DollarSign className="h-5 w-5" />,
-    },
-  ];
 
   return (
     <div className="min-h-screen bg-[#faf7f2] text-neutral-900">
       <div className="mx-auto max-w-7xl px-6 py-10">
         <AdminPageHeader title="Agent performance and operating pressure" active="agent-kpis" />
 
+        <section className="mt-8 rounded-[32px] border border-black/5 bg-white p-6 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-orange-500">Metric honesty</p>
+          <h2 className="mt-2 text-2xl font-semibold text-neutral-950">This page now separates live data from inference</h2>
+          <p className="mt-2 max-w-3xl text-sm text-neutral-600">
+            These KPI cards are fed from the current OpenClaw runtime snapshot. Each card tells you whether the number is live, inferred from heuristics, or not yet wired at all.
+          </p>
+          <div className="mt-4 flex flex-wrap gap-3 text-xs font-semibold">
+            <span className="rounded-full bg-emerald-100 px-3 py-1.5 text-emerald-800">Live = directly visible in runtime state</span>
+            <span className="rounded-full bg-amber-100 px-3 py-1.5 text-amber-800">Inferred = derived from runtime signals</span>
+            <span className="rounded-full bg-neutral-100 px-3 py-1.5 text-neutral-700">Not wired = intentionally withheld</span>
+          </div>
+        </section>
+
         <section className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {kpis.map((kpi) => (
-            <KpiCard key={kpi.label} label={kpi.label} value={kpi.value} helper={kpi.helper} icon={kpi.icon} updatedAt={generatedAt} />
+          {data.metricCards.map((metric) => (
+            <KpiCard key={metric.key} metric={metric} />
           ))}
         </section>
 
@@ -165,8 +135,8 @@ export default async function AgentKpisPage() {
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-orange-500">Live operations</p>
-                <h2 className="mt-2 text-2xl font-semibold text-neutral-950">Recent runs</h2>
-                <p className="mt-2 text-sm text-neutral-500">The fastest way to tell whether the system is healthy is still the recent run list.</p>
+                <h2 className="mt-2 text-2xl font-semibold text-neutral-950">Recent runtime sessions</h2>
+                <p className="mt-2 text-sm text-neutral-500">The run list is still the clearest source of truth when a KPI looks suspicious.</p>
               </div>
               <Link href="/admin/agent-runs" className="inline-flex items-center gap-2 rounded-xl border border-black/10 bg-[#fcfaf7] px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-white">
                 Open full run feed
@@ -181,6 +151,9 @@ export default async function AgentKpisPage() {
                     <span className="rounded-full bg-white px-2.5 py-1 font-semibold text-neutral-700">{run.project}</span>
                     <span className="rounded-full bg-white px-2.5 py-1 font-semibold text-neutral-700">{run.agent_name}</span>
                     <span className="rounded-full bg-white px-2.5 py-1 font-semibold text-neutral-700">{run.status}</span>
+                    {run.estimated_cost_usd == null ? (
+                      <span className="rounded-full bg-neutral-200 px-2.5 py-1 font-semibold text-neutral-600">cost unavailable</span>
+                    ) : null}
                   </div>
                   <h3 className="mt-3 text-lg font-semibold text-neutral-950">{run.task_title}</h3>
                   <div className="mt-2 grid gap-2 text-sm text-neutral-600 md:grid-cols-3">
@@ -196,14 +169,22 @@ export default async function AgentKpisPage() {
 
           <div className="space-y-6">
             <div className="rounded-[32px] border border-black/5 bg-white p-6 shadow-sm">
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-orange-500">Operator notes</p>
-              <h2 className="mt-2 text-2xl font-semibold text-neutral-950">Read this before trusting the page</h2>
-              <ul className="mt-4 space-y-3 text-sm text-neutral-600">
-                <li>Success rate, average duration, runs today, and cost today are all coming from the current OpenClaw session snapshot.</li>
-                <li>Stuck runs are currently inferred as runs still marked running after 30 minutes.</li>
-                <li>Human approvals pending is intentionally not faked. It stays zero until a real approval queue exists.</li>
-                <li>Cost today is an estimate derived from token counts, not invoice-grade billing.</li>
-              </ul>
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-orange-500">Definitions</p>
+              <h2 className="mt-2 text-2xl font-semibold text-neutral-950">What each KPI actually means</h2>
+              <div className="mt-4 space-y-3 text-sm text-neutral-600">
+                {data.metricCards.map((metric) => (
+                  <div key={metric.key} className="rounded-2xl bg-[#fcfaf7] p-4">
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="font-semibold text-neutral-900">{metric.label}</p>
+                      <span className={cn("rounded-full px-2.5 py-1 text-[11px] font-semibold", getAvailabilityMeta(metric.availability).tone)}>
+                        {getAvailabilityMeta(metric.availability).label}
+                      </span>
+                    </div>
+                    <p className="mt-2">{metric.definition}</p>
+                    <p className="mt-2 text-neutral-500">{metric.note}</p>
+                  </div>
+                ))}
+              </div>
             </div>
 
             <div className="rounded-[32px] border border-black/5 bg-white p-6 shadow-sm">
@@ -220,6 +201,10 @@ export default async function AgentKpisPage() {
                 <div className="flex items-center justify-between rounded-2xl bg-[#fcfaf7] px-4 py-3">
                   <span>Total tokens today</span>
                   <span className="font-semibold text-neutral-950">{data.kpis.totalTokensToday.toLocaleString()}</span>
+                </div>
+                <div className="flex items-center justify-between rounded-2xl bg-[#fcfaf7] px-4 py-3">
+                  <span>Median completion time</span>
+                  <span className="font-semibold text-neutral-950">{formatDuration(data.kpis.medianDurationMs)}</span>
                 </div>
                 <div className="flex items-center justify-between rounded-2xl bg-[#fcfaf7] px-4 py-3">
                   <span>Runs visible in feed</span>
