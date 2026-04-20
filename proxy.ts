@@ -1,18 +1,16 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { ADMIN_SESSION_COOKIE } from "@/lib/admin-gate";
 import { isAllowedAdminEmail } from "@/lib/admin-auth";
 
 const PUBLIC_PATHS = [
   "/",
   "/agalmanac",
   "/auth/login",
+  "/auth/login/submit",
   "/auth/callback",
   "/icon",
 ];
-
-function isPublic(pathname: string) {
-  return PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));
-}
 
 function isProtected(pathname: string) {
   return pathname === "/admin" || pathname.startsWith("/admin/") || pathname.startsWith("/api/admin/");
@@ -22,6 +20,10 @@ export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (!isProtected(pathname)) {
+    return NextResponse.next();
+  }
+
+  if (request.cookies.get(ADMIN_SESSION_COOKIE)?.value === "1") {
     return NextResponse.next();
   }
 
