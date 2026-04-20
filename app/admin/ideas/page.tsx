@@ -46,8 +46,8 @@ export default async function IdeasPage({
   const industryOptions = Array.from(new Set(allIdeas.map((idea) => idea.industry))).sort((a, b) => a.localeCompare(b));
   const dispositionOptions = Array.from(new Set(allIdeas.map((idea) => idea.disposition)));
   const workflowOptions = Array.from(new Set(allIdeas.map((idea) => idea.workflowState))).sort((a, b) => a.localeCompare(b));
-  const recommendationOptions = Array.from(new Set(allIdeas.map((idea) => idea.recommendation))).sort((a, b) => a.localeCompare(b));
-  const confidenceOptions = Array.from(new Set(allIdeas.map((idea) => idea.confidence))).sort((a, b) => a.localeCompare(b));
+  const recommendationOptions = ["Pursue", "Hold", "Pass"];
+  const confidenceOptions = ["High", "Medium", "Low"];
   const ideas = allIdeas
     .filter((idea) => (view === "archived" ? idea.disposition === "archived" : idea.disposition !== "archived"))
     .filter((idea) => (industryValue ? idea.industry === industryValue : true))
@@ -73,18 +73,14 @@ export default async function IdeasPage({
   return (
     <div className="min-h-screen bg-[#faf7f2] text-neutral-900">
       <div className="mx-auto max-w-7xl px-6 py-10">
-        <div className="overflow-hidden rounded-[32px] border border-black/5 bg-white shadow-sm">
-          <div className="h-2 gradient-bg" />
-          <div className="p-8 md:p-10">
-            <p className="text-sm font-semibold uppercase tracking-widest" style={{ color: "var(--color-orange)" }}>Admin Portal</p>
-            <h1 className="mt-3 text-4xl font-bold" style={{ color: "var(--color-dark)" }}>{view === "archived" ? "Archived Ideas" : "Opportunity Research Queue"}</h1>
-            <p className="mt-4 max-w-3xl text-lg" style={{ color: "var(--color-slate)" }}>{view === "archived" ? "Past ideas kept for memory, reference, and pattern spotting." : "New concepts under active scoring, pressure testing, and founder review."}</p>
-            <div className="mt-8 flex flex-col sm:flex-row gap-4">
-              {view === "active" ? <Link href="/admin/ideas/new" className="btn-gradient px-6 py-3 text-sm">New Idea</Link> : null}
-              {view === "archived" ? <Link href="/admin/ideas" className="btn-gradient px-6 py-3 text-sm">Active Ideas</Link> : null}
-              <Link href="/admin" className="btn-gradient px-6 py-3 text-sm">Studio Dashboard</Link>
-              <Link href="/admin/future-apps" className="btn-gradient px-6 py-3 text-sm">Future Apps</Link>
-            </div>
+        <div className="rounded-[32px] border border-black/5 bg-white p-6 shadow-sm">
+          <h1 className="text-3xl font-semibold text-orange-500">RaT Studios Admin</h1>
+          <div className="mt-5 flex flex-wrap gap-3">
+            <Link href="/admin/current-apps" className="inline-flex items-center gap-2 rounded-2xl border border-black/10 bg-[#fcfaf7] px-4 py-3 text-sm font-medium text-neutral-800 transition hover:bg-white hover:border-black/20">Current Apps</Link>
+            <Link href="/admin/ideas" className="inline-flex items-center gap-2 rounded-2xl border border-black/10 bg-[#fcfaf7] px-4 py-3 text-sm font-medium text-neutral-800 transition hover:bg-white hover:border-black/20">Ideas</Link>
+            <Link href="/admin/future-apps" className="inline-flex items-center gap-2 rounded-2xl border border-black/10 bg-[#fcfaf7] px-4 py-3 text-sm font-medium text-neutral-800 transition hover:bg-white hover:border-black/20">Future Apps</Link>
+            <Link href="/admin/issues" className="inline-flex items-center gap-2 rounded-2xl border border-black/10 bg-[#fcfaf7] px-4 py-3 text-sm font-medium text-neutral-800 transition hover:bg-white hover:border-black/20">Issues</Link>
+            <Link href="/admin/org-chart" className="inline-flex items-center gap-2 rounded-2xl border border-black/10 bg-[#fcfaf7] px-4 py-3 text-sm font-medium text-neutral-800 transition hover:bg-white hover:border-black/20">Org Chart</Link>
           </div>
         </div>
 
@@ -115,7 +111,7 @@ export default async function IdeasPage({
             </select>
             <select name="recommendation" defaultValue={recommendationValue ?? ""} className="rounded-xl border border-black/10 bg-white px-3 py-2 text-sm text-neutral-700">
               <option value="">All recommendations</option>
-              {recommendationOptions.map((recommendation) => <option key={recommendation} value={recommendation}>{statusLabel(recommendation)}</option>)}
+              {recommendationOptions.map((recommendation) => <option key={recommendation} value={recommendation}>{recommendation}</option>)}
             </select>
             <select name="confidence" defaultValue={confidenceValue ?? ""} className="rounded-xl border border-black/10 bg-white px-3 py-2 text-sm text-neutral-700">
               <option value="">All confidence levels</option>
@@ -146,7 +142,7 @@ export default async function IdeasPage({
                     <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${dispositionClasses(idea.disposition)}`}>{dispositionLabel(idea.disposition)}</span>
                     <span>{statusLabel(idea.workflowState)}</span>
                     <span>• {idea.productType}</span>
-                    <span>• {idea.recommendation.replaceAll("_", " ")}</span>
+                    <span>• {idea.recommendation}</span>
                     <span>• {idea.confidence} confidence</span>
                   </div>
                 </div>
