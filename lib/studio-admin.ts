@@ -86,7 +86,7 @@ function buildTodayIssueFixKpi(tracker: IssueTrackerResponse | null): StudioKpi 
 
   return {
     label: "Issues fixed today",
-    value: `${fixedToday}/${identifiedToday}`,
+    value: `${identifiedToday}/${fixedToday}`,
     helper: `${identifiedToday} identified, ${fixedToday} fixed, deployed, and verified`,
   };
 }
