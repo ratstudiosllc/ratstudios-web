@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { redirect } from "next/navigation";
 import { getIdeasAgentSummary, listIdeas } from "@/lib/ideas-agent";
 
@@ -73,16 +74,7 @@ export default async function IdeasPage({
   return (
     <div className="min-h-screen bg-[#faf7f2] text-neutral-900">
       <div className="mx-auto max-w-7xl px-6 py-10">
-        <div className="rounded-[32px] border border-black/5 bg-white p-6 shadow-sm">
-          <h1 className="text-3xl font-semibold text-orange-500">RaT Studios Admin</h1>
-          <div className="mt-5 flex flex-wrap gap-3">
-            <Link href="/admin/current-apps" className="inline-flex items-center gap-2 rounded-2xl border border-black/10 bg-[#fcfaf7] px-4 py-3 text-sm font-medium text-neutral-800 transition hover:bg-white hover:border-black/20">Current Apps</Link>
-            <Link href="/admin/ideas" className="inline-flex items-center gap-2 rounded-2xl border border-black/10 bg-[#fcfaf7] px-4 py-3 text-sm font-medium text-neutral-800 transition hover:bg-white hover:border-black/20">Ideas</Link>
-            <Link href="/admin/future-apps" className="inline-flex items-center gap-2 rounded-2xl border border-black/10 bg-[#fcfaf7] px-4 py-3 text-sm font-medium text-neutral-800 transition hover:bg-white hover:border-black/20">Future Apps</Link>
-            <Link href="/admin/issues" className="inline-flex items-center gap-2 rounded-2xl border border-black/10 bg-[#fcfaf7] px-4 py-3 text-sm font-medium text-neutral-800 transition hover:bg-white hover:border-black/20">Issues</Link>
-            <Link href="/admin/org-chart" className="inline-flex items-center gap-2 rounded-2xl border border-black/10 bg-[#fcfaf7] px-4 py-3 text-sm font-medium text-neutral-800 transition hover:bg-white hover:border-black/20">Org Chart</Link>
-          </div>
-        </div>
+        <AdminPageHeader title="Ideas Pipeline" active="ideas" />
 
         <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <Link href="/admin/ideas" className="rounded-[28px] border border-black/5 bg-white p-6 shadow-sm transition hover:border-black/10 hover:bg-[#fcfaf7]"><p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">Active ideas</p><p className="mt-2 text-3xl font-semibold text-neutral-950">{summary.active}</p></Link>

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import {
   Activity,
   AlertCircle,
@@ -151,40 +152,7 @@ export default async function AgentKpisPage() {
   return (
     <div className="min-h-screen bg-[#faf7f2] text-neutral-900">
       <div className="mx-auto max-w-7xl px-6 py-10">
-        <div className="overflow-hidden rounded-[32px] border border-black/5 bg-white shadow-sm">
-          <div className="h-2 gradient-bg" />
-          <div className="p-8 md:p-10">
-            <p className="text-sm font-semibold uppercase tracking-widest text-orange-500">Agent KPI Dashboard</p>
-            <h1 className="mt-3 text-4xl font-bold text-neutral-950">Agent performance and operating pressure</h1>
-            <p className="mt-4 max-w-3xl text-lg text-neutral-600">This page keeps the first pass focused on real operational signal, not made-up scorecards. It shows what agents are doing today, what is failing, what is stuck, and what it costs.</p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link href="/admin/current-apps" className="inline-flex items-center gap-2 rounded-2xl border border-black/10 bg-[#fcfaf7] px-4 py-3 text-sm font-medium text-neutral-800 transition hover:bg-white hover:border-black/20">
-                <Layers3 className="h-4 w-4 text-orange-500" />
-                Current Apps
-              </Link>
-              <Link href="/admin/ideas" className="inline-flex items-center gap-2 rounded-2xl border border-black/10 bg-[#fcfaf7] px-4 py-3 text-sm font-medium text-neutral-800 transition hover:bg-white hover:border-black/20">
-                <Sparkles className="h-4 w-4 text-orange-500" />
-                Ideas
-              </Link>
-              <Link href="/admin/future-apps" className="inline-flex items-center gap-2 rounded-2xl border border-black/10 bg-[#fcfaf7] px-4 py-3 text-sm font-medium text-neutral-800 transition hover:bg-white hover:border-black/20">
-                <Megaphone className="h-4 w-4 text-orange-500" />
-                Future Apps
-              </Link>
-              <Link href="/admin/issues" className="inline-flex items-center gap-2 rounded-2xl border border-black/10 bg-[#fcfaf7] px-4 py-3 text-sm font-medium text-neutral-800 transition hover:bg-white hover:border-black/20">
-                <Wrench className="h-4 w-4 text-orange-500" />
-                Issues
-              </Link>
-              <Link href="/admin/org-chart" className="inline-flex items-center gap-2 rounded-2xl border border-black/10 bg-[#fcfaf7] px-4 py-3 text-sm font-medium text-neutral-800 transition hover:bg-white hover:border-black/20">
-                <Building2 className="h-4 w-4 text-orange-500" />
-                Org Chart
-              </Link>
-              <Link href="/admin/agent-kpis" className="inline-flex items-center gap-2 rounded-2xl border border-orange-200 bg-orange-50 px-4 py-3 text-sm font-medium text-neutral-900 transition hover:border-orange-300 hover:bg-orange-100">
-                <Activity className="h-4 w-4 text-orange-500" />
-                Agent KPIs
-              </Link>
-            </div>
-          </div>
-        </div>
+        <AdminPageHeader title="Agent performance and operating pressure" active="agent-kpis" />
 
         <section className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           {kpis.map((kpi) => (

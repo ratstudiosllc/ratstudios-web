@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { getCurrentApps, getAppIssueMetrics } from "@/lib/studio-admin";
 import { getIssueTracker } from "@/lib/issues-tracker";
 
@@ -9,19 +10,7 @@ export default async function CurrentAppsPage() {
   return (
     <div className="min-h-screen bg-[#faf7f2] text-neutral-900">
       <div className="mx-auto max-w-6xl px-6 py-10">
-        <div className="overflow-hidden rounded-[32px] border border-black/5 bg-white shadow-sm">
-          <div className="h-2 gradient-bg" />
-          <div className="p-8 md:p-10">
-            <p className="text-sm font-semibold uppercase tracking-widest" style={{ color: "var(--color-orange)" }}>Admin Portal</p>
-            <h1 className="mt-3 text-4xl font-bold" style={{ color: "var(--color-dark)" }}>Current App Portfolio</h1>
-            <p className="mt-4 max-w-3xl text-lg" style={{ color: "var(--color-slate)" }}>Live products, issue pressure, and the next moves that actually matter.</p>
-            <div className="mt-8 flex flex-col sm:flex-row gap-4">
-              <Link href="/admin" className="btn-gradient px-6 py-3 text-sm">Studio Dashboard</Link>
-              <Link href="/admin/issues" className="btn-gradient px-6 py-3 text-sm">Tracked Issues</Link>
-              <Link href="/admin/marketing" className="btn-gradient px-6 py-3 text-sm">Marketing</Link>
-            </div>
-          </div>
-        </div>
+        <AdminPageHeader title="Current App Portfolio" active="current-apps" />
 
         <div className="mt-8 grid gap-5 xl:grid-cols-2">
           {apps.map((app) => {

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { ArrowRight, Building2, GitBranch, Network, Users } from "lucide-react";
 import { buildAgentWorkflowSnapshot } from "@/lib/agent-workflow";
 import { getOpsRuns } from "@/lib/ops-admin";
@@ -106,18 +107,7 @@ export default async function OrgChartPage() {
   return (
     <div className="min-h-screen bg-[#faf7f2] text-neutral-900">
       <div className="mx-auto max-w-7xl px-6 py-10">
-        <div className="overflow-hidden rounded-[32px] border border-black/5 bg-white shadow-sm">
-          <div className="h-2 gradient-bg" />
-          <div className="p-8 md:p-10">
-            <p className="text-sm font-semibold uppercase tracking-widest" style={{ color: "var(--color-orange)" }}>Admin Portal</p>
-            <h1 className="mt-3 text-4xl font-bold" style={{ color: "var(--color-dark)" }}>RaT Studios Leadership and Agent Org</h1>
-            <p className="mt-4 max-w-3xl text-lg" style={{ color: "var(--color-slate)" }}>Who owns what, how work flows, and where agent execution actually sits in the studio.</p>
-            <div className="mt-8 flex flex-col sm:flex-row gap-4">
-              <Link href="/admin" className="btn-gradient px-6 py-3 text-sm">Studio Dashboard</Link>
-              <Link href="/admin/agent-runs" className="btn-gradient px-6 py-3 text-sm">Agent Runs</Link>
-            </div>
-          </div>
-        </div>
+        <AdminPageHeader title="RaT Studios Leadership and Agent Org" active="org-chart" />
 
         <section className="mt-8 rounded-[32px] border border-black/5 bg-white p-6 shadow-sm">
           <div className="flex items-center gap-2 text-neutral-900">

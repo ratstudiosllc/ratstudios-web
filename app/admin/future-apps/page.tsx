@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 
 export const revalidate = 300;
 import { getFutureAppsSummary, listFutureApps } from "@/lib/future-apps-agent";
@@ -23,18 +24,7 @@ export default function FutureAppsPage() {
   return (
     <div className="min-h-screen bg-[#faf7f2] text-neutral-900">
       <div className="mx-auto max-w-7xl px-6 py-10">
-        <div className="overflow-hidden rounded-[32px] border border-black/5 bg-white shadow-sm">
-          <div className="h-2 gradient-bg" />
-          <div className="p-8 md:p-10">
-            <p className="text-sm font-semibold uppercase tracking-widest" style={{ color: "var(--color-orange)" }}>Admin Portal</p>
-            <h1 className="mt-3 text-4xl font-bold" style={{ color: "var(--color-dark)" }}>Future App Pipeline</h1>
-            <p className="mt-4 max-w-3xl text-lg" style={{ color: "var(--color-slate)" }}>Ideas that survived early screening and now need real commercial judgment.</p>
-            <div className="mt-8 flex flex-col sm:flex-row gap-4">
-              <Link href="/admin" className="btn-gradient px-6 py-3 text-sm">Studio Dashboard</Link>
-              <Link href="/admin/ideas" className="btn-gradient px-6 py-3 text-sm">Ideas Queue</Link>
-            </div>
-          </div>
-        </div>
+        <AdminPageHeader title="Future App Pipeline" active="future-apps" />
 
         <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <div className="rounded-[28px] border border-black/5 bg-white p-6 shadow-sm"><p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">Total future apps</p><p className="mt-2 text-3xl font-semibold text-neutral-950">{summary.total}</p></div>
