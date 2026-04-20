@@ -1,6 +1,168 @@
 {
   "ideas": [
     {
+      "id": "idea-clay-target-club-scoring-management-web-app",
+      "slug": "clay-target-club-scoring-management-web-app",
+      "ideaName": "Clay Club OS",
+      "industry": "Recreation",
+      "oneSentenceConcept": "A club operating system for U.S. clay target programs that combines live scoring, squadding, memberships, payments, communication, and light inventory for trap, skeet, sporting clays, and 5-stand.",
+      "problemSolved": "Clay target clubs and youth teams still juggle TeamReach chats, paper score sheets, spreadsheets, lightweight scoring tools, and separate payment systems, which creates messy match-day operations, fragmented member data, and avoidable admin work.",
+      "targetUser": "U.S. shotgun sports clubs, SCTP and 4-H style youth teams, volunteer coordinators, coaches, and small club operators running trap, skeet, sporting clays, and 5-stand programs.",
+      "productType": "Vertical SaaS for clay target club operations",
+      "buyer": "Club owners, board members, head coaches, team coordinators, and operations managers.",
+      "businessModelGuess": "Annual club subscription plus payments revenue and optional premium modules for larger programs.",
+      "geography": "United States first",
+      "whyNow": "Many clubs still run on patched-together communication, scoring, and payment workflows, while mobile expectations are rising and niche sports operators remain underserved by modern vertical software.",
+      "workflowState": "scored",
+      "recommendation": "pursue_with_niche_focus",
+      "confidence": "medium",
+      "bestWedge": "Start as Clay Club OS for U.S. clay target clubs and youth teams that currently rely on TeamReach, paper or spreadsheets, lightweight score tools, and separate payments.",
+      "strongestReasonToBuild": "The workflow is operationally messy, recurring, and concentrated in a niche where one product can unify scoring, squadding, member operations, and payments.",
+      "strongestReasonNotToBuild": "The niche is narrower than generic range software, so the product must stay tightly aligned to clay clubs and teams rather than drifting into broad shooting-range management.",
+      "biggestRisk": "Trying to become generic shooting-range software too early instead of owning the clay club and youth team operating wedge.",
+      "nextValidationSteps": [
+        "Interview 10 to 15 clay club operators, coaches, and youth team coordinators about scorekeeping, squadding, payments, and communication pain.",
+        "Map the current stack across TeamReach, spreadsheets, paper score sheets, score-entry tools, and payment workflows to find the sharpest switching trigger.",
+        "Prototype a live match-day flow covering squadding, score entry, payments, and member communication for one club or youth team pilot."
+      ],
+      "memoSummary": "This is a good niche SaaS candidate if it stays narrow. The opportunity is not generic range management. It is a clay club operating system for U.S. shotgun sports clubs and youth teams that need live scoring, squadding, memberships, payments, communication, and light inventory in one place.",
+      "memoSections": [
+        {
+          "title": "Executive summary",
+          "body": "This looks worth pursuing with niche discipline. Clay target clubs and youth teams often run on a messy stack of TeamReach, paper, spreadsheets, small scoring tools, and separate payment workflows. A focused operating system that cleans up match-day execution and club admin could win, but only if it stays aimed at clay clubs rather than expanding into generic shooting-range software."
+        },
+        {
+          "title": "Market shape",
+          "body": "The best entry point is U.S. shotgun sports clubs and youth programs, not the broader firearms or range market. These organizations share similar match formats, volunteer-heavy operations, recurring events, and awkward admin stacks. The niche is smaller than broad range management, but that is a feature, not a bug, if the product becomes the obvious operating layer for clay clubs."
+        },
+        {
+          "title": "Workflow pain",
+          "body": "Operators need to manage squads, member records, event communication, scoring, payments, and sometimes consumables or light inventory across trap, skeet, sporting clays, and 5-stand. Today that work is often split across chats, paper sheets, spreadsheets, and disconnected tools. Match days get chaotic, records drift, and volunteer admin overhead stacks up fast."
+        },
+        {
+          "title": "Current software weaknesses",
+          "body": "Current solutions appear fragmented. TeamReach handles communication, paper and spreadsheets handle operations, lightweight scoring tools cover only one slice, and payments live somewhere else entirely. That leaves clubs without one coherent source of truth for events, scoring, memberships, and money."
+        },
+        {
+          "title": "How we improve it",
+          "body": "Build Clay Club OS around the full club workflow: live scoring, squadding, memberships, payments, communication, and light inventory in one product. The differentiator is not feature volume. It is removing operational fragmentation for clay-specific formats and roles."
+        },
+        {
+          "title": "Revenue opportunities",
+          "body": "Core revenue can come from annual club subscriptions, with payments revenue and premium modules for larger clubs or youth programs. Expansion could include tournament hosting, roster workflows, volunteer coordination, fundraising support, and deeper reporting once the operational core sticks."
+        },
+        {
+          "title": "Pricing structure and ARR scenarios",
+          "body": "A practical model is annual club pricing sized to team or member count, with payment take rate layered on top. Even moderate ACVs can work if the product becomes operationally central, but early success depends more on owning the niche workflow than on aggressive pricing breadth."
+        },
+        {
+          "title": "Recommendation",
+          "body": "Pursue with niche focus. Build for clay target clubs and youth teams specifically. Do not dilute the wedge by launching as generic shooting-range management software."
+        }
+      ],
+      "evidenceSources": [],
+      "researchInputs": [],
+      "scorecard": {
+        "problemSeverity": 8,
+        "willingnessToPay": 7,
+        "marketSize": 6,
+        "marketGrowth": 6,
+        "competitiveIntensity": 6,
+        "opportunityGap": 8,
+        "distributionFeasibility": 7,
+        "productFeasibility": 8,
+        "defensibilityPotential": 7,
+        "revenuePotential": 7,
+        "speedToFirstRevenue": 7,
+        "strategicFit": 8,
+        "weightedTotal": 76
+      },
+      "disposition": "active",
+      "createdAt": "2026-04-19T17:12:43.936380+00:00",
+      "updatedAt": "2026-04-19T17:12:43.936380+00:00"
+    },
+    {
+      "id": "idea-rfid-expiration-recall-control-hospitals",
+      "slug": "rfid-expiration-recall-control-hospitals",
+      "ideaName": "RFID expiration + recall control for hospitals",
+      "industry": "Healthcare",
+      "oneSentenceConcept": "An RFID-enabled control layer that helps hospitals track expiration dates and recalls for high-risk inventory before they become compliance, safety, or waste problems.",
+      "problemSolved": "Hospitals struggle to maintain accurate, real-time control over expiration exposure and recall status for high-dollar, high-risk inventory spread across storage rooms, procedure areas, and departments, which leads to waste, manual audits, and patient-safety risk.",
+      "targetUser": "Supply chain leaders, materials managers, perioperative inventory teams, cath lab and EP managers, and rural or independent hospital operators responsible for high-risk inventory control.",
+      "productType": "Vertical SaaS plus RFID workflow layer for hospital inventory control",
+      "buyer": "Hospital supply chain leadership, perioperative operations, and materials management leaders",
+      "businessModelGuess": "Annual SaaS plus implementation and RFID hardware or partner-driven deployment services",
+      "geography": "United States first",
+      "whyNow": "Hospitals face constant pressure to reduce waste, tighten compliance, and respond faster to recalls, but many still rely on fragmented manual processes for product-level control in the most sensitive inventory categories.",
+      "workflowState": "scored",
+      "recommendation": "pursue_with_niche_focus",
+      "confidence": "medium",
+      "bestWedge": "Start with rural and independent hospitals that need tighter control over implants, tissue and biologics, cath or EP inventory, and selected OR or pharmacy items where expiration and recall failures are expensive and risky.",
+      "strongestReasonToBuild": "Expiration and recall control for high-risk hospital inventory is painful, high-stakes, and tied directly to waste reduction, compliance, and patient safety.",
+      "strongestReasonNotToBuild": "Hospital buying cycles are slow, incumbent vendors exist, and the product can get dragged into hardware, services, and broad inventory-platform scope too early.",
+      "biggestRisk": "Trying to become a generic hospital inventory platform instead of owning one narrow, high-value control wedge with clear ROI.",
+      "nextValidationSteps": [
+        "Interview 10 to 15 supply chain and perioperative leaders at rural or independent hospitals about current expiration and recall workflows for implants, tissue, biologics, and cath or EP inventory.",
+        "Validate whether hospitals will adopt an RFID-driven wedge if it starts as a focused control layer rather than a full inventory replacement.",
+        "Pressure-test recall data ingestion, exception handling, and implementation scope before committing to any hardware-heavy deployment model."
+      ],
+      "memoSummary": "This is interesting only as a narrow, high-risk inventory control wedge. The opportunity is not generic hospital inventory management. It is tighter expiration and recall control for a few painful categories where a missed item is expensive, dangerous, or both.",
+      "memoSections": [
+        {
+          "title": "Executive summary",
+          "body": "There is a real problem here, but the broad version is a trap. Hospitals already have inventory systems, entrenched vendors, and ugly buying processes. The attractive opening is a narrow control product for high-dollar, high-risk inventory where expiration and recall failures create obvious financial and clinical pain. That makes this worth pursuing only with disciplined scope and wedge selection."
+        },
+        {
+          "title": "Market shape",
+          "body": "The market includes hospitals, health systems, and independent facilities, but the best initial buyers are likely rural and independent hospitals that still feel acute process pain without deep internal tooling or enterprise-scale customizations. The broader hospital supply chain market is large, but it is full of incumbents and integration drag, so niche entry matters."
+        },
+        {
+          "title": "Workflow pain",
+          "body": "Teams need to know what inventory is on hand, where it sits, what is nearing expiration, and whether any item is affected by a recall. That gets messy fast across implants, tissue and biologics, cath or EP stock, and selected OR or pharmacy items. Manual audits are slow, product movement is messy, and recall response can become a scramble."
+        },
+        {
+          "title": "Current software weaknesses",
+          "body": "Many existing systems are better at broad inventory accounting than last-mile control of specific high-risk items in real hospital workflows. Expiration visibility is often partial, recall data is messy, and staff still rely on manual checks, spreadsheets, or disconnected processes to close the gap."
+        },
+        {
+          "title": "How we improve it",
+          "body": "Use RFID as a control layer for a small set of high-risk categories where location awareness, expiration monitoring, and fast recall response actually matter. The product should surface actionable exceptions, not become a bloated general-purpose inventory suite. Start with one operational motion and one buyer pain story."
+        },
+        {
+          "title": "Revenue opportunities",
+          "body": "Revenue likely comes from annual SaaS contracts with implementation fees, plus either hardware revenue or partner-led RFID deployment. Expansion could include additional high-risk categories, audit workflows, compliance reporting, and deeper integrations if the initial wedge proves sticky."
+        },
+        {
+          "title": "Pricing structure and ARR scenarios",
+          "body": "This probably behaves more like mid-market or enterprise healthcare software than SMB SaaS, with meaningful implementation scope and slower closes. The economics can work if one hospital contract is large enough and the ROI story is clear, but early traction will depend more on wedge urgency than elegant pricing theory."
+        },
+        {
+          "title": "Recommendation",
+          "body": "Pursue with niche focus. Go after expiration and recall control for a few high-risk categories in rural and independent hospitals. Do not try to launch as generic hospital inventory management, because that road gets ugly fast."
+        }
+      ],
+      "evidenceSources": [],
+      "researchInputs": [],
+      "scorecard": {
+        "problemSeverity": 8,
+        "willingnessToPay": 8,
+        "marketSize": 7,
+        "marketGrowth": 6,
+        "competitiveIntensity": 5,
+        "opportunityGap": 7,
+        "distributionFeasibility": 5,
+        "productFeasibility": 7,
+        "defensibilityPotential": 7,
+        "revenuePotential": 8,
+        "speedToFirstRevenue": 4,
+        "strategicFit": 9,
+        "weightedTotal": 76
+      },
+      "disposition": "active",
+      "createdAt": "2026-04-19T16:57:00.000000+00:00",
+      "updatedAt": "2026-04-19T16:57:00.000000+00:00"
+    },
+    {
       "id": "idea-routegreen-pest-control-lawn-care-mobile-ops",
       "slug": "routegreen-pest-control-lawn-care-mobile-ops",
       "ideaName": "RouteGreen",
@@ -78,7 +240,8 @@
       },
       "disposition": "active",
       "createdAt": "2026-04-18T17:58:35.958674+00:00",
-      "updatedAt": "2026-04-18T17:58:35.958674+00:00"
+      "updatedAt": "2026-04-18T17:58:35.958674+00:00",
+      "industry": "Field Services"
     },
     {
       "id": "idea-fieldmind-community-behavioral-health-mobile-ops",
@@ -158,7 +321,8 @@
       },
       "disposition": "active",
       "createdAt": "2026-04-18T17:58:35.958674+00:00",
-      "updatedAt": "2026-04-18T17:58:35.958674+00:00"
+      "updatedAt": "2026-04-18T17:58:35.958674+00:00",
+      "industry": "Healthcare"
     },
     {
       "id": "idea-punchflow-construction-closeout-qa-mobile-ops",
@@ -238,7 +402,8 @@
       },
       "disposition": "active",
       "createdAt": "2026-04-18T17:58:35.958674+00:00",
-      "updatedAt": "2026-04-18T17:58:35.958674+00:00"
+      "updatedAt": "2026-04-18T17:58:35.958674+00:00",
+      "industry": "Construction"
     },
     {
       "id": "idea-techonsite-specialty-field-service-mobile-ops",
@@ -318,7 +483,8 @@
       },
       "disposition": "active",
       "createdAt": "2026-04-18T17:38:38.203328+00:00",
-      "updatedAt": "2026-04-18T17:38:38.203328+00:00"
+      "updatedAt": "2026-04-18T17:38:38.203328+00:00",
+      "industry": "Field Services"
     },
     {
       "id": "idea-turnflow-multifamily-property-maintenance-mobile-ops",
@@ -398,7 +564,8 @@
       },
       "disposition": "active",
       "createdAt": "2026-04-18T17:38:38.203328+00:00",
-      "updatedAt": "2026-04-18T17:38:38.203328+00:00"
+      "updatedAt": "2026-04-18T17:38:38.203328+00:00",
+      "industry": "Facilities"
     },
     {
       "id": "idea-care-route-home-health-hospice-mobile-ops",
@@ -478,7 +645,8 @@
       },
       "disposition": "active",
       "createdAt": "2026-04-18T17:38:38.203328+00:00",
-      "updatedAt": "2026-04-18T17:38:38.203328+00:00"
+      "updatedAt": "2026-04-18T17:38:38.203328+00:00",
+      "industry": "Healthcare"
     },
     {
       "id": "idea-self-storage-management-software",
@@ -590,7 +758,8 @@
       },
       "disposition": "active",
       "createdAt": "2026-04-18T16:16:59.097Z",
-      "updatedAt": "2026-04-18T17:16:57.977Z"
+      "updatedAt": "2026-04-18T17:16:57.977Z",
+      "industry": "Facilities"
     },
     {
       "id": "idea-fieldops-copilot",
@@ -674,7 +843,8 @@
       },
       "disposition": "active",
       "createdAt": "2026-04-18T16:16:59.097Z",
-      "updatedAt": "2026-04-18T16:16:59.097Z"
+      "updatedAt": "2026-04-18T16:16:59.097Z",
+      "industry": "Field Services"
     },
     {
       "id": "idea-family-eye-care-growth-ops",
@@ -755,7 +925,8 @@
       "disposition": "archived",
       "promotedAppSlug": "family-eye-care-growth-tools",
       "createdAt": "2026-04-18T16:16:59.097Z",
-      "updatedAt": "2026-04-18T16:42:19.245Z"
+      "updatedAt": "2026-04-18T16:42:19.245Z",
+      "industry": "Healthcare"
     },
     {
       "ideaName": "MediVan Flow",
@@ -835,7 +1006,8 @@
       "evidenceSources": [],
       "researchInputs": [],
       "createdAt": "2026-04-18T21:59:52.881774+00:00",
-      "updatedAt": "2026-04-18T21:59:52.881774+00:00"
+      "updatedAt": "2026-04-18T21:59:52.881774+00:00",
+      "industry": "Healthcare"
     },
     {
       "ideaName": "SnowCrew Command",
@@ -915,7 +1087,8 @@
       "evidenceSources": [],
       "researchInputs": [],
       "createdAt": "2026-04-18T21:59:52.881774+00:00",
-      "updatedAt": "2026-04-18T21:59:52.881774+00:00"
+      "updatedAt": "2026-04-18T21:59:52.881774+00:00",
+      "industry": "Field Services"
     },
     {
       "ideaName": "SpecimenRunner",
@@ -995,7 +1168,8 @@
       "evidenceSources": [],
       "researchInputs": [],
       "createdAt": "2026-04-18T21:59:52.881774+00:00",
-      "updatedAt": "2026-04-18T21:59:52.881774+00:00"
+      "updatedAt": "2026-04-18T21:59:52.881774+00:00",
+      "industry": "Healthcare"
     },
     {
       "ideaName": "PumpWatch Field",
@@ -1075,7 +1249,8 @@
       "evidenceSources": [],
       "researchInputs": [],
       "createdAt": "2026-04-18T21:59:52.881774+00:00",
-      "updatedAt": "2026-04-18T21:59:52.881774+00:00"
+      "updatedAt": "2026-04-18T21:59:52.881774+00:00",
+      "industry": "Field Services"
     },
     {
       "ideaName": "RestoreRun",
@@ -1155,7 +1330,8 @@
       "evidenceSources": [],
       "researchInputs": [],
       "createdAt": "2026-04-18T21:59:52.881774+00:00",
-      "updatedAt": "2026-04-18T21:59:52.881774+00:00"
+      "updatedAt": "2026-04-18T21:59:52.881774+00:00",
+      "industry": "Field Services"
     },
     {
       "ideaName": "MeterField",
@@ -1235,7 +1411,8 @@
       "evidenceSources": [],
       "researchInputs": [],
       "createdAt": "2026-04-18T21:59:52.881774+00:00",
-      "updatedAt": "2026-04-18T21:59:52.881774+00:00"
+      "updatedAt": "2026-04-18T21:59:52.881774+00:00",
+      "industry": "Utilities"
     },
     {
       "ideaName": "FleetReady PDI",
@@ -1315,7 +1492,8 @@
       "evidenceSources": [],
       "researchInputs": [],
       "createdAt": "2026-04-18T21:59:52.881774+00:00",
-      "updatedAt": "2026-04-18T21:59:52.881774+00:00"
+      "updatedAt": "2026-04-18T21:59:52.881774+00:00",
+      "industry": "Transportation"
     },
     {
       "ideaName": "ShuttleOps",
@@ -1395,7 +1573,8 @@
       "evidenceSources": [],
       "researchInputs": [],
       "createdAt": "2026-04-18T21:59:52.881774+00:00",
-      "updatedAt": "2026-04-18T21:59:52.881774+00:00"
+      "updatedAt": "2026-04-18T21:59:52.881774+00:00",
+      "industry": "Transportation"
     },
     {
       "ideaName": "RailYard Mobile",
@@ -1475,7 +1654,8 @@
       "evidenceSources": [],
       "researchInputs": [],
       "createdAt": "2026-04-18T21:59:52.881774+00:00",
-      "updatedAt": "2026-04-18T21:59:52.881774+00:00"
+      "updatedAt": "2026-04-18T21:59:52.881774+00:00",
+      "industry": "Transportation"
     },
     {
       "ideaName": "LinenRoute",
@@ -1555,7 +1735,8 @@
       "evidenceSources": [],
       "researchInputs": [],
       "createdAt": "2026-04-18T21:59:52.881774+00:00",
-      "updatedAt": "2026-04-18T21:59:52.881774+00:00"
+      "updatedAt": "2026-04-18T21:59:52.881774+00:00",
+      "industry": "Healthcare"
     },
     {
       "ideaName": "GreaseRoute",
@@ -1635,7 +1816,8 @@
       "evidenceSources": [],
       "researchInputs": [],
       "createdAt": "2026-04-18T21:59:52.881774+00:00",
-      "updatedAt": "2026-04-18T21:59:52.881774+00:00"
+      "updatedAt": "2026-04-18T21:59:52.881774+00:00",
+      "industry": "Field Services"
     },
     {
       "ideaName": "DialyzeTransit",
@@ -1715,7 +1897,8 @@
       "evidenceSources": [],
       "researchInputs": [],
       "createdAt": "2026-04-18T21:59:52.881774+00:00",
-      "updatedAt": "2026-04-18T21:59:52.881774+00:00"
+      "updatedAt": "2026-04-18T21:59:52.881774+00:00",
+      "industry": "Healthcare"
     },
     {
       "ideaName": "SignRoute",
@@ -1795,7 +1978,8 @@
       "evidenceSources": [],
       "researchInputs": [],
       "createdAt": "2026-04-18T21:59:52.881774+00:00",
-      "updatedAt": "2026-04-18T21:59:52.881774+00:00"
+      "updatedAt": "2026-04-18T21:59:52.881774+00:00",
+      "industry": "Field Services"
     },
     {
       "ideaName": "Canopy Crew",
@@ -1875,7 +2059,8 @@
       "evidenceSources": [],
       "researchInputs": [],
       "createdAt": "2026-04-18T21:59:52.881774+00:00",
-      "updatedAt": "2026-04-18T21:59:52.881774+00:00"
+      "updatedAt": "2026-04-18T21:59:52.881774+00:00",
+      "industry": "Field Services"
     },
     {
       "ideaName": "PorterTrack",
@@ -1955,7 +2140,8 @@
       "evidenceSources": [],
       "researchInputs": [],
       "createdAt": "2026-04-18T21:59:52.881774+00:00",
-      "updatedAt": "2026-04-18T21:59:52.881774+00:00"
+      "updatedAt": "2026-04-18T21:59:52.881774+00:00",
+      "industry": "Healthcare"
     },
     {
       "ideaName": "ScanStock Field",
@@ -2035,7 +2221,8 @@
       "evidenceSources": [],
       "researchInputs": [],
       "createdAt": "2026-04-18T21:59:52.881774+00:00",
-      "updatedAt": "2026-04-18T21:59:52.881774+00:00"
+      "updatedAt": "2026-04-18T21:59:52.881774+00:00",
+      "industry": "Healthcare"
     },
     {
       "ideaName": "PavePulse",
@@ -2115,7 +2302,8 @@
       "evidenceSources": [],
       "researchInputs": [],
       "createdAt": "2026-04-18T21:59:52.881774+00:00",
-      "updatedAt": "2026-04-18T21:59:52.881774+00:00"
+      "updatedAt": "2026-04-18T21:59:52.881774+00:00",
+      "industry": "Construction"
     },
     {
       "ideaName": "GlazeField",
@@ -2195,7 +2383,8 @@
       "evidenceSources": [],
       "researchInputs": [],
       "createdAt": "2026-04-18T21:59:52.881774+00:00",
-      "updatedAt": "2026-04-18T21:59:52.881774+00:00"
+      "updatedAt": "2026-04-18T21:59:52.881774+00:00",
+      "industry": "Construction"
     },
     {
       "ideaName": "ValveLoop",
@@ -2275,7 +2464,8 @@
       "evidenceSources": [],
       "researchInputs": [],
       "createdAt": "2026-04-18T21:59:52.881774+00:00",
-      "updatedAt": "2026-04-18T21:59:52.881774+00:00"
+      "updatedAt": "2026-04-18T21:59:52.881774+00:00",
+      "industry": "Industrial"
     },
     {
       "ideaName": "LotMedic",
@@ -2355,7 +2545,8 @@
       "evidenceSources": [],
       "researchInputs": [],
       "createdAt": "2026-04-18T21:59:52.881774+00:00",
-      "updatedAt": "2026-04-18T21:59:52.881774+00:00"
+      "updatedAt": "2026-04-18T21:59:52.881774+00:00",
+      "industry": "Field Services"
     },
     {
       "ideaName": "VaultTrack",
@@ -2435,7 +2626,8 @@
       "evidenceSources": [],
       "researchInputs": [],
       "createdAt": "2026-04-18T21:59:52.881774+00:00",
-      "updatedAt": "2026-04-18T21:59:52.881774+00:00"
+      "updatedAt": "2026-04-18T21:59:52.881774+00:00",
+      "industry": "Facilities"
     },
     {
       "ideaName": "EventCrew Ops",
@@ -2515,7 +2707,8 @@
       "evidenceSources": [],
       "researchInputs": [],
       "createdAt": "2026-04-18T21:59:52.881774+00:00",
-      "updatedAt": "2026-04-18T21:59:52.881774+00:00"
+      "updatedAt": "2026-04-18T21:59:52.881774+00:00",
+      "industry": "Events"
     },
     {
       "ideaName": "KegRoute",
@@ -2595,7 +2788,8 @@
       "evidenceSources": [],
       "researchInputs": [],
       "createdAt": "2026-04-18T21:59:52.881774+00:00",
-      "updatedAt": "2026-04-18T21:59:52.881774+00:00"
+      "updatedAt": "2026-04-18T21:59:52.881774+00:00",
+      "industry": "Food & Beverage"
     },
     {
       "ideaName": "MooringOps",
@@ -2675,7 +2869,8 @@
       "evidenceSources": [],
       "researchInputs": [],
       "createdAt": "2026-04-18T21:59:52.881774+00:00",
-      "updatedAt": "2026-04-18T21:59:52.881774+00:00"
+      "updatedAt": "2026-04-18T21:59:52.881774+00:00",
+      "industry": "Maritime"
     },
     {
       "ideaName": "BioRoute",
@@ -2755,7 +2950,8 @@
       "evidenceSources": [],
       "researchInputs": [],
       "createdAt": "2026-04-18T21:59:52.881774+00:00",
-      "updatedAt": "2026-04-18T21:59:52.881774+00:00"
+      "updatedAt": "2026-04-18T21:59:52.881774+00:00",
+      "industry": "Healthcare"
     }
   ]
 }

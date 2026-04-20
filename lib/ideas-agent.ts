@@ -198,22 +198,19 @@ function ensureDefaultReportStructure(memoSections: IdeaMemoSection[], fallbackI
 
 function inferIndustry(idea: Pick<OpportunityIdeaRecord, "slug" | "ideaName" | "targetUser" | "productType" | "oneSentenceConcept">) {
   const text = `${idea.slug} ${idea.ideaName} ${idea.targetUser} ${idea.productType} ${idea.oneSentenceConcept}`.toLowerCase();
-  if (text.includes("behavioral health") || text.includes("mental health") || text.includes("community care")) return "Behavioral health and community care";
-  if (text.includes("home health") || text.includes("hospice") || text.includes("home care")) return "Home health and home care";
-  if (text.includes("nemt") || text.includes("medical transportation") || text.includes("non-emergency medical transportation")) return "Medical transportation";
-  if (text.includes("dental")) return "Dental practices";
-  if (text.includes("optometry") || text.includes("eye care") || text.includes("vision")) return "Eye care and optometry";
-  if (text.includes("construction") || text.includes("punch list") || text.includes("closeout")) return "Construction and trades";
-  if (text.includes("property maintenance") || text.includes("multifamily") || text.includes("facilities")) return "Property and facilities operations";
-  if (text.includes("self-storage") || text.includes("storage facility") || text.includes("storage operator")) return "Self-storage operations";
-  if (text.includes("pest control") || text.includes("lawn care") || text.includes("landscap") || text.includes("snow")) return "Route-based field services";
-  if (text.includes("field service") || text.includes("hvac") || text.includes("plumbing") || text.includes("electrical") || text.includes("specialty trade")) return "Field service operations";
-  if (text.includes("inspection") || text.includes("inspector")) return "Inspection and compliance";
-  if (text.includes("cleaning") || text.includes("janitorial")) return "Cleaning operations";
-  if (text.includes("waste") || text.includes("recycling") || text.includes("medical waste") || text.includes("sharps")) return "Waste and environmental services";
-  if (text.includes("ag") || text.includes("farm") || text.includes("crop") || text.includes("ranch")) return "Agriculture";
-  if (text.includes("marketing") || text.includes("growth")) return "Marketing and growth operations";
-  return "Other opportunities";
+  if (text.includes("hospital") || text.includes("clinical") || text.includes("behavioral health") || text.includes("mental health") || text.includes("community care") || text.includes("home health") || text.includes("hospice") || text.includes("home care") || text.includes("nemt") || text.includes("medical transportation") || text.includes("non-emergency medical transportation") || text.includes("dental") || text.includes("optometry") || text.includes("eye care") || text.includes("vision") || text.includes("medtech") || text.includes("specimen") || text.includes("dialy")) return "Healthcare";
+  if (text.includes("construction") || text.includes("punch list") || text.includes("closeout") || text.includes("glazing") || text.includes("paving")) return "Construction";
+  if (text.includes("property maintenance") || text.includes("multifamily") || text.includes("facilities") || text.includes("self-storage") || text.includes("storage facility") || text.includes("storage operator")) return "Facilities";
+  if (text.includes("rail") || text.includes("fleet") || text.includes("shuttle") || text.includes("transport") || text.includes("yard")) return "Transportation";
+  if (text.includes("utility") || text.includes("meter") || text.includes("water")) return "Utilities";
+  if (text.includes("marina") || text.includes("mooring") || text.includes("dock")) return "Maritime";
+  if (text.includes("brewery") || text.includes("beverage") || text.includes("keg")) return "Food & Beverage";
+  if (text.includes("event") || text.includes("venue")) return "Events";
+  if (text.includes("shooting") || text.includes("club") || text.includes("sports")) return "Recreation";
+  if (text.includes("agriculture") || text.includes("farm") || text.includes("crop") || text.includes("ranch")) return "Agriculture";
+  if (text.includes("industrial") || text.includes("valve") || text.includes("plant")) return "Industrial";
+  if (text.includes("field service") || text.includes("hvac") || text.includes("plumbing") || text.includes("electrical") || text.includes("specialty trade") || text.includes("route") || text.includes("service") || text.includes("crew") || text.includes("waste") || text.includes("recycling") || text.includes("portable sanitation") || text.includes("septic")) return "Field Services";
+  return "Other";
 }
 
 function normalizeIdea(idea: OpportunityIdeaRecord): OpportunityIdeaRecord {
