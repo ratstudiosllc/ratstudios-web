@@ -55,6 +55,39 @@ function ReportingBand({ label, body }: { label: string; body: string }) {
   );
 }
 
+function TeamSection({
+  icon,
+  title,
+  body,
+  members,
+  workflow,
+  ops,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  body?: string;
+  members: Array<{ slug: string; name: string; title: string; team: string; type: string; reportsTo?: string }>;
+  workflow: Parameters<typeof getOrgRoleStatus>[1];
+  ops: Parameters<typeof getOrgRoleStatus>[2];
+}) {
+  if (!members.length) return null;
+
+  return (
+    <section className="mt-8 rounded-[32px] border border-black/5 bg-white p-6 shadow-sm">
+      <div className="flex items-center gap-2 text-neutral-900">
+        {icon}
+        <h2 className="text-2xl font-semibold">{title}</h2>
+      </div>
+      {body ? <p className="mt-3 text-sm text-neutral-600">{body}</p> : null}
+      <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+        {members.map((member) => (
+          <MemberCard key={member.slug} {...member} status={getOrgRoleStatus(member.slug, workflow, ops)} />
+        ))}
+      </div>
+    </section>
+  );
+}
+
 export default async function OrgChartPage() {
   const [ops, issues] = await Promise.all([
     getOpsRuns().catch(() => null),
@@ -67,6 +100,8 @@ export default async function OrgChartPage() {
   const bub = roots.find((member) => member.slug === "bub") ?? null;
   const directReports = bub ? getOrgChartChildren(bub.name) : [];
   const executionReports = getOrgChartChildren("Execution Agent");
+  const markReports = getOrgChartChildren("Mark");
+  const qaReports = getOrgChartChildren("QA / Verification Agent");
 
   return (
     <div className="min-h-screen bg-[#faf7f2] text-neutral-900">
@@ -106,31 +141,41 @@ export default async function OrgChartPage() {
           </div>
         </section>
 
-        <section className="mt-8 rounded-[32px] border border-black/5 bg-white p-6 shadow-sm">
-          <div className="flex items-center gap-2 text-neutral-900">
-            <Network className="h-5 w-5" />
-            <h2 className="text-2xl font-semibold">Direct reports under Bub</h2>
-          </div>
-          <p className="mt-3 text-sm text-neutral-600">These are the operating roles Bub coordinates directly. Click any role to see duties, tasks, and live work links.</p>
-          <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-            {directReports.map((member) => (
-              <MemberCard key={member.slug} {...member} status={getOrgRoleStatus(member.slug, workflow, ops)} />
-            ))}
-          </div>
-        </section>
+        <TeamSection
+          icon={<Network className="h-5 w-5" />}
+          title="Direct reports under Bub"
+          body="These are the operating roles Bub coordinates directly. Click any role to see duties, tasks, and live work links."
+          members={directReports}
+          workflow={workflow}
+          ops={ops}
+        />
 
-        <section className="mt-8 rounded-[32px] border border-black/5 bg-white p-6 shadow-sm">
-          <div className="flex items-center gap-2 text-neutral-900">
-            <Building2 className="h-5 w-5" />
-            <h2 className="text-2xl font-semibold">Engineering specialists under execution</h2>
-          </div>
-          <p className="mt-3 text-sm text-neutral-600">These specialists sit underneath the execution function. They are role-specific contributors, not top-level managers.</p>
-          <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-            {executionReports.map((member) => (
-              <MemberCard key={member.slug} {...member} status={getOrgRoleStatus(member.slug, workflow, ops)} />
-            ))}
-          </div>
-        </section>
+        <TeamSection
+          icon={<Building2 className="h-5 w-5" />}
+          title="Engineering specialists under execution"
+          body="These specialists sit underneath the execution function. They are role-specific contributors, not top-level managers."
+          members={executionReports}
+          workflow={workflow}
+          ops={ops}
+        />
+
+        <TeamSection
+          icon={<Building2 className="h-5 w-5" />}
+          title="Marketing specialists under Mark"
+          body="These agents handle growth execution and focused marketing work under the marketing lane."
+          members={markReports}
+          workflow={workflow}
+          ops={ops}
+        />
+
+        <TeamSection
+          icon={<Building2 className="h-5 w-5" />}
+          title="Verification and release specialists under QA"
+          body="These agents support release confidence, validation, and regression checking under the QA lane."
+          members={qaReports}
+          workflow={workflow}
+          ops={ops}
+        />
 
         <section className="mt-8 rounded-[32px] border border-black/5 bg-white p-6 shadow-sm">
           <div className="flex items-center gap-2 text-neutral-900">
@@ -141,7 +186,7 @@ export default async function OrgChartPage() {
             <ReportingBand label="Leadership" body="Richard + Topher" />
             <ReportingBand label="Chief of Staff / Orchestrator" body="Bub" />
             <ReportingBand label="Operating managers" body="Issues, Execution, QA, Growth, Ideas" />
-            <ReportingBand label="Specialists" body="Frontend + Backend under Execution" />
+            <ReportingBand label="Specialists" body="Frontend + Backend under Execution, workers under Mark and QA" />
           </div>
         </section>
       </div>
