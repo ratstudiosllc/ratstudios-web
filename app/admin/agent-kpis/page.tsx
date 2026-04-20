@@ -2,13 +2,16 @@ import Link from "next/link";
 import {
   Activity,
   AlertCircle,
+  Building2,
   CheckCircle2,
   Clock3,
   DollarSign,
+  Layers3,
+  Megaphone,
   PauseCircle,
   PlayCircle,
   ShieldAlert,
-  TimerReset,
+  Sparkles,
   Wrench,
 } from "lucide-react";
 import { getOpsRuns } from "@/lib/ops-admin";
@@ -154,9 +157,31 @@ export default async function AgentKpisPage() {
             <p className="text-sm font-semibold uppercase tracking-widest text-orange-500">Agent KPI Dashboard</p>
             <h1 className="mt-3 text-4xl font-bold text-neutral-950">Agent performance and operating pressure</h1>
             <p className="mt-4 max-w-3xl text-lg text-neutral-600">This page keeps the first pass focused on real operational signal, not made-up scorecards. It shows what agents are doing today, what is failing, what is stuck, and what it costs.</p>
-            <div className="mt-8 flex flex-col gap-4 sm:flex-row">
-              <Link href="/admin" className="inline-flex items-center justify-center rounded-2xl border border-black/10 bg-[#fcfaf7] px-5 py-3 text-sm font-medium text-neutral-800 hover:bg-white hover:border-black/20">Studio Dashboard</Link>
-              <Link href="/admin/agent-runs" className="inline-flex items-center justify-center rounded-2xl border border-black/10 bg-[#fcfaf7] px-5 py-3 text-sm font-medium text-neutral-800 hover:bg-white hover:border-black/20">Agent Runs</Link>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link href="/admin/current-apps" className="inline-flex items-center gap-2 rounded-2xl border border-black/10 bg-[#fcfaf7] px-4 py-3 text-sm font-medium text-neutral-800 transition hover:bg-white hover:border-black/20">
+                <Layers3 className="h-4 w-4 text-orange-500" />
+                Current Apps
+              </Link>
+              <Link href="/admin/ideas" className="inline-flex items-center gap-2 rounded-2xl border border-black/10 bg-[#fcfaf7] px-4 py-3 text-sm font-medium text-neutral-800 transition hover:bg-white hover:border-black/20">
+                <Sparkles className="h-4 w-4 text-orange-500" />
+                Ideas
+              </Link>
+              <Link href="/admin/future-apps" className="inline-flex items-center gap-2 rounded-2xl border border-black/10 bg-[#fcfaf7] px-4 py-3 text-sm font-medium text-neutral-800 transition hover:bg-white hover:border-black/20">
+                <Megaphone className="h-4 w-4 text-orange-500" />
+                Future Apps
+              </Link>
+              <Link href="/admin/issues" className="inline-flex items-center gap-2 rounded-2xl border border-black/10 bg-[#fcfaf7] px-4 py-3 text-sm font-medium text-neutral-800 transition hover:bg-white hover:border-black/20">
+                <Wrench className="h-4 w-4 text-orange-500" />
+                Issues
+              </Link>
+              <Link href="/admin/org-chart" className="inline-flex items-center gap-2 rounded-2xl border border-black/10 bg-[#fcfaf7] px-4 py-3 text-sm font-medium text-neutral-800 transition hover:bg-white hover:border-black/20">
+                <Building2 className="h-4 w-4 text-orange-500" />
+                Org Chart
+              </Link>
+              <Link href="/admin/agent-kpis" className="inline-flex items-center gap-2 rounded-2xl border border-orange-200 bg-orange-50 px-4 py-3 text-sm font-medium text-neutral-900 transition hover:border-orange-300 hover:bg-orange-100">
+                <Activity className="h-4 w-4 text-orange-500" />
+                Agent KPIs
+              </Link>
             </div>
           </div>
         </div>
