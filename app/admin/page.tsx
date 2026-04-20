@@ -324,10 +324,10 @@ export default async function AdminPage() {
           <KpiCard label={studioKpis[0].label} value={studioKpis[0].value} helper={studioKpis[0].helper} icon={<Layers3 className="h-5 w-5" />} href="/admin/current-apps" updatedAt={ops?.generatedAt ?? null} />
           <KpiCard label={studioKpis[1].label} value={studioKpis[1].value} helper={studioKpis[1].helper} icon={<Sparkles className="h-5 w-5" />} href="/admin/ideas" updatedAt={ideasSummary.latestUpdatedAt ?? null} />
           <KpiCard label={studioKpis[2].label} value={studioKpis[2].value} helper={studioKpis[2].helper} icon={<Megaphone className="h-5 w-5" />} href="/admin/future-apps" updatedAt={ops?.generatedAt ?? null} />
-          <KpiCard label={studioKpis[3].label} value={studioKpis[3].value} helper={studioKpis[3].helper} icon={<Wrench className="h-5 w-5" />} href="/admin/issues" updatedAt={issues?.lastUpdated ?? null} />
-          <KpiCard label={studioKpis[4].label} value={studioKpis[4].value} helper={studioKpis[4].helper} icon={<AlertCircle className="h-5 w-5" />} href="/admin/issues?priority=P1" updatedAt={issues?.lastUpdated ?? null} />
-          <KpiCard label={studioKpis[5].label} value={studioKpis[5].value} helper={studioKpis[5].helper} icon={<CheckCircle2 className="h-5 w-5" />} href="/admin/issues" updatedAt={issues?.lastUpdated ?? null} />
-          <KpiCard label="Org chart" value="Studio" helper="Leadership, Bub, and agent roles" icon={<Building2 className="h-5 w-5" />} href="/admin/org-chart" updatedAt={issues?.lastUpdated ?? null} />
+          <KpiCard label={studioKpis[3].label} value={studioKpis[3].value} helper={studioKpis[3].helper} icon={<Wrench className="h-5 w-5" />} href="/admin/issues" updatedAt={issues?.lastUpdatedRaw ?? null} />
+          <KpiCard label={studioKpis[4].label} value={studioKpis[4].value} helper={studioKpis[4].helper} icon={<AlertCircle className="h-5 w-5" />} href="/admin/issues?priority=P1" updatedAt={issues?.lastUpdatedRaw ?? null} />
+          <KpiCard label={studioKpis[5].label} value={studioKpis[5].value} helper={studioKpis[5].helper} icon={<CheckCircle2 className="h-5 w-5" />} href="/admin/issues" updatedAt={issues?.lastUpdatedRaw ?? null} />
+          <KpiCard label="Org chart" value="Studio" helper="Leadership, Bub, and agent roles" icon={<Building2 className="h-5 w-5" />} href="/admin/org-chart" updatedAt={issues?.lastUpdatedRaw ?? null} />
         </section>
 
         <section className="mt-8 rounded-[32px] border border-black/5 bg-white p-6 shadow-sm">
@@ -340,7 +340,7 @@ export default async function AdminPage() {
           </div>
           <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             <div className="rounded-2xl bg-[#fcfaf7] p-4"><p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">Ideas store</p><p className="mt-2 text-sm text-neutral-800">File-backed ideas data</p><p className="mt-2 text-xs text-neutral-500">Updated {formatMountainNow(ideasSummary.latestUpdatedAt ?? null)}</p></div>
-            <div className="rounded-2xl bg-[#fcfaf7] p-4"><p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">Issue tracker</p><p className="mt-2 text-sm text-neutral-800">Tracker-backed product issues</p><p className="mt-2 text-xs text-neutral-500">Updated {formatMountainNow(issues?.lastUpdated ?? null)}</p></div>
+            <div className="rounded-2xl bg-[#fcfaf7] p-4"><p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">Issue tracker</p><p className="mt-2 text-sm text-neutral-800">Tracker-backed product issues</p><p className="mt-2 text-xs text-neutral-500">Updated {formatMountainNow(issues?.lastUpdatedRaw ?? null)}</p></div>
             <div className="rounded-2xl bg-[#fcfaf7] p-4"><p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">Ops runs</p><p className="mt-2 text-sm text-neutral-800">Generated ops snapshot</p><p className="mt-2 text-xs text-neutral-500">Updated {formatMountainNow(ops?.generatedAt ?? null)}</p></div>
             <div className="rounded-2xl bg-[#fcfaf7] p-4"><p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">Smoke checks</p><p className="mt-2 text-sm text-neutral-800">Route verification results</p><p className="mt-2 text-xs text-neutral-500">Updated {formatMountainNow(qaSmoke?.generatedAt ?? null)}</p></div>
           </div>

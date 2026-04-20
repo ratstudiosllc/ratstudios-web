@@ -77,8 +77,11 @@ function buildTodayIssueFixKpi(tracker: IssueTrackerResponse | null): StudioKpi 
   const issues = tracker?.issues ?? [];
   const identifiedToday = issues.filter((issue) => sameMountainDay(issue.identified, today)).length;
   const fixedToday = issues.filter((issue) => {
-    const verifiedToday = sameMountainDay(issue.updatedAt, today);
-    return verifiedToday && issue.status === "Resolved" && issue.committed === "Yes" && issue.pushed === "Yes" && issue.deployed === "Yes";
+    return sameMountainDay(issue.updatedAt, today)
+      && issue.status == "Resolved"
+      && issue.committed == "Yes"
+      && issue.pushed == "Yes"
+      && issue.deployed == "Yes";
   }).length;
 
   return {

@@ -23,6 +23,7 @@ export interface TrackedIssue {
 export interface IssueTrackerResponse {
   trackerPath: string;
   lastUpdated: string | null;
+  lastUpdatedRaw: string | null;
   counts: {
     total: number;
     unresolved: number;
@@ -59,6 +60,7 @@ export function buildIssueTrackerResponse(issues: TrackedIssue[], lastUpdated: s
   return {
     trackerPath: "supabase.admin_issues",
     lastUpdated: formatMountainTimestamp(lastUpdated),
+    lastUpdatedRaw: lastUpdated,
     counts: {
       total: issues.length,
       unresolved: issues.filter((issue) => issue.status !== "Resolved").length,
