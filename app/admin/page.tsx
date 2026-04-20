@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-export const revalidate = 120;
+export const revalidate = 0;
 import {
   AlertCircle,
   ArrowRight,
@@ -279,8 +279,8 @@ function formatMountainNow(dateString?: string | null) {
 
 export default async function AdminPage() {
   const [ops, issues] = await Promise.all([
-    import("@/lib/ops-admin").then((m) => m.getOpsRuns().catch(() => null)),
-    import("@/lib/issues-tracker").then((m) => m.getIssueTracker().catch(() => null)),
+    import("@/lib/ops-admin").then((m) => m.getOpsRuns().catch(() => null)).catch(() => null),
+    import("@/lib/issues-tracker").then((m) => m.getIssueTracker().catch(() => null)).catch(() => null),
   ]);
 
   const currentApps = getCurrentApps();
