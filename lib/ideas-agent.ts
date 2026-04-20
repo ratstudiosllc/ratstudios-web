@@ -79,6 +79,7 @@ export interface OpportunityIdeaRecord {
   id: string;
   slug: string;
   ideaName: string;
+  isFavorite?: boolean;
   industry: string;
   oneSentenceConcept: string;
   problemSolved: string;
@@ -221,6 +222,7 @@ function normalizeIdea(idea: OpportunityIdeaRecord): OpportunityIdeaRecord {
 
   return {
     ...idea,
+    isFavorite: idea.isFavorite ?? false,
     industry: idea.industry || inferIndustry(idea),
     evidenceSources: idea.evidenceSources ?? [],
     researchInputs: idea.researchInputs ?? [],
@@ -604,6 +606,14 @@ export function archiveIdea(id: string) {
 
 export function promoteIdea(id: string) {
   return updateIdeaRecord(id, (idea) => ({ ...idea, disposition: "promoted", workflowState: "approved_for_validation" }));
+}
+
+export function setIdeaFavorite(id: string, isFavorite: boolean) {
+  return updateIdeaRecord(id, (idea) => ({ ...idea, isFavorite }));
+}
+
+export function toggleIdeaFavorite(id: string) {
+  return updateIdeaRecord(id, (idea) => ({ ...idea, isFavorite: !idea.isFavorite }));
 }
 
 export function addIdeaEvidenceSource(id: string, input: Omit<IdeaEvidenceSource, "id">) {

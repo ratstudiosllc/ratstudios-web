@@ -79,7 +79,8 @@
       },
       "disposition": "active",
       "createdAt": "2026-04-19T17:12:43.936380+00:00",
-      "updatedAt": "2026-04-19T17:12:43.936380+00:00"
+      "updatedAt": "2026-04-19T17:12:43.936380+00:00",
+      "isFavorite": false
     },
     {
       "id": "idea-rfid-expiration-recall-control-hospitals",
@@ -160,7 +161,8 @@
       },
       "disposition": "active",
       "createdAt": "2026-04-19T16:57:00.000000+00:00",
-      "updatedAt": "2026-04-19T16:57:00.000000+00:00"
+      "updatedAt": "2026-04-19T16:57:00.000000+00:00",
+      "isFavorite": false
     },
     {
       "id": "idea-routegreen-pest-control-lawn-care-mobile-ops",
@@ -241,7 +243,8 @@
       "disposition": "active",
       "createdAt": "2026-04-18T17:58:35.958674+00:00",
       "updatedAt": "2026-04-18T17:58:35.958674+00:00",
-      "industry": "Field Services"
+      "industry": "Field Services",
+      "isFavorite": false
     },
     {
       "id": "idea-fieldmind-community-behavioral-health-mobile-ops",
@@ -322,7 +325,8 @@
       "disposition": "active",
       "createdAt": "2026-04-18T17:58:35.958674+00:00",
       "updatedAt": "2026-04-18T17:58:35.958674+00:00",
-      "industry": "Healthcare"
+      "industry": "Healthcare",
+      "isFavorite": false
     },
     {
       "id": "idea-punchflow-construction-closeout-qa-mobile-ops",
@@ -403,7 +407,8 @@
       "disposition": "active",
       "createdAt": "2026-04-18T17:58:35.958674+00:00",
       "updatedAt": "2026-04-18T17:58:35.958674+00:00",
-      "industry": "Construction"
+      "industry": "Construction",
+      "isFavorite": false
     },
     {
       "id": "idea-techonsite-specialty-field-service-mobile-ops",
@@ -484,7 +489,8 @@
       "disposition": "active",
       "createdAt": "2026-04-18T17:38:38.203328+00:00",
       "updatedAt": "2026-04-18T17:38:38.203328+00:00",
-      "industry": "Field Services"
+      "industry": "Field Services",
+      "isFavorite": false
     },
     {
       "id": "idea-turnflow-multifamily-property-maintenance-mobile-ops",
@@ -565,7 +571,8 @@
       "disposition": "active",
       "createdAt": "2026-04-18T17:38:38.203328+00:00",
       "updatedAt": "2026-04-18T17:38:38.203328+00:00",
-      "industry": "Facilities"
+      "industry": "Facilities",
+      "isFavorite": false
     },
     {
       "id": "idea-care-route-home-health-hospice-mobile-ops",
@@ -646,7 +653,8 @@
       "disposition": "active",
       "createdAt": "2026-04-18T17:38:38.203328+00:00",
       "updatedAt": "2026-04-18T17:38:38.203328+00:00",
-      "industry": "Healthcare"
+      "industry": "Healthcare",
+      "isFavorite": false
     },
     {
       "id": "idea-self-storage-management-software",
@@ -759,7 +767,8 @@
       "disposition": "active",
       "createdAt": "2026-04-18T16:16:59.097Z",
       "updatedAt": "2026-04-18T17:16:57.977Z",
-      "industry": "Facilities"
+      "industry": "Facilities",
+      "isFavorite": false
     },
     {
       "id": "idea-fieldops-copilot",
@@ -844,7 +853,8 @@
       "disposition": "active",
       "createdAt": "2026-04-18T16:16:59.097Z",
       "updatedAt": "2026-04-18T16:16:59.097Z",
-      "industry": "Field Services"
+      "industry": "Field Services",
+      "isFavorite": false
     },
     {
       "id": "idea-family-eye-care-growth-ops",
@@ -926,7 +936,8 @@
       "promotedAppSlug": "family-eye-care-growth-tools",
       "createdAt": "2026-04-18T16:16:59.097Z",
       "updatedAt": "2026-04-18T16:42:19.245Z",
-      "industry": "Healthcare"
+      "industry": "Healthcare",
+      "isFavorite": false
     },
     {
       "ideaName": "MediVan Flow",
@@ -1007,7 +1018,8 @@
       "researchInputs": [],
       "createdAt": "2026-04-18T21:59:52.881774+00:00",
       "updatedAt": "2026-04-18T21:59:52.881774+00:00",
-      "industry": "Healthcare"
+      "industry": "Healthcare",
+      "isFavorite": false
     },
     {
       "ideaName": "SnowCrew Command",
@@ -1088,7 +1100,8 @@
       "researchInputs": [],
       "createdAt": "2026-04-18T21:59:52.881774+00:00",
       "updatedAt": "2026-04-18T21:59:52.881774+00:00",
-      "industry": "Field Services"
+      "industry": "Field Services",
+      "isFavorite": false
     },
     {
       "ideaName": "SpecimenRunner",
@@ -1169,7 +1182,8 @@
       "researchInputs": [],
       "createdAt": "2026-04-18T21:59:52.881774+00:00",
       "updatedAt": "2026-04-18T21:59:52.881774+00:00",
-      "industry": "Healthcare"
+      "industry": "Healthcare",
+      "isFavorite": false
     },
     {
       "ideaName": "PumpWatch Field",
@@ -1250,7 +1264,8 @@
       "researchInputs": [],
       "createdAt": "2026-04-18T21:59:52.881774+00:00",
       "updatedAt": "2026-04-18T21:59:52.881774+00:00",
-      "industry": "Field Services"
+      "industry": "Field Services",
+      "isFavorite": false
     },
     {
       "ideaName": "RestoreRun",
@@ -1331,7 +1346,8 @@
       "researchInputs": [],
       "createdAt": "2026-04-18T21:59:52.881774+00:00",
       "updatedAt": "2026-04-18T21:59:52.881774+00:00",
-      "industry": "Field Services"
+      "industry": "Field Services",
+      "isFavorite": false
     },
     {
       "ideaName": "MeterField",
@@ -1412,7 +1428,8 @@
       "researchInputs": [],
       "createdAt": "2026-04-18T21:59:52.881774+00:00",
       "updatedAt": "2026-04-18T21:59:52.881774+00:00",
-      "industry": "Utilities"
+      "industry": "Utilities",
+      "isFavorite": false
     },
     {
       "ideaName": "FleetReady PDI",
@@ -1493,7 +1510,8 @@
       "researchInputs": [],
       "createdAt": "2026-04-18T21:59:52.881774+00:00",
       "updatedAt": "2026-04-18T21:59:52.881774+00:00",
-      "industry": "Transportation"
+      "industry": "Transportation",
+      "isFavorite": false
     },
     {
       "ideaName": "ShuttleOps",
@@ -1574,7 +1592,8 @@
       "researchInputs": [],
       "createdAt": "2026-04-18T21:59:52.881774+00:00",
       "updatedAt": "2026-04-18T21:59:52.881774+00:00",
-      "industry": "Transportation"
+      "industry": "Transportation",
+      "isFavorite": false
     },
     {
       "ideaName": "RailYard Mobile",
@@ -1655,7 +1674,8 @@
       "researchInputs": [],
       "createdAt": "2026-04-18T21:59:52.881774+00:00",
       "updatedAt": "2026-04-18T21:59:52.881774+00:00",
-      "industry": "Transportation"
+      "industry": "Transportation",
+      "isFavorite": false
     },
     {
       "ideaName": "LinenRoute",
@@ -1736,7 +1756,8 @@
       "researchInputs": [],
       "createdAt": "2026-04-18T21:59:52.881774+00:00",
       "updatedAt": "2026-04-18T21:59:52.881774+00:00",
-      "industry": "Healthcare"
+      "industry": "Healthcare",
+      "isFavorite": false
     },
     {
       "ideaName": "GreaseRoute",
@@ -1817,7 +1838,8 @@
       "researchInputs": [],
       "createdAt": "2026-04-18T21:59:52.881774+00:00",
       "updatedAt": "2026-04-18T21:59:52.881774+00:00",
-      "industry": "Field Services"
+      "industry": "Field Services",
+      "isFavorite": false
     },
     {
       "ideaName": "DialyzeTransit",
@@ -1898,7 +1920,8 @@
       "researchInputs": [],
       "createdAt": "2026-04-18T21:59:52.881774+00:00",
       "updatedAt": "2026-04-18T21:59:52.881774+00:00",
-      "industry": "Healthcare"
+      "industry": "Healthcare",
+      "isFavorite": false
     },
     {
       "ideaName": "SignRoute",
@@ -1979,7 +2002,8 @@
       "researchInputs": [],
       "createdAt": "2026-04-18T21:59:52.881774+00:00",
       "updatedAt": "2026-04-18T21:59:52.881774+00:00",
-      "industry": "Field Services"
+      "industry": "Field Services",
+      "isFavorite": false
     },
     {
       "ideaName": "Canopy Crew",
@@ -2060,7 +2084,8 @@
       "researchInputs": [],
       "createdAt": "2026-04-18T21:59:52.881774+00:00",
       "updatedAt": "2026-04-18T21:59:52.881774+00:00",
-      "industry": "Field Services"
+      "industry": "Field Services",
+      "isFavorite": false
     },
     {
       "ideaName": "PorterTrack",
@@ -2141,7 +2166,8 @@
       "researchInputs": [],
       "createdAt": "2026-04-18T21:59:52.881774+00:00",
       "updatedAt": "2026-04-18T21:59:52.881774+00:00",
-      "industry": "Healthcare"
+      "industry": "Healthcare",
+      "isFavorite": false
     },
     {
       "ideaName": "ScanStock Field",
@@ -2222,7 +2248,8 @@
       "researchInputs": [],
       "createdAt": "2026-04-18T21:59:52.881774+00:00",
       "updatedAt": "2026-04-18T21:59:52.881774+00:00",
-      "industry": "Healthcare"
+      "industry": "Healthcare",
+      "isFavorite": false
     },
     {
       "ideaName": "PavePulse",
@@ -2303,7 +2330,8 @@
       "researchInputs": [],
       "createdAt": "2026-04-18T21:59:52.881774+00:00",
       "updatedAt": "2026-04-18T21:59:52.881774+00:00",
-      "industry": "Construction"
+      "industry": "Construction",
+      "isFavorite": false
     },
     {
       "ideaName": "GlazeField",
@@ -2384,7 +2412,8 @@
       "researchInputs": [],
       "createdAt": "2026-04-18T21:59:52.881774+00:00",
       "updatedAt": "2026-04-18T21:59:52.881774+00:00",
-      "industry": "Construction"
+      "industry": "Construction",
+      "isFavorite": false
     },
     {
       "ideaName": "ValveLoop",
@@ -2465,7 +2494,8 @@
       "researchInputs": [],
       "createdAt": "2026-04-18T21:59:52.881774+00:00",
       "updatedAt": "2026-04-18T21:59:52.881774+00:00",
-      "industry": "Industrial"
+      "industry": "Industrial",
+      "isFavorite": false
     },
     {
       "ideaName": "LotMedic",
@@ -2546,7 +2576,8 @@
       "researchInputs": [],
       "createdAt": "2026-04-18T21:59:52.881774+00:00",
       "updatedAt": "2026-04-18T21:59:52.881774+00:00",
-      "industry": "Field Services"
+      "industry": "Field Services",
+      "isFavorite": false
     },
     {
       "ideaName": "VaultTrack",
@@ -2627,7 +2658,8 @@
       "researchInputs": [],
       "createdAt": "2026-04-18T21:59:52.881774+00:00",
       "updatedAt": "2026-04-18T21:59:52.881774+00:00",
-      "industry": "Facilities"
+      "industry": "Facilities",
+      "isFavorite": false
     },
     {
       "ideaName": "EventCrew Ops",
@@ -2708,7 +2740,8 @@
       "researchInputs": [],
       "createdAt": "2026-04-18T21:59:52.881774+00:00",
       "updatedAt": "2026-04-18T21:59:52.881774+00:00",
-      "industry": "Events"
+      "industry": "Events",
+      "isFavorite": false
     },
     {
       "ideaName": "KegRoute",
@@ -2789,7 +2822,8 @@
       "researchInputs": [],
       "createdAt": "2026-04-18T21:59:52.881774+00:00",
       "updatedAt": "2026-04-18T21:59:52.881774+00:00",
-      "industry": "Food & Beverage"
+      "industry": "Food & Beverage",
+      "isFavorite": false
     },
     {
       "ideaName": "MooringOps",
@@ -2870,7 +2904,8 @@
       "researchInputs": [],
       "createdAt": "2026-04-18T21:59:52.881774+00:00",
       "updatedAt": "2026-04-18T21:59:52.881774+00:00",
-      "industry": "Maritime"
+      "industry": "Maritime",
+      "isFavorite": false
     },
     {
       "ideaName": "BioRoute",
@@ -2951,7 +2986,8 @@
       "researchInputs": [],
       "createdAt": "2026-04-18T21:59:52.881774+00:00",
       "updatedAt": "2026-04-18T21:59:52.881774+00:00",
-      "industry": "Healthcare"
+      "industry": "Healthcare",
+      "isFavorite": false
     }
   ]
 }

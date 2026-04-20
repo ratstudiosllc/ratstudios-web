@@ -3,6 +3,7 @@ import {
   archiveIdea,
   getIdeaById,
   promoteIdea,
+  setIdeaFavorite,
   updateIdea,
   type IdeaConfidence,
   type IdeaEvidenceSource,
@@ -72,6 +73,7 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
       recommendation: (normalize(body.recommendation) as IdeaRecommendation | undefined) ?? idea.recommendation,
       confidence: (normalize(body.confidence) as IdeaConfidence | undefined) ?? idea.confidence,
       bestWedge: normalize(body.bestWedge) ?? idea.bestWedge,
+      isFavorite: typeof body.isFavorite === "boolean" ? body.isFavorite : idea.isFavorite,
       strongestReasonToBuild: normalize(body.strongestReasonToBuild) ?? idea.strongestReasonToBuild,
       strongestReasonNotToBuild: normalize(body.strongestReasonNotToBuild) ?? idea.strongestReasonNotToBuild,
       biggestRisk: normalize(body.biggestRisk) ?? idea.biggestRisk,
@@ -122,6 +124,14 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
 
   if (action === "archive") {
     return NextResponse.json({ idea: archiveIdea(id) });
+  }
+
+  if (action === "favorite") {
+    return NextResponse.json({ idea: setIdeaFavorite(id, true) });
+  }
+
+  if (action === "unfavorite") {
+    return NextResponse.json({ idea: setIdeaFavorite(id, false) });
   }
 
   if (action === "promote") {

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { IdeaFavoriteButton } from "@/components/admin/IdeaFavoriteButton";
 import { redirect } from "next/navigation";
 import { getIdeasAgentSummary, listIdeas } from "@/lib/ideas-agent";
 
@@ -23,7 +24,7 @@ function dispositionClasses(disposition: string) {
 export default async function IdeasPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ view?: string | string[] | undefined; industry?: string | string[] | undefined; disposition?: string | string[] | undefined; workflow?: string | string[] | undefined; recommendation?: string | string[] | undefined; confidence?: string | string[] | undefined; sort?: string | string[] | undefined }> | { view?: string | string[] | undefined; industry?: string | string[] | undefined; disposition?: string | string[] | undefined; workflow?: string | string[] | undefined; recommendation?: string | string[] | undefined; confidence?: string | string[] | undefined; sort?: string | string[] | undefined };
+  searchParams?: Promise<{ view?: string | string[] | undefined; industry?: string | string[] | undefined; disposition?: string | string[] | undefined; workflow?: string | string[] | undefined; recommendation?: string | string[] | undefined; confidence?: string | string[] | undefined; favorite?: string | string[] | undefined; sort?: string | string[] | undefined }> | { view?: string | string[] | undefined; industry?: string | string[] | undefined; disposition?: string | string[] | undefined; workflow?: string | string[] | undefined; recommendation?: string | string[] | undefined; confidence?: string | string[] | undefined; favorite?: string | string[] | undefined; sort?: string | string[] | undefined };
 }) {
   const resolvedSearchParams = searchParams ? await searchParams : {};
   const viewValue = Array.isArray(resolvedSearchParams.view) ? resolvedSearchParams.view[0] : resolvedSearchParams.view;
@@ -32,6 +33,7 @@ export default async function IdeasPage({
   const workflowValue = Array.isArray(resolvedSearchParams.workflow) ? resolvedSearchParams.workflow[0] : resolvedSearchParams.workflow;
   const recommendationValue = Array.isArray(resolvedSearchParams.recommendation) ? resolvedSearchParams.recommendation[0] : resolvedSearchParams.recommendation;
   const confidenceValue = Array.isArray(resolvedSearchParams.confidence) ? resolvedSearchParams.confidence[0] : resolvedSearchParams.confidence;
+  const favoriteValue = Array.isArray(resolvedSearchParams.favorite) ? resolvedSearchParams.favorite[0] : resolvedSearchParams.favorite;
   const sortValue = Array.isArray(resolvedSearchParams.sort) ? resolvedSearchParams.sort[0] : resolvedSearchParams.sort;
   const view = viewValue === "archived" ? "archived" : "active";
   const summary = getIdeasAgentSummary();
@@ -49,6 +51,11 @@ export default async function IdeasPage({
   const workflowOptions = Array.from(new Set(allIdeas.map((idea) => idea.workflowState))).sort((a, b) => a.localeCompare(b));
   const recommendationOptions = ["Pursue", "Hold", "Pass"];
   const confidenceOptions = ["High", "Medium", "Low"];
+  const favoriteOptions = [
+    { value: "", label: "All star states" },
+    { value: "starred", label: "Starred only" },
+    { value: "unstarred", label: "Unstarred only" },
+  ];
   const ideas = allIdeas
     .filter((idea) => (view === "archived" ? idea.disposition === "archived" : idea.disposition !== "archived"))
     .filter((idea) => (industryValue ? idea.industry === industryValue : true))
@@ -56,12 +63,15 @@ export default async function IdeasPage({
     .filter((idea) => (workflowValue ? idea.workflowState === workflowValue : true))
     .filter((idea) => (recommendationValue ? idea.recommendation === recommendationValue : true))
     .filter((idea) => (confidenceValue ? idea.confidence === confidenceValue : true))
+    .filter((idea) => (favoriteValue === "starred" ? idea.isFavorite : favoriteValue === "unstarred" ? !idea.isFavorite : true))
     .sort((a, b) => {
       if (sortValue === "score") return b.scorecard.weightedTotal - a.scorecard.weightedTotal || a.ideaName.localeCompare(b.ideaName);
       if (sortValue === "score_asc") return a.scorecard.weightedTotal - b.scorecard.weightedTotal || a.ideaName.localeCompare(b.ideaName);
       if (sortValue === "name") return a.ideaName.localeCompare(b.ideaName);
       if (sortValue === "updated") return (Date.parse(b.updatedAt) || 0) - (Date.parse(a.updatedAt) || 0);
-      if (sortValue === "industry") return a.industry.localeCompare(b.industry) || b.scorecard.weightedTotal - a.scorecard.weightedTotal;
+      if (sortValue === "industry") return a.industry.localeCompare(b.industry) || Number(b.isFavorite) - Number(a.isFavorite) || b.scorecard.weightedTotal - a.scorecard.weightedTotal;
+      if (sortValue === "favorites") return Number(b.isFavorite) - Number(a.isFavorite) || b.scorecard.weightedTotal - a.scorecard.weightedTotal || a.ideaName.localeCompare(b.ideaName);
+      if (Number(b.isFavorite) !== Number(a.isFavorite)) return Number(b.isFavorite) - Number(a.isFavorite);
       if (a.disposition !== b.disposition) {
         const dispositionRank = { active: 0, promoted: 1, archived: 2 };
         return dispositionRank[a.disposition] - dispositionRank[b.disposition];
@@ -109,16 +119,20 @@ export default async function IdeasPage({
               <option value="">All confidence levels</option>
               {confidenceOptions.map((confidence) => <option key={confidence} value={confidence}>{confidence}</option>)}
             </select>
+            <select name="favorite" defaultValue={favoriteValue ?? ""} className="rounded-xl border border-black/10 bg-white px-3 py-2 text-sm text-neutral-700">
+              {favoriteOptions.map((option) => <option key={option.value || "all"} value={option.value}>{option.label}</option>)}
+            </select>
             <select name="sort" defaultValue={sortValue ?? "portfolio"} className="rounded-xl border border-black/10 bg-white px-3 py-2 text-sm text-neutral-700">
               <option value="portfolio">Portfolio order</option>
               <option value="score">Highest score</option>
               <option value="score_asc">Lowest score</option>
               <option value="updated">Recently updated</option>
               <option value="industry">Industry</option>
+              <option value="favorites">Starred first</option>
               <option value="name">Name</option>
             </select>
             <button formAction="/admin/ideas" className="rounded-xl bg-neutral-950 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800">Apply</button>
-            {(industryValue || dispositionValue || workflowValue || recommendationValue || confidenceValue || (sortValue && sortValue !== "portfolio")) ? <Link href={view === "archived" ? "/admin/ideas?view=archived&disposition=archived" : "/admin/ideas"} className="text-sm text-neutral-500 underline underline-offset-2">Clear</Link> : null}
+            {(industryValue || dispositionValue || workflowValue || recommendationValue || confidenceValue || favoriteValue || (sortValue && sortValue !== "portfolio")) ? <Link href={view === "archived" ? "/admin/ideas?view=archived&disposition=archived" : "/admin/ideas"} className="text-sm text-neutral-500 underline underline-offset-2">Clear</Link> : null}
           </div>
         </form>
 
@@ -138,7 +152,10 @@ export default async function IdeasPage({
                     <span>• {idea.confidence} confidence</span>
                   </div>
                 </div>
-                <span className="rounded-full bg-[#fcfaf7] px-3 py-1 text-xs font-semibold text-neutral-700">score {idea.scorecard.weightedTotal}</span>
+                <div className="flex items-center gap-2">
+                  <IdeaFavoriteButton ideaId={idea.id} isFavorite={Boolean(idea.isFavorite)} />
+                  <span className="rounded-full bg-[#fcfaf7] px-3 py-1 text-xs font-semibold text-neutral-700">score {idea.scorecard.weightedTotal}</span>
+                </div>
               </div>
               <p className="mt-4 text-sm text-neutral-600">{idea.oneSentenceConcept}</p>
               <div className="mt-5 grid gap-3 md:grid-cols-2">
