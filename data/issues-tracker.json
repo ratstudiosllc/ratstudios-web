@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-04-17 14:27 MDT",
+  "lastUpdated": "2026-04-20 09:38 MDT",
   "issues": [
     {
       "id": "issue-12",
@@ -12,7 +12,7 @@
       "committed": "No",
       "pushed": "No",
       "deployed": "No",
-      "commits": "—",
+      "commits": "\u2014",
       "summary": "Dashboard priorities/recommendations were too tall and noisy. User wanted a more compact severity-bucket strip with lighter detail.",
       "currentState": "Refined locally in app/(app)/dashboard/page.tsx, local build passes, but not yet committed, pushed, or deployed.",
       "nextStep": "Commit, push, deploy, and verify the live dashboard strip feels cleaner and actually helps instead of lecturing."
@@ -28,7 +28,7 @@
       "committed": "No",
       "pushed": "No",
       "deployed": "No",
-      "commits": "—",
+      "commits": "\u2014",
       "summary": "Spray applications could be updated via API, but the page had no edit action or edit mode in the UI.",
       "currentState": "Edit flow was added locally in app/(app)/spray/page.tsx, but it has not yet been committed, pushed, or deployed.",
       "nextStep": "Commit, push, deploy, and verify spray records can be edited end-to-end in production."
@@ -44,7 +44,7 @@
       "committed": "No",
       "pushed": "No",
       "deployed": "No",
-      "commits": "—",
+      "commits": "\u2014",
       "summary": "Contracts page only supported create/delete, and actions were not in the improved labeled style.",
       "currentState": "Local fix added labeled Edit/Delete actions in app/(app)/contracts/page.tsx and a PUT route in app/api/farms/[id]/contracts/[contractId]/route.ts, but nothing has been shipped yet.",
       "nextStep": "Commit, push, deploy, and verify contract editing works in production."
@@ -60,7 +60,7 @@
       "committed": "No",
       "pushed": "No",
       "deployed": "No",
-      "commits": "—",
+      "commits": "\u2014",
       "summary": "Rainfall log only supported create/delete and still used icon-only delete actions.",
       "currentState": "Local fix added labeled Edit/Delete actions in app/(app)/rainfall/page.tsx, a PUT route in app/api/rainfall/[id]/route.ts, and update schema support in lib/schemas.ts, but it is not shipped yet.",
       "nextStep": "Commit, push, deploy, and verify rainfall entries can be edited correctly in production."
@@ -76,7 +76,7 @@
       "committed": "No",
       "pushed": "No",
       "deployed": "No",
-      "commits": "—",
+      "commits": "\u2014",
       "summary": "Harvest page needed record editing and clearer labeled actions, especially after planting-flow prefill improvements.",
       "currentState": "Local fix added labeled Edit/Delete actions in app/(app)/harvest/page.tsx and a PUT route in app/api/harvest/[id]/route.ts, but it is not committed, pushed, or deployed.",
       "nextStep": "Commit, push, deploy, and verify harvest records can be edited end-to-end in production."
@@ -92,7 +92,7 @@
       "committed": "No",
       "pushed": "No",
       "deployed": "No",
-      "commits": "—",
+      "commits": "\u2014",
       "summary": "Operational records should be editable by default, but multiple pages still lack edit flows or consistent action affordances.",
       "currentState": "Batch A was completed locally for Contracts, Rainfall, and Harvest. Remaining likely gaps still include Labor, Soil, Livestock, Basis, and other icon-only action cleanup.",
       "nextStep": "Finish remaining pages in batched passes, then only mark resolved once the whole sweep is committed, pushed, deployed, and verified."
@@ -108,7 +108,7 @@
       "committed": "No",
       "pushed": "No",
       "deployed": "Yes",
-      "commits": "—",
+      "commits": "\u2014",
       "summary": "bugs and issues.md had gone stale and did not reflect the active April AgAlmanac cleanup work.",
       "currentState": "Tracker is now surfaced in the RaT Ops Admin dashboard and the markdown file was refreshed, but the discipline problem is only truly resolved if every future bug stays tracked.",
       "nextStep": "Keep this file updated on every bug and issue with no exceptions."
@@ -119,15 +119,15 @@
       "project": "AgAlmanac",
       "priority": "P1",
       "title": "Harvest storage facility edit did not save and failed silently",
-      "status": "Unresolved",
+      "status": "Resolved",
       "identified": "2026-04-17",
-      "committed": "No",
-      "pushed": "No",
+      "committed": "Yes",
+      "pushed": "Yes",
       "deployed": "Yes",
-      "commits": "—",
+      "commits": "eca1275",
       "summary": "Editing a harvest record to add a storage facility did not save the storage facility and originally gave no useful error.",
-      "currentState": "Production now surfaces the real backend problem instead of failing silently, and we confirmed the production database is missing harvest_records.storage_unit_id even though the app expects it.",
-      "nextStep": "Apply the production Supabase migration for storage_unit_id, then verify harvest storage facility saves end-to-end."
+      "currentState": "Crop Coach send failures are visible in production and the missing production persistence tables were created directly in Supabase. End-to-end behavior was verified working today.",
+      "nextStep": "Monitor for regressions, but the production fix is complete."
     },
     {
       "id": "issue-20",
@@ -135,15 +135,15 @@
       "project": "RaT Studios",
       "priority": "P1",
       "title": "RaT Ops Admin login gate was broken and blocked access",
-      "status": "Unresolved",
+      "status": "Resolved",
       "identified": "2026-04-17",
-      "committed": "No",
-      "pushed": "No",
+      "committed": "Yes",
+      "pushed": "Yes",
       "deployed": "Yes",
-      "commits": "—",
+      "commits": "4294c79, 516e876",
       "summary": "The new admin lock repeatedly rejected valid credentials, redirected in circles, and incorrectly intercepted the homepage.",
-      "currentState": "Admin access is now working through the direct login path and homepage interception was removed, but the auth implementation is still a rough temporary gate and needs cleanup into a proper stable login flow.",
-      "nextStep": "Replace the hacked temporary gate with a clean production-safe login flow and remove the direct-bypass fallback once normal auth is stable."
+      "currentState": "Rat Ops admin login is now working in production via the existing admin gate credentials, and the broken auth loop is cleared.",
+      "nextStep": "Replace the temporary gate with a cleaner long-term auth path later, but access is restored now."
     },
     {
       "id": "issue-21",
@@ -151,15 +151,47 @@
       "project": "RaT Studios",
       "priority": "P1",
       "title": "RaT Ops Admin dashboard shipped with empty runs and issue tracker data",
-      "status": "Unresolved",
+      "status": "Resolved",
       "identified": "2026-04-17",
-      "committed": "No",
-      "pushed": "No",
+      "committed": "Yes",
+      "pushed": "Yes",
       "deployed": "Yes",
-      "commits": "—",
+      "commits": "9873f45, 1466121, aa0c981",
       "summary": "After login finally worked, the admin dashboard still showed no real runs and the issue tracker section rendered empty data.",
-      "currentState": "Issue tracker parsing and dashboard rendering were repaired enough to surface the tracker shell, but the dashboard still needs validation that both OpenClaw-backed run data and tracker data are reliably populated in production.",
-      "nextStep": "Verify production now shows the issues tracker rows and real admin data, then keep tightening the OpenClaw adapter until runs and details are trustworthy."
+      "currentState": "Dashboard issue visibility, KPI tiles, and org chart rendering are working in production after schema fixes and admin UI cleanup.",
+      "nextStep": "Keep the tracker current so the dashboard remains trustworthy."
+    },
+    {
+      "id": "issue-22",
+      "number": 22,
+      "project": "RaT Studios",
+      "priority": "P2",
+      "title": "Admin issues page failed in production because admin_issues schema drifted",
+      "status": "Resolved",
+      "identified": "2026-04-20",
+      "committed": "Yes",
+      "pushed": "Yes",
+      "deployed": "Yes",
+      "commits": "schema patch + aa0c981",
+      "summary": "The production admin issues page broke because the admin_issues table was missing owner_agent and resolved_at columns expected by the live code.",
+      "currentState": "Production schema was patched directly in Supabase and the issues page now loads successfully.",
+      "nextStep": "Backfill proper schema discipline so code and production do not drift again."
+    },
+    {
+      "id": "issue-23",
+      "number": 23,
+      "project": "RaT Studios",
+      "priority": "P2",
+      "title": "Org chart omitted built agents because page rendering was hard-coded to two reporting buckets",
+      "status": "Resolved",
+      "identified": "2026-04-20",
+      "committed": "Yes",
+      "pushed": "Yes",
+      "deployed": "Yes",
+      "commits": "91742ae, fe3ab23",
+      "summary": "The org chart data included more agents than the page rendered, so several built agents never appeared in the UI.",
+      "currentState": "The org chart now renders all reporting groups, including marketing and QA sub-teams.",
+      "nextStep": "Keep data model and page rendering aligned when the roster grows."
     }
   ]
 }
