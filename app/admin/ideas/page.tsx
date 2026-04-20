@@ -1,7 +1,8 @@
 import Link from "next/link";
-
-export const revalidate = 300;
+import { redirect } from "next/navigation";
 import { getIdeasAgentSummary, listIdeas } from "@/lib/ideas-agent";
+
+export const revalidate = 0;
 
 function statusLabel(status: string) {
   return status.replaceAll("_", " ");
@@ -34,6 +35,14 @@ export default async function IdeasPage({
   const view = viewValue === "archived" ? "archived" : "active";
   const summary = getIdeasAgentSummary();
   const allIdeas = listIdeas();
+
+  if (view === "active" && dispositionValue === "archived") {
+    redirect("/admin/ideas?view=archived");
+  }
+
+  if (view === "archived" && dispositionValue && dispositionValue !== "archived") {
+    redirect("/admin/ideas?view=archived");
+  }
   const industryOptions = Array.from(new Set(allIdeas.map((idea) => idea.industry))).sort((a, b) => a.localeCompare(b));
   const dispositionOptions = Array.from(new Set(allIdeas.map((idea) => idea.disposition)));
   const workflowOptions = Array.from(new Set(allIdeas.map((idea) => idea.workflowState))).sort((a, b) => a.localeCompare(b));
@@ -47,7 +56,8 @@ export default async function IdeasPage({
     .filter((idea) => (recommendationValue ? idea.recommendation === recommendationValue : true))
     .filter((idea) => (confidenceValue ? idea.confidence === confidenceValue : true))
     .sort((a, b) => {
-      if (sortValue === "score_asc") return a.scorecard.weightedTotal - b.scorecard.weightedTotal;
+      if (sortValue === "score") return b.scorecard.weightedTotal - a.scorecard.weightedTotal || a.ideaName.localeCompare(b.ideaName);
+      if (sortValue === "score_asc") return a.scorecard.weightedTotal - b.scorecard.weightedTotal || a.ideaName.localeCompare(b.ideaName);
       if (sortValue === "name") return a.ideaName.localeCompare(b.ideaName);
       if (sortValue === "updated") return (Date.parse(b.updatedAt) || 0) - (Date.parse(a.updatedAt) || 0);
       if (sortValue === "industry") return a.industry.localeCompare(b.industry) || b.scorecard.weightedTotal - a.scorecard.weightedTotal;
@@ -64,24 +74,19 @@ export default async function IdeasPage({
     <div className="min-h-screen bg-[#faf7f2] text-neutral-900">
       <div className="mx-auto max-w-7xl px-6 py-10">
         <div className="rounded-[32px] border border-black/5 bg-white p-8 shadow-sm">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-orange-500">Ideas agent</p>
-              <h1 className="mt-2 text-3xl font-semibold text-neutral-950">{view === "archived" ? "Archived ideas" : "Opportunity research queue"}</h1>
-              <p className="mt-4 max-w-3xl text-sm text-neutral-600">{view === "archived" ? "Archived ideas are kept out of the active research queue but remain visible here for reference." : "This is the v1 operating surface for the ideas agent: intake, scoring, memo review, archive, and promotion into the future apps pipeline."}</p>
-            </div>
-            <div className="flex gap-3">
-              {view === "active" ? <Link href="/admin/ideas/new" className="rounded-xl bg-neutral-950 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800">New idea</Link> : null}
-              {view === "archived" ? <Link href="/admin/ideas" className="rounded-xl border border-black/10 bg-white px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-black/[0.03]">Back to active ideas</Link> : null}
-              <Link href="/admin" className="rounded-xl border border-black/10 bg-white px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-black/[0.03]">Back to dashboard</Link>
-            </div>
+          <h1 className="text-3xl font-semibold text-orange-500">{view === "archived" ? "Archived Ideas" : "Opportunity Research Queue"}</h1>
+          <div className="mt-5 flex flex-wrap gap-3">
+            {view === "active" ? <Link href="/admin/ideas/new" className="rounded-2xl bg-neutral-950 px-4 py-3 text-sm font-medium text-white hover:bg-neutral-800">New Idea</Link> : null}
+            {view === "archived" ? <Link href="/admin/ideas" className="rounded-2xl border border-black/10 bg-[#fcfaf7] px-4 py-3 text-sm font-medium text-neutral-800 transition hover:bg-white hover:border-black/20">Active Ideas</Link> : null}
+            <Link href="/admin" className="rounded-2xl border border-black/10 bg-[#fcfaf7] px-4 py-3 text-sm font-medium text-neutral-800 transition hover:bg-white hover:border-black/20">Dashboard</Link>
+            <Link href="/admin/future-apps" className="rounded-2xl border border-black/10 bg-[#fcfaf7] px-4 py-3 text-sm font-medium text-neutral-800 transition hover:bg-white hover:border-black/20">Future Apps</Link>
           </div>
         </div>
 
         <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <Link href="/admin/ideas" className="rounded-[28px] border border-black/5 bg-white p-6 shadow-sm transition hover:border-black/10 hover:bg-[#fcfaf7]"><p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">Active ideas</p><p className="mt-2 text-3xl font-semibold text-neutral-950">{summary.active}</p></Link>
           <div className="rounded-[28px] border border-black/5 bg-white p-6 shadow-sm"><p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">Promoted</p><p className="mt-2 text-3xl font-semibold text-neutral-950">{summary.promoted}</p></div>
-          <Link href="/admin/ideas?view=archived" className="rounded-[28px] border border-black/5 bg-white p-6 shadow-sm transition hover:border-black/10 hover:bg-[#fcfaf7]"><p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">Archived</p><p className="mt-2 text-3xl font-semibold text-neutral-950">{summary.archived}</p></Link>
+          <Link href="/admin/ideas?view=archived&disposition=archived" className="rounded-[28px] border border-black/5 bg-white p-6 shadow-sm transition hover:border-black/10 hover:bg-[#fcfaf7]"><p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">Archived</p><p className="mt-2 text-3xl font-semibold text-neutral-950">{summary.archived}</p></Link>
           <div className="rounded-[28px] border border-black/5 bg-white p-6 shadow-sm"><p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">Scored</p><p className="mt-2 text-3xl font-semibold text-neutral-950">{summary.scored}</p></div>
         </div>
 
@@ -94,8 +99,10 @@ export default async function IdeasPage({
               {industryOptions.map((industry) => <option key={industry} value={industry}>{industry}</option>)}
             </select>
             <select name="disposition" defaultValue={dispositionValue ?? ""} className="rounded-xl border border-black/10 bg-white px-3 py-2 text-sm text-neutral-700">
-              <option value="">All dispositions</option>
-              {dispositionOptions.map((disposition) => <option key={disposition} value={disposition}>{dispositionLabel(disposition)}</option>)}
+              <option value="">{view === "archived" ? "Archived only" : "All dispositions"}</option>
+              {dispositionOptions
+                .filter((disposition) => (view === "archived" ? disposition === "archived" : disposition !== "archived"))
+                .map((disposition) => <option key={disposition} value={disposition}>{dispositionLabel(disposition)}</option>)}
             </select>
             <select name="workflow" defaultValue={workflowValue ?? ""} className="rounded-xl border border-black/10 bg-white px-3 py-2 text-sm text-neutral-700">
               <option value="">All workflow states</option>
@@ -118,7 +125,7 @@ export default async function IdeasPage({
               <option value="name">Name</option>
             </select>
             <button formAction="/admin/ideas" className="rounded-xl bg-neutral-950 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800">Apply</button>
-            {(industryValue || dispositionValue || workflowValue || recommendationValue || confidenceValue || (sortValue && sortValue !== "portfolio")) ? <Link href={view === "archived" ? "/admin/ideas?view=archived" : "/admin/ideas"} className="text-sm text-neutral-500 underline underline-offset-2">Clear</Link> : null}
+            {(industryValue || dispositionValue || workflowValue || recommendationValue || confidenceValue || (sortValue && sortValue !== "portfolio")) ? <Link href={view === "archived" ? "/admin/ideas?view=archived&disposition=archived" : "/admin/ideas"} className="text-sm text-neutral-500 underline underline-offset-2">Clear</Link> : null}
           </div>
         </form>
 
