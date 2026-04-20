@@ -15,11 +15,16 @@ export default function MarketingPage() {
   return (
     <div className="min-h-screen bg-[#faf7f2] text-neutral-900">
       <div className="mx-auto max-w-7xl px-6 py-10">
-        <div className="rounded-[32px] border border-black/5 bg-white p-8 shadow-sm">
-          <h1 className="text-3xl font-semibold text-orange-500">Marketing by Application</h1>
-          <div className="mt-5 flex flex-wrap gap-3">
-            <Link href="/admin" className="rounded-2xl border border-black/10 bg-[#fcfaf7] px-4 py-3 text-sm font-medium text-neutral-800 transition hover:bg-white hover:border-black/20">Dashboard</Link>
-            <Link href="/admin/current-apps" className="rounded-2xl border border-black/10 bg-[#fcfaf7] px-4 py-3 text-sm font-medium text-neutral-800 transition hover:bg-white hover:border-black/20">Current Apps</Link>
+        <div className="overflow-hidden rounded-[32px] border border-black/5 bg-white shadow-sm">
+          <div className="h-2 gradient-bg" />
+          <div className="p-8 md:p-10">
+            <p className="text-sm font-semibold uppercase tracking-widest" style={{ color: "var(--color-orange)" }}>Admin Portal</p>
+            <h1 className="mt-3 text-4xl font-bold" style={{ color: "var(--color-dark)" }}>Marketing by Application</h1>
+            <p className="mt-4 max-w-3xl text-lg" style={{ color: "var(--color-slate)" }}>Positioning, channel work, and growth priorities for the products already in motion.</p>
+            <div className="mt-8 flex flex-col sm:flex-row gap-4">
+              <Link href="/admin" className="btn-gradient px-6 py-3 text-sm">Studio Dashboard</Link>
+              <Link href="/admin/current-apps" className="btn-gradient px-6 py-3 text-sm">Current Apps</Link>
+            </div>
           </div>
         </div>
 

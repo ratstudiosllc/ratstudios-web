@@ -7,11 +7,16 @@ export default async function AgentRunsPage() {
   return (
     <div className="min-h-screen bg-[#faf7f2] text-neutral-900">
       <div className="mx-auto max-w-6xl px-6 py-10">
-        <div className="rounded-[32px] border border-black/5 bg-white p-8 shadow-sm">
-          <h1 className="text-3xl font-semibold text-orange-500">Execution Activity</h1>
-          <div className="mt-5 flex flex-wrap gap-3">
-            <Link href="/admin" className="rounded-2xl border border-black/10 bg-[#fcfaf7] px-4 py-3 text-sm font-medium text-neutral-800 transition hover:bg-white hover:border-black/20">Dashboard</Link>
-            <Link href="/admin/org-chart" className="rounded-2xl border border-black/10 bg-[#fcfaf7] px-4 py-3 text-sm font-medium text-neutral-800 transition hover:bg-white hover:border-black/20">Org Chart</Link>
+        <div className="overflow-hidden rounded-[32px] border border-black/5 bg-white shadow-sm">
+          <div className="h-2 gradient-bg" />
+          <div className="p-8 md:p-10">
+            <p className="text-sm font-semibold uppercase tracking-widest" style={{ color: "var(--color-orange)" }}>Admin Portal</p>
+            <h1 className="mt-3 text-4xl font-bold" style={{ color: "var(--color-dark)" }}>Execution Activity</h1>
+            <p className="mt-4 max-w-3xl text-lg" style={{ color: "var(--color-slate)" }}>Recent run history, agent throughput, and the queue that is actually moving.</p>
+            <div className="mt-8 flex flex-col sm:flex-row gap-4">
+              <Link href="/admin" className="btn-gradient px-6 py-3 text-sm">Studio Dashboard</Link>
+              <Link href="/admin/org-chart" className="btn-gradient px-6 py-3 text-sm">Org Chart</Link>
+            </div>
           </div>
         </div>
 
