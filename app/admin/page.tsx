@@ -2,6 +2,7 @@ import Link from "next/link";
 
 export const revalidate = 0;
 import {
+  Activity,
   AlertCircle,
   ArrowRight,
   CheckCircle2,
@@ -316,6 +317,10 @@ export default async function AdminPage() {
             <Link href="/admin/org-chart" className="inline-flex items-center gap-2 rounded-2xl border border-black/10 bg-[#fcfaf7] px-4 py-3 text-sm font-medium text-neutral-800 transition hover:bg-white hover:border-black/20">
               <Building2 className="h-4 w-4 text-orange-500" />
               Org Chart
+            </Link>
+            <Link href="/admin/agent-kpis" className="inline-flex items-center gap-2 rounded-2xl border border-black/10 bg-[#fcfaf7] px-4 py-3 text-sm font-medium text-neutral-800 transition hover:bg-white hover:border-black/20">
+              <Activity className="h-4 w-4 text-orange-500" />
+              Agent KPIs
             </Link>
           </div>
         </div>
