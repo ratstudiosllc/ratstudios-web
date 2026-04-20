@@ -49,6 +49,45 @@ export interface StudioKpi {
   helper: string;
 }
 
+function sameMountainDay(value: string | undefined, target: Date) {
+  if (!value) return false;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return false;
+
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Denver",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(date);
+
+  const targetParts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Denver",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(target);
+
+  const getKey = (items: Intl.DateTimeFormatPart[]) => `${items.find((p) => p.type === "year")?.value}-${items.find((p) => p.type === "month")?.value}-${items.find((p) => p.type === "day")?.value}`;
+  return getKey(parts) == getKey(targetParts);
+}
+
+function buildTodayIssueFixKpi(tracker: IssueTrackerResponse | null): StudioKpi {
+  const today = new Date();
+  const issues = tracker?.issues ?? [];
+  const identifiedToday = issues.filter((issue) => sameMountainDay(issue.identified, today)).length;
+  const fixedToday = issues.filter((issue) => {
+    const verifiedToday = sameMountainDay(issue.updatedAt, today);
+    return verifiedToday && issue.status === "Resolved" && issue.committed === "Yes" && issue.pushed === "Yes" && issue.deployed === "Yes";
+  }).length;
+
+  return {
+    label: "Issues fixed today",
+    value: `${fixedToday}/${identifiedToday}`,
+    helper: `${identifiedToday} identified, ${fixedToday} fixed, deployed, and verified`,
+  };
+}
+
 export interface AppIssueMetrics {
   total: number;
   open: number;
@@ -331,6 +370,7 @@ export function buildStudioKpis(ops: OpsRunsResponse | null, tracker: IssueTrack
       value: String(p1Issues),
       helper: "P1 issues still unresolved",
     },
+    buildTodayIssueFixKpi(tracker),
   ];
 }
 
