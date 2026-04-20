@@ -67,13 +67,25 @@ async function persistRunStart(issue: TrackedIssue, ownerAgent: string, raw: str
     updated_at: now,
   }).eq("id", issue.id);
 
+  let runId: string | null = null;
+  try {
+    const parsed = JSON.parse(raw) as { sessionId?: string; id?: string };
+    runId = parsed.sessionId ?? parsed.id ?? null;
+  } catch {
+    runId = null;
+  }
+
   await supabase.from("admin_issue_runs").insert({
     issue_id: issue.id,
     issue_number: issue.number,
     project: issue.project,
     owner_agent: ownerAgent,
+    run_id: runId,
+    task_title: issue.title,
+    source: "issue-runner",
     status: "running",
     raw_spawn_result: raw,
+    started_at: now,
     created_at: now,
     updated_at: now,
   });

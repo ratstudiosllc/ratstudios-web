@@ -1,5 +1,6 @@
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
+import { createSupabaseAdmin } from "@/lib/supabase-admin";
 
 const execFileAsync = promisify(execFile);
 
@@ -16,6 +17,7 @@ export type UserRole = "Admin" | "Operator" | "Viewer" | "ProjectOwner";
 export type TriggerType = "schedule" | "manual" | "api" | "webhook";
 export type Priority = "low" | "normal" | "high" | "urgent";
 export type MetricAvailability = "live" | "inferred" | "unavailable";
+export type MetricSource = "durable" | "runtime" | "unavailable";
 
 export interface OpsCurrentStep {
   step_index: number;
@@ -106,6 +108,7 @@ export interface OpsMetricCard {
   value: number | null;
   formattedValue: string;
   availability: MetricAvailability;
+  source: MetricSource;
   definition: string;
   note: string;
   updatedAt: string | null;
@@ -158,6 +161,11 @@ export interface OpsRunsResponse {
     statuses: RunStatus[];
   };
   generatedAt: string;
+  sourceSummary: {
+    metrics: MetricSource;
+    runsFeed: MetricSource;
+    notes: string[];
+  };
   transport: {
     realtimePreferred: "sse" | "websocket";
     pollingFallbackSeconds: number;
@@ -233,6 +241,24 @@ type OpenClawHistoryResponse = {
   messages?: OpenClawHistoryMessage[];
 };
 
+type DurableRunRow = {
+  id: number;
+  project: string | null;
+  owner_agent: string | null;
+  run_id: string | null;
+  task_title: string | null;
+  source: string | null;
+  status: string | null;
+  started_at: string | null;
+  completed_at: string | null;
+  duration_ms: number | null;
+  estimated_cost_usd: number | string | null;
+  failure_category: string | null;
+  failure_message: string | null;
+  created_at: string | null;
+  updated_at: string | null;
+};
+
 function median(values: number[]) {
   if (!values.length) return 0;
   const sorted = [...values].sort((a, b) => a - b);
@@ -284,6 +310,11 @@ function emptyOpsRunsResponse(): OpsRunsResponse {
       statuses: [],
     },
     generatedAt,
+    sourceSummary: {
+      metrics: "unavailable",
+      runsFeed: "unavailable",
+      notes: ["No durable run history rows and no runtime snapshot were available."],
+    },
     transport: {
       realtimePreferred: "sse",
       pollingFallbackSeconds: 10,
@@ -301,6 +332,11 @@ function inferProject(session: OpenClawSession) {
   return { name: session.agentId || "OpenClaw", id: `proj_${(session.agentId || "openclaw").replace(/[^a-z0-9]+/gi, "_").toLowerCase()}` };
 }
 
+function projectIdFromName(name: string | null | undefined) {
+  const base = (name || "OpenClaw").replace(/[^a-z0-9]+/gi, "_").toLowerCase();
+  return `proj_${base || "openclaw"}`;
+}
+
 function inferStatus(session: OpenClawSession): RunStatus {
   if (session.abortedLastRun) return "failed";
   const ageMs = session.ageMs ?? Number.MAX_SAFE_INTEGER;
@@ -308,6 +344,29 @@ function inferStatus(session: OpenClawSession): RunStatus {
   if (ageMs < 5 * 60 * 1000) return "running";
   if (!hasFreshTokenSnapshot && ageMs < 30 * 60 * 1000) return "running";
   return "completed";
+}
+
+function normalizeRunStatus(value: string | null | undefined): RunStatus {
+  switch ((value || "").toLowerCase()) {
+    case "queued":
+      return "queued";
+    case "running":
+      return "running";
+    case "completed":
+    case "success":
+    case "succeeded":
+      return "completed";
+    case "failed":
+    case "error":
+      return "failed";
+    case "canceled":
+    case "cancelled":
+      return "canceled";
+    case "retrying":
+      return "retrying";
+    default:
+      return "running";
+  }
 }
 
 function inferTriggerType(session: OpenClawSession): TriggerType {
@@ -377,6 +436,48 @@ function mapSessionToRun(session: OpenClawSession): OpsRun {
   };
 }
 
+function mapDurableRowToRun(row: DurableRunRow): OpsRun {
+  const status = normalizeRunStatus(row.status);
+  const createdAt = row.started_at || row.created_at || row.updated_at || new Date().toISOString();
+  const updatedAt = row.updated_at || row.completed_at || createdAt;
+  const durationMs = row.duration_ms ?? (row.completed_at && row.started_at
+    ? Math.max(0, new Date(row.completed_at).getTime() - new Date(row.started_at).getTime())
+    : 0);
+  const project = row.project || "RaT Studios";
+  const owner = row.owner_agent || "OpenClaw";
+  const cost = row.estimated_cost_usd == null ? null : Number(row.estimated_cost_usd);
+
+  return {
+    id: row.run_id || `durable_run_${row.id}`,
+    project,
+    project_id: projectIdFromName(project),
+    environment: "prod",
+    agent_name: owner,
+    agent_id: owner,
+    agent_version: "unknown",
+    task_title: row.task_title || row.run_id || `Run ${row.id}`,
+    owner,
+    owner_user_id: owner,
+    trigger_type: "manual",
+    status,
+    priority: inferPriority(status, "manual"),
+    created_at: createdAt,
+    started_at: row.started_at || createdAt,
+    updated_at: updatedAt,
+    duration_ms: durationMs,
+    retry_count: 0,
+    tokens_input: 0,
+    tokens_output: 0,
+    estimated_cost_usd: Number.isFinite(cost ?? NaN) ? cost : null,
+    current_step: status === "running"
+      ? { step_index: 1, title: "Persisted run in progress", status: "running" }
+      : null,
+    failure_category: row.failure_category,
+    failure_message: row.failure_message,
+    queue_position: status === "queued" ? 1 : 0,
+  };
+}
+
 function applyFilters(runs: OpsRun[], filters: OpsFilters) {
   let result = [...runs];
 
@@ -428,6 +529,22 @@ async function loadStatus(): Promise<OpenClawStatusResponse | null> {
   }
 }
 
+async function loadDurableRuns(): Promise<DurableRunRow[]> {
+  try {
+    const supabase = createSupabaseAdmin();
+    const { data, error } = await supabase
+      .from("admin_issue_runs")
+      .select("id, project, owner_agent, run_id, task_title, source, status, started_at, completed_at, duration_ms, estimated_cost_usd, failure_category, failure_message, created_at, updated_at")
+      .order("started_at", { ascending: false })
+      .limit(200);
+
+    if (error) return [];
+    return (data ?? []) as DurableRunRow[];
+  } catch {
+    return [];
+  }
+}
+
 function formatMetricValue(key: OpsMetricCard["key"], value: number | null) {
   if (value == null) return "Not yet wired";
   if (key === "successRate") return `${value}%`;
@@ -443,16 +560,21 @@ function formatMetricValue(key: OpsMetricCard["key"], value: number | null) {
   return String(value);
 }
 
-function buildMetricCards(kpis: OpsKpis, generatedAt: string): OpsMetricCard[] {
+function buildMetricCards(kpis: OpsKpis, generatedAt: string, source: MetricSource): OpsMetricCard[] {
+  const isDurable = source === "durable";
+  const commonLiveLabel: MetricAvailability = isDurable ? "live" : "live";
   return [
     {
       key: "runsToday",
       label: "Runs today",
       value: kpis.runsToday,
       formattedValue: formatMetricValue("runsToday", kpis.runsToday),
-      availability: "live",
-      definition: "Distinct runtime sessions created today from the OpenClaw session snapshot.",
-      note: "Live from current session inventory.",
+      availability: commonLiveLabel,
+      source,
+      definition: isDurable
+        ? "Distinct durable run history rows started today from admin_issue_runs."
+        : "Distinct runtime sessions created today from the OpenClaw session snapshot.",
+      note: isDurable ? "Backed by persisted run history." : "Live from current session inventory.",
       updatedAt: generatedAt,
     },
     {
@@ -460,9 +582,12 @@ function buildMetricCards(kpis: OpsKpis, generatedAt: string): OpsMetricCard[] {
       label: "Active runs",
       value: kpis.activeRuns,
       formattedValue: formatMetricValue("activeRuns", kpis.activeRuns),
-      availability: "live",
-      definition: "Sessions currently inferred to still be in progress from fresh runtime activity.",
-      note: "Backed by live session freshness and status snapshot.",
+      availability: commonLiveLabel,
+      source,
+      definition: isDurable
+        ? "Persisted runs currently marked queued, running, or retrying."
+        : "Sessions currently inferred to still be in progress from fresh runtime activity.",
+      note: isDurable ? "Backed by durable statuses, plus runtime queue depth if present." : "Backed by live session freshness and status snapshot.",
       updatedAt: generatedAt,
     },
     {
@@ -470,9 +595,12 @@ function buildMetricCards(kpis: OpsKpis, generatedAt: string): OpsMetricCard[] {
       label: "Success rate",
       value: kpis.successRate,
       formattedValue: formatMetricValue("successRate", kpis.successRate),
-      availability: "inferred",
-      definition: "Completed sessions divided by today’s visible sessions in the current runtime snapshot.",
-      note: "Inference only. OpenClaw does not yet expose explicit terminal success events per run.",
+      availability: isDurable ? "live" : "inferred",
+      source,
+      definition: isDurable
+        ? "Completed durable runs divided by durable runs started today."
+        : "Completed sessions divided by today’s visible sessions in the current runtime snapshot.",
+      note: isDurable ? "Backed by stored terminal statuses." : "Inference only. OpenClaw does not yet expose explicit terminal success events per run.",
       updatedAt: generatedAt,
     },
     {
@@ -480,9 +608,12 @@ function buildMetricCards(kpis: OpsKpis, generatedAt: string): OpsMetricCard[] {
       label: "Failed runs",
       value: kpis.failuresToday,
       formattedValue: formatMetricValue("failedRuns", kpis.failuresToday),
-      availability: "live",
-      definition: "Sessions marked failed today because the runtime reports an aborted last run.",
-      note: "Live for aborted runs only. Other failure modes may not be surfaced yet.",
+      availability: commonLiveLabel,
+      source,
+      definition: isDurable
+        ? "Durable runs started today with a failed terminal state."
+        : "Sessions marked failed today because the runtime reports an aborted last run.",
+      note: isDurable ? "Backed by persisted terminal state." : "Live for aborted runs only. Other failure modes may not be surfaced yet.",
       updatedAt: generatedAt,
     },
     {
@@ -491,8 +622,11 @@ function buildMetricCards(kpis: OpsKpis, generatedAt: string): OpsMetricCard[] {
       value: kpis.stuckRuns,
       formattedValue: formatMetricValue("stuckRuns", kpis.stuckRuns),
       availability: "inferred",
-      definition: "Runs still marked active after 30 minutes without clearing.",
-      note: "Heuristic until runtime exposes a real stuck or blocked state.",
+      source,
+      definition: isDurable
+        ? "Persisted runs still active after 30 minutes without reaching a terminal state."
+        : "Runs still marked active after 30 minutes without clearing.",
+      note: "Heuristic until the system stores a first-class blocked or approval-waiting state.",
       updatedAt: generatedAt,
     },
     {
@@ -501,8 +635,9 @@ function buildMetricCards(kpis: OpsKpis, generatedAt: string): OpsMetricCard[] {
       value: kpis.humanApprovalsPending,
       formattedValue: formatMetricValue("humanApprovalsPending", kpis.humanApprovalsPending),
       availability: "unavailable",
+      source: "unavailable",
       definition: "Count of runs waiting on a human approval queue.",
-      note: "Not shown because no approval queue API is wired into this admin surface yet.",
+      note: "Still explicit because neither durable history nor runtime state exposes approval waits here yet.",
       updatedAt: null,
     },
     {
@@ -510,9 +645,12 @@ function buildMetricCards(kpis: OpsKpis, generatedAt: string): OpsMetricCard[] {
       label: "Avg completion time",
       value: kpis.avgDurationMs,
       formattedValue: formatMetricValue("avgCompletionTime", kpis.avgDurationMs),
-      availability: "inferred",
-      definition: "Average age of today’s completed visible sessions.",
-      note: "Useful directional signal, but not a true run lifecycle duration yet.",
+      availability: isDurable ? "live" : "inferred",
+      source,
+      definition: isDurable
+        ? "Average stored duration for durable runs completed today."
+        : "Average age of today’s completed visible sessions.",
+      note: isDurable ? "Backed by stored run durations when present." : "Useful directional signal, but not a true run lifecycle duration yet.",
       updatedAt: generatedAt,
     },
     {
@@ -520,56 +658,71 @@ function buildMetricCards(kpis: OpsKpis, generatedAt: string): OpsMetricCard[] {
       label: "Cost today",
       value: kpis.totalCostToday,
       formattedValue: formatMetricValue("costToday", kpis.totalCostToday),
-      availability: kpis.totalCostToday == null ? "unavailable" : "inferred",
-      definition: "Estimated spend from token counts visible in the runtime snapshot.",
+      availability: kpis.totalCostToday == null ? "unavailable" : isDurable ? "live" : "inferred",
+      source: kpis.totalCostToday == null ? "unavailable" : source,
+      definition: isDurable
+        ? "Persisted estimated spend for runs started today."
+        : "Estimated spend from token counts visible in the runtime snapshot.",
       note: kpis.totalCostToday == null
-        ? "Not shown because at least one visible session lacks fresh token usage data."
-        : "Estimated only. This is not invoice-grade billing data.",
+        ? "Not shown because cost data is not yet persisted for the available runs."
+        : isDurable
+          ? "Backed by stored cost estimates."
+          : "Estimated only. This is not invoice-grade billing data.",
       updatedAt: kpis.totalCostToday == null ? null : generatedAt,
     },
   ];
 }
 
-export async function getOpsRuns(filters: OpsFilters = {}): Promise<OpsRunsResponse> {
-  const [sessions, status] = await Promise.all([loadSessions(), loadStatus()]);
-  if (!sessions.length) return emptyOpsRunsResponse();
+function isSameLocalDay(value: string, today = new Date()) {
+  return new Date(value).toDateString() === today.toDateString();
+}
 
-  const runs = sessions.map(mapSessionToRun);
-  const filtered = applyFilters(runs, filters);
-  const page = Math.max(1, filters.page ?? 1);
-  const pageSize = Math.min(100, Math.max(10, filters.pageSize ?? 25));
-  const start = (page - 1) * pageSize;
-  const paged = filtered.slice(start, start + pageSize);
-  const today = new Date();
-  const isToday = (value: string) => new Date(value).toDateString() === today.toDateString();
-  const todaysRuns = runs.filter((run) => isToday(run.created_at));
+function buildKpisFromRuns(runs: OpsRun[], queueDepth: number): OpsKpis {
+  const todaysRuns = runs.filter((run) => isSameLocalDay(run.created_at));
   const completedRunsToday = todaysRuns.filter((run) => run.status === "completed");
-  const completedDurations = completedRunsToday.map((run) => run.duration_ms);
-  const queueDepth = status?.tasks?.queued ?? runs.filter((run) => run.status === "queued").length;
-  const activeRuns = runs.filter((run) => ["running", "retrying"].includes(run.status)).length;
-  const stuckRuns = runs.filter((run) => run.status === "running" && run.duration_ms >= 30 * 60 * 1000).length;
-  const allTodaysRunsHaveCost = todaysRuns.every((run) => run.estimated_cost_usd != null);
-  const totalCostToday = todaysRuns.length && allTodaysRunsHaveCost
-    ? Number(todaysRuns.reduce((sum, run) => sum + (run.estimated_cost_usd ?? 0), 0).toFixed(2))
+  const completedDurations = completedRunsToday.map((run) => run.duration_ms).filter((value) => value > 0);
+  const knownCosts = todaysRuns.filter((run) => run.estimated_cost_usd != null);
+  const totalCostToday = knownCosts.length
+    ? Number(knownCosts.reduce((sum, run) => sum + (run.estimated_cost_usd ?? 0), 0).toFixed(2))
     : null;
 
-  const kpis: OpsKpis = {
+  return {
     runsToday: todaysRuns.length,
     successRate: todaysRuns.length ? Number(((completedRunsToday.length / todaysRuns.length) * 100).toFixed(1)) : null,
     failuresToday: todaysRuns.filter((run) => run.status === "failed").length,
     avgDurationMs: completedDurations.length ? Math.round(completedDurations.reduce((sum, value) => sum + value, 0) / completedDurations.length) : null,
     medianDurationMs: completedDurations.length ? median(completedDurations) : null,
-    activeRuns,
-    stuckRuns,
+    activeRuns: runs.filter((run) => ["queued", "running", "retrying"].includes(run.status)).length,
+    stuckRuns: runs.filter((run) => ["queued", "running", "retrying"].includes(run.status) && run.duration_ms >= 30 * 60 * 1000).length,
     queueDepth,
     retriesToday: todaysRuns.reduce((sum, run) => sum + run.retry_count, 0),
     totalCostToday,
     totalTokensToday: todaysRuns.reduce((sum, run) => sum + run.tokens_input + run.tokens_output, 0),
     humanApprovalsPending: null,
   };
+}
 
+export async function getOpsRuns(filters: OpsFilters = {}): Promise<OpsRunsResponse> {
+  const [durableRows, sessions, status] = await Promise.all([loadDurableRuns(), loadSessions(), loadStatus()]);
+  const durableRuns = durableRows.map(mapDurableRowToRun);
+  const runtimeRuns = sessions.map(mapSessionToRun);
+  const useDurableMetrics = durableRuns.length > 0;
+  const canonicalRuns = useDurableMetrics ? durableRuns : runtimeRuns;
+
+  if (!canonicalRuns.length && !runtimeRuns.length) return emptyOpsRunsResponse();
+
+  const filtered = applyFilters(canonicalRuns, filters);
+  const page = Math.max(1, filters.page ?? 1);
+  const pageSize = Math.min(100, Math.max(10, filters.pageSize ?? 25));
+  const start = (page - 1) * pageSize;
+  const paged = filtered.slice(start, start + pageSize);
+  const queueDepth = status?.tasks?.queued ?? canonicalRuns.filter((run) => run.status === "queued").length;
+  const kpis = buildKpisFromRuns(canonicalRuns, queueDepth);
   const generatedAt = new Date().toISOString();
-  const alerts: OpsAlert[] = runs.filter((run) => run.status === "failed").slice(0, 10).map((run) => ({
+  const metricsSource: MetricSource = useDurableMetrics ? "durable" : runtimeRuns.length ? "runtime" : "unavailable";
+  const runsFeedSource: MetricSource = paged.length ? metricsSource : "unavailable";
+
+  const alerts: OpsAlert[] = canonicalRuns.filter((run) => run.status === "failed").slice(0, 10).map((run) => ({
     id: `alert_${run.id}`,
     status: "open",
     severity: "critical",
@@ -586,15 +739,24 @@ export async function getOpsRuns(filters: OpsFilters = {}): Promise<OpsRunsRespo
       project_id: "proj_ratstudios",
       status: "healthy",
       queue_depth: queueDepth,
-      active_run_id: runs.find((run) => run.status === "running")?.id ?? null,
-      active_step_title: runs.find((run) => run.status === "running")?.current_step?.title ?? null,
+      active_run_id: runtimeRuns.find((run) => run.status === "running")?.id ?? null,
+      active_step_title: runtimeRuns.find((run) => run.status === "running")?.current_step?.title ?? null,
       last_heartbeat_at: generatedAt,
     },
   ];
 
+  const notes: string[] = [];
+  if (useDurableMetrics) {
+    notes.push("KPI cards are sourced from persisted admin_issue_runs history.");
+    if (runtimeRuns.length) notes.push("Runtime snapshot is still used for live heartbeat and queue context.");
+  } else if (runtimeRuns.length) {
+    notes.push("No durable run history rows were available, so KPIs fell back to the current runtime snapshot.");
+  }
+  notes.push("Human approvals pending remains unavailable until approval wait states are stored or exposed.");
+
   return {
     kpis,
-    metricCards: buildMetricCards(kpis, generatedAt),
+    metricCards: buildMetricCards(kpis, generatedAt, metricsSource),
     runs: paged,
     alerts,
     heartbeats,
@@ -605,12 +767,17 @@ export async function getOpsRuns(filters: OpsFilters = {}): Promise<OpsRunsRespo
       totalPages: Math.max(1, Math.ceil(filtered.length / pageSize)),
     },
     filters: {
-      projects: [...new Set(runs.map((run) => run.project))],
-      environments: [...new Set(runs.map((run) => run.environment))],
-      owners: [...new Set(runs.map((run) => run.owner))],
-      statuses: [...new Set(runs.map((run) => run.status))],
+      projects: [...new Set(canonicalRuns.map((run) => run.project))],
+      environments: [...new Set(canonicalRuns.map((run) => run.environment))],
+      owners: [...new Set(canonicalRuns.map((run) => run.owner))],
+      statuses: [...new Set(canonicalRuns.map((run) => run.status))],
     },
     generatedAt,
+    sourceSummary: {
+      metrics: metricsSource,
+      runsFeed: runsFeedSource,
+      notes,
+    },
     transport: {
       realtimePreferred: "sse",
       pollingFallbackSeconds: 10,
@@ -620,16 +787,19 @@ export async function getOpsRuns(filters: OpsFilters = {}): Promise<OpsRunsRespo
 }
 
 export async function getOpsRunDetail(id: string): Promise<OpsRunDetailResponse | null> {
-  const sessions = await loadSessions();
-  const session = sessions.find((item) => (item.sessionId || item.key) === id);
-  if (!session) return null;
+  const [durableRows, sessions] = await Promise.all([loadDurableRuns(), loadSessions()]);
+  const durableMatch = durableRows.map(mapDurableRowToRun).find((item) => item.id === id);
+  const runtimeSession = sessions.find((item) => (item.sessionId || item.key) === id);
+  const run = durableMatch ?? (runtimeSession ? mapSessionToRun(runtimeSession) : null);
+  if (!run) return null;
 
-  const run = mapSessionToRun(session);
   let history: OpenClawHistoryResponse | null = null;
-  try {
-    history = (await runOpenClawJson(["session", "history", run.id, "--json", "--limit", "20"])) as OpenClawHistoryResponse;
-  } catch {
-    history = null;
+  if (runtimeSession) {
+    try {
+      history = (await runOpenClawJson(["session", "history", run.id, "--json", "--limit", "20"])) as OpenClawHistoryResponse;
+    } catch {
+      history = null;
+    }
   }
 
   const logs: OpsRunLog[] = (history?.messages ?? []).slice(-20).map((message, index) => ({
@@ -669,8 +839,8 @@ export async function getOpsRunDetail(id: string): Promise<OpsRunDetailResponse 
     artifacts: [
       {
         id: `artifact_${run.id}`,
-        kind: "session",
-        title: "OpenClaw session record",
+        kind: durableMatch ? "durable-run-history" : "session",
+        title: durableMatch ? "Persisted run history record" : "OpenClaw session record",
         created_at: run.updated_at,
       },
     ],

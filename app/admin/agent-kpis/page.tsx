@@ -35,6 +35,12 @@ function getAvailabilityMeta(availability: MetricAvailability) {
   return { label: "Not wired", tone: "bg-neutral-100 text-neutral-700" };
 }
 
+function getSourceMeta(source: "durable" | "runtime" | "unavailable") {
+  if (source === "durable") return { label: "History-backed", tone: "bg-sky-100 text-sky-800" };
+  if (source === "runtime") return { label: "Runtime snapshot", tone: "bg-violet-100 text-violet-800" };
+  return { label: "Unavailable", tone: "bg-neutral-100 text-neutral-700" };
+}
+
 function formatMountain(dateString?: string | null) {
   if (!dateString) return "timestamp unavailable";
   const date = new Date(dateString);
@@ -91,6 +97,7 @@ function KpiCard({ metric }: { metric: OpsMetricCard }) {
           <div className="flex flex-wrap items-center gap-2">
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-neutral-500">{metric.label}</p>
             <span className={cn("rounded-full px-2 py-1 text-[11px] font-semibold", availability.tone)}>{availability.label}</span>
+            <span className={cn("rounded-full px-2 py-1 text-[11px] font-semibold", getSourceMeta(metric.source).tone)}>{getSourceMeta(metric.source).label}</span>
             <span className={cn("rounded-full px-2 py-1 text-[11px] font-semibold", freshness.tone)}>{freshness.label}</span>
           </div>
           <p className="mt-2 text-3xl font-semibold text-neutral-950">{metric.formattedValue}</p>
@@ -113,14 +120,33 @@ export default async function AgentKpisPage() {
 
         <section className="mt-8 rounded-[32px] border border-black/5 bg-white p-6 shadow-sm">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-orange-500">Metric honesty</p>
-          <h2 className="mt-2 text-2xl font-semibold text-neutral-950">This page now separates live data from inference</h2>
+          <h2 className="mt-2 text-2xl font-semibold text-neutral-950">This page now separates durable history from runtime fallback</h2>
           <p className="mt-2 max-w-3xl text-sm text-neutral-600">
-            These KPI cards are fed from the current OpenClaw runtime snapshot. Each card tells you whether the number is live, inferred from heuristics, or not yet wired at all.
+            KPI cards prefer persisted run history first, then fall back to the current OpenClaw runtime snapshot only when durable history is absent. Each card shows both data quality and source.
           </p>
           <div className="mt-4 flex flex-wrap gap-3 text-xs font-semibold">
-            <span className="rounded-full bg-emerald-100 px-3 py-1.5 text-emerald-800">Live = directly visible in runtime state</span>
-            <span className="rounded-full bg-amber-100 px-3 py-1.5 text-amber-800">Inferred = derived from runtime signals</span>
+            <span className="rounded-full bg-sky-100 px-3 py-1.5 text-sky-800">History-backed = persisted in admin_issue_runs</span>
+            <span className="rounded-full bg-violet-100 px-3 py-1.5 text-violet-800">Runtime snapshot = current visible OpenClaw state</span>
+            <span className="rounded-full bg-emerald-100 px-3 py-1.5 text-emerald-800">Live = directly observed in chosen source</span>
+            <span className="rounded-full bg-amber-100 px-3 py-1.5 text-amber-800">Inferred = heuristic inside that source</span>
             <span className="rounded-full bg-neutral-100 px-3 py-1.5 text-neutral-700">Not wired = intentionally withheld</span>
+          </div>
+        </section>
+
+        <section className="mt-6 rounded-[32px] border border-black/5 bg-white p-6 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-orange-500">Current sourcing</p>
+          <div className="mt-3 flex flex-wrap items-center gap-3">
+            <span className={cn("rounded-full px-3 py-1.5 text-xs font-semibold", getSourceMeta(data.sourceSummary.metrics).tone)}>
+              KPI source: {getSourceMeta(data.sourceSummary.metrics).label}
+            </span>
+            <span className={cn("rounded-full px-3 py-1.5 text-xs font-semibold", getSourceMeta(data.sourceSummary.runsFeed).tone)}>
+              Run feed: {getSourceMeta(data.sourceSummary.runsFeed).label}
+            </span>
+          </div>
+          <div className="mt-4 space-y-2 text-sm text-neutral-600">
+            {data.sourceSummary.notes.map((note) => (
+              <p key={note}>{note}</p>
+            ))}
           </div>
         </section>
 
@@ -135,8 +161,8 @@ export default async function AgentKpisPage() {
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-orange-500">Live operations</p>
-                <h2 className="mt-2 text-2xl font-semibold text-neutral-950">Recent runtime sessions</h2>
-                <p className="mt-2 text-sm text-neutral-500">The run list is still the clearest source of truth when a KPI looks suspicious.</p>
+                <h2 className="mt-2 text-2xl font-semibold text-neutral-950">Recent agent runs</h2>
+                <p className="mt-2 text-sm text-neutral-500">This feed follows the same sourcing choice as the KPI cards, with runtime heartbeat context still shown separately.</p>
               </div>
               <Link href="/admin/agent-runs" className="inline-flex items-center gap-2 rounded-xl border border-black/10 bg-[#fcfaf7] px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-white">
                 Open full run feed
