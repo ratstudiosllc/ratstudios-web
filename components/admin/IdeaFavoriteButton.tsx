@@ -24,6 +24,7 @@ export function IdeaFavoriteButton({
       try {
         const response = await fetch(`/api/admin/ideas/${ideaId}`, {
           method: "PATCH",
+          credentials: "include",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ isFavorite: nextFavorite }),
         });
