@@ -1,7 +1,24 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
+
+const STORAGE_KEY = "ratstudios.favoriteIdeas";
+
+function readFavoriteIds() {
+  if (typeof window === "undefined") return new Set<string>();
+  try {
+    const parsed = JSON.parse(window.localStorage.getItem(STORAGE_KEY) ?? "[]");
+    return new Set(Array.isArray(parsed) ? parsed.map((value) => String(value)) : []);
+  } catch {
+    return new Set<string>();
+  }
+}
+
+function writeFavoriteIds(ids: Set<string>) {
+  if (typeof window === "undefined") return;
+  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(ids)));
+}
 
 export function IdeaFavoriteButton({
   ideaId,
@@ -15,10 +32,25 @@ export function IdeaFavoriteButton({
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
+  useEffect(() => {
+    const favoriteIds = readFavoriteIds();
+    if (favoriteIds.has(ideaId)) {
+      setOptimisticFavorite(true);
+    }
+  }, [ideaId]);
+
+  function persistLocalFavorite(nextFavorite: boolean) {
+    const favoriteIds = readFavoriteIds();
+    if (nextFavorite) favoriteIds.add(ideaId);
+    else favoriteIds.delete(ideaId);
+    writeFavoriteIds(favoriteIds);
+  }
+
   function toggleFavorite() {
     const nextFavorite = !optimisticFavorite;
     setOptimisticFavorite(nextFavorite);
     setError(null);
+    persistLocalFavorite(nextFavorite);
 
     startTransition(async () => {
       try {
@@ -35,8 +67,7 @@ export function IdeaFavoriteButton({
 
         router.refresh();
       } catch {
-        setOptimisticFavorite(!nextFavorite);
-        setError("Could not save star");
+        setError("Saved only on this browser for now");
       }
     });
   }
@@ -57,7 +88,7 @@ export function IdeaFavoriteButton({
         <span aria-hidden="true">{optimisticFavorite ? "★" : "☆"}</span>
         <span>{optimisticFavorite ? "Starred" : "Star"}</span>
       </button>
-      {error ? <p className="text-xs text-red-600">Could not save star</p> : null}
+      {error ? <p className="text-xs text-amber-700">{error}</p> : null}
     </div>
   );
 }
