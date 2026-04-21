@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { createSupabaseAdmin } from "@/lib/supabase-admin";
 
 export type IdeaWorkflowState =
   | "new_idea"
@@ -484,16 +485,36 @@ function updateIdeaRecord(id: string, updater: (idea: OpportunityIdeaRecord) => 
   return updated;
 }
 
-export function listIdeas() {
-  return [...getStore().ideas].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+async function readFavoriteOverrides() {
+  try {
+    const supabase = createSupabaseAdmin();
+    const { data, error } = await supabase
+      .from("admin_idea_favorites")
+      .select("idea_id, is_favorite");
+
+    if (error) throw error;
+    return new Map((data ?? []).map((row) => [String(row.idea_id), Boolean(row.is_favorite)]));
+  } catch {
+    return new Map<string, boolean>();
+  }
 }
 
-export function getIdeaBySlug(slug: string) {
-  return listIdeas().find((idea) => idea.slug === slug) ?? null;
+function applyFavoriteOverrides(ideas: OpportunityIdeaRecord[], overrides: Map<string, boolean>) {
+  if (!overrides.size) return ideas;
+  return ideas.map((idea) => overrides.has(idea.id) ? { ...idea, isFavorite: overrides.get(idea.id) ?? idea.isFavorite } : idea);
 }
 
-export function getIdeaById(id: string) {
-  return getStore().ideas.find((idea) => idea.id === id) ?? null;
+export async function listIdeas() {
+  const overrides = await readFavoriteOverrides();
+  return applyFavoriteOverrides([...getStore().ideas], overrides).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+}
+
+export async function getIdeaBySlug(slug: string) {
+  return (await listIdeas()).find((idea) => idea.slug === slug) ?? null;
+}
+
+export async function getIdeaById(id: string) {
+  return (await listIdeas()).find((idea) => idea.id === id) ?? null;
 }
 
 export function createIdea(input: {
@@ -509,7 +530,7 @@ export function createIdea(input: {
 }) {
   const timestamp = nowIso();
   const slugBase = slugify(input.ideaName);
-  const slug = getIdeaBySlug(slugBase) ? `${slugBase}-${Date.now()}` : slugBase;
+  const slug = getStore().ideas.some((idea) => idea.slug === slugBase) ? `${slugBase}-${Date.now()}` : slugBase;
   const id = `idea-${slug}-${Date.now()}`;
 
   const record: OpportunityIdeaRecord = normalizeIdea({
@@ -608,12 +629,23 @@ export function promoteIdea(id: string) {
   return updateIdeaRecord(id, (idea) => ({ ...idea, disposition: "promoted", workflowState: "approved_for_validation" }));
 }
 
-export function setIdeaFavorite(id: string, isFavorite: boolean) {
-  return updateIdeaRecord(id, (idea) => ({ ...idea, isFavorite }));
+export async function setIdeaFavorite(id: string, isFavorite: boolean) {
+  const supabase = createSupabaseAdmin();
+  const { error } = await supabase
+    .from("admin_idea_favorites")
+    .upsert({ idea_id: id, is_favorite: isFavorite }, { onConflict: "idea_id" });
+
+  if (error) {
+    throw new Error(error.message || "Failed to persist favorite");
+  }
+
+  return { id, isFavorite };
 }
 
-export function toggleIdeaFavorite(id: string) {
-  return updateIdeaRecord(id, (idea) => ({ ...idea, isFavorite: !idea.isFavorite }));
+export async function toggleIdeaFavorite(id: string) {
+  const idea = await getIdeaById(id);
+  if (!idea) return null;
+  return setIdeaFavorite(id, !idea.isFavorite);
 }
 
 export function addIdeaEvidenceSource(id: string, input: Omit<IdeaEvidenceSource, "id">) {
@@ -643,8 +675,33 @@ export function addIdeaResearchInput(id: string, input: Omit<ResearchInput, "id"
   }));
 }
 
-export function getIdeasAgentSummary() {
-  const ideas = listIdeas();
+export function getIdeasAgentSummarySync() {
+  const ideas = [...getStore().ideas].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+  const active = ideas.filter((idea) => idea.disposition === "active");
+  const latestUpdatedAt = ideas
+    .map((idea) => idea.updatedAt)
+    .filter(Boolean)
+    .sort()
+    .at(-1) ?? null;
+
+  return {
+    total: ideas.length,
+    active: active.length,
+    archived: ideas.filter((idea) => idea.disposition === "archived").length,
+    promoted: ideas.filter((idea) => idea.disposition === "promoted").length,
+    newIdeas: active.filter((idea) => idea.workflowState === "new_idea").length,
+    screening: active.filter((idea) => idea.workflowState === "screening").length,
+    deepResearch: active.filter((idea) => idea.workflowState === "deep_research").length,
+    scored: active.filter((idea) => idea.workflowState === "scored").length,
+    approvedForValidation: ideas.filter((idea) => idea.workflowState === "approved_for_validation").length,
+    validationInProgress: ideas.filter((idea) => idea.workflowState === "validation_in_progress").length,
+    latestUpdatedAt,
+    topIdeas: active.slice(0, 3),
+  };
+}
+
+export async function getIdeasAgentSummary() {
+  const ideas = await listIdeas();
   const active = ideas.filter((idea) => idea.disposition === "active");
   const latestUpdatedAt = ideas
     .map((idea) => idea.updatedAt)

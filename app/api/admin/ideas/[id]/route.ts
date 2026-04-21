@@ -45,7 +45,7 @@ function parseScore(value: unknown) {
 
 export async function GET(_: Request, context: { params: Promise<{ id: string }> }) {
   const { id } = await context.params;
-  const idea = getIdeaById(id);
+  const idea = await getIdeaById(id);
   if (!idea) return NextResponse.json({ error: "Idea not found" }, { status: 404 });
   return NextResponse.json({ idea });
 }
@@ -57,7 +57,7 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
   }
 
   const { id } = await context.params;
-  const idea = getIdeaById(id);
+  const idea = await getIdeaById(id);
   if (!idea) return NextResponse.json({ error: "Idea not found" }, { status: 404 });
 
   const body = await request.json().catch(() => null);
@@ -66,6 +66,10 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
   }
 
   try {
+    if (typeof body.isFavorite === "boolean") {
+      return NextResponse.json({ idea: await setIdeaFavorite(id, body.isFavorite) });
+    }
+
     const updated = updateIdea(id, {
       ideaName: normalize(body.ideaName) ?? idea.ideaName,
       oneSentenceConcept: normalize(body.oneSentenceConcept) ?? idea.oneSentenceConcept,
@@ -80,7 +84,6 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
       recommendation: (normalize(body.recommendation) as IdeaRecommendation | undefined) ?? idea.recommendation,
       confidence: (normalize(body.confidence) as IdeaConfidence | undefined) ?? idea.confidence,
       bestWedge: normalize(body.bestWedge) ?? idea.bestWedge,
-      isFavorite: typeof body.isFavorite === "boolean" ? body.isFavorite : idea.isFavorite,
       strongestReasonToBuild: normalize(body.strongestReasonToBuild) ?? idea.strongestReasonToBuild,
       strongestReasonNotToBuild: normalize(body.strongestReasonNotToBuild) ?? idea.strongestReasonNotToBuild,
       biggestRisk: normalize(body.biggestRisk) ?? idea.biggestRisk,
@@ -115,7 +118,7 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
 
 export async function POST(request: Request, context: { params: Promise<{ id: string }> }) {
   const { id } = await context.params;
-  const idea = getIdeaById(id);
+  const idea = await getIdeaById(id);
   if (!idea) return NextResponse.json({ error: "Idea not found" }, { status: 404 });
 
   const contentType = request.headers.get("content-type") ?? "";
@@ -134,11 +137,11 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
   }
 
   if (action === "favorite") {
-    return NextResponse.json({ idea: setIdeaFavorite(id, true) });
+    return NextResponse.json({ idea: await setIdeaFavorite(id, true) });
   }
 
   if (action === "unfavorite") {
-    return NextResponse.json({ idea: setIdeaFavorite(id, false) });
+    return NextResponse.json({ idea: await setIdeaFavorite(id, false) });
   }
 
   if (action === "promote") {

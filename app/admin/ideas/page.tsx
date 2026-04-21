@@ -36,8 +36,8 @@ export default async function IdeasPage({
   const favoriteValue = Array.isArray(resolvedSearchParams.favorite) ? resolvedSearchParams.favorite[0] : resolvedSearchParams.favorite;
   const sortValue = Array.isArray(resolvedSearchParams.sort) ? resolvedSearchParams.sort[0] : resolvedSearchParams.sort;
   const view = viewValue === "archived" ? "archived" : "active";
-  const summary = getIdeasAgentSummary();
-  const allIdeas = listIdeas();
+  const summary = await getIdeasAgentSummary();
+  const allIdeas = await listIdeas();
 
   if (view === "active" && dispositionValue === "archived") {
     redirect("/admin/ideas?view=archived");

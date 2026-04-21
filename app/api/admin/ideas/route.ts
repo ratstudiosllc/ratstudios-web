@@ -8,7 +8,7 @@ function normalize(value: unknown) {
 }
 
 export async function GET() {
-  return NextResponse.json({ ideas: listIdeas() });
+  return NextResponse.json({ ideas: await listIdeas() });
 }
 
 export async function POST(request: Request) {
@@ -36,5 +36,5 @@ export async function POST(request: Request) {
     whyNow: normalize(body.whyNow),
   });
 
-  return NextResponse.json({ idea, ideas: listIdeas() });
+  return NextResponse.json({ idea, ideas: await listIdeas() });
 }

@@ -1,8 +1,8 @@
 import { createFutureAppFromIdea, getFutureAppById } from "@/lib/future-apps-agent";
 import { getIdeaById, promoteIdea, updateIdea } from "@/lib/ideas-agent";
 
-export function promoteIdeaToFutureApps(id: string) {
-  const existingIdea = getIdeaById(id);
+export async function promoteIdeaToFutureApps(id: string) {
+  const existingIdea = await getIdeaById(id);
   if (!existingIdea) {
     throw new Error("Idea not found");
   }
