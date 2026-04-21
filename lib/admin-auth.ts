@@ -20,9 +20,18 @@ function safeEqual(a: string, b: string) {
 }
 
 export function isValidAdminLogin(username: string, password: string) {
-  const expectedUser = process.env.ADMIN_GATE_USER || "admin";
+  const normalizedUsername = username.trim().toLowerCase();
+  const expectedUser = (process.env.ADMIN_GATE_USER || "admin").trim().toLowerCase();
   const expectedPass = process.env.ADMIN_GATE_PASSWORD || "";
-  return safeEqual(username, expectedUser) && safeEqual(password, expectedPass);
+  const allowedEmails = (process.env.ADMIN_ALLOWED_EMAILS || "")
+    .split(",")
+    .map((value) => value.trim().toLowerCase())
+    .filter(Boolean);
+
+  const usernameMatches = safeEqual(normalizedUsername, expectedUser)
+    || allowedEmails.some((email) => safeEqual(normalizedUsername, email));
+
+  return usernameMatches && safeEqual(password, expectedPass);
 }
 
 export async function createAdminSession() {
