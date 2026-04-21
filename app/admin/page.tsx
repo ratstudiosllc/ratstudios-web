@@ -1,5 +1,7 @@
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
+import Link from "next/link";
+import { redirect } from "next/navigation";
 import {
   Activity,
   AlertCircle,
@@ -9,6 +11,7 @@ import {
   PlayCircle,
   ShieldAlert,
 } from "lucide-react";
+import { isAdminAuthenticated } from "@/lib/admin-auth";
 
 export const revalidate = 0;
 
@@ -300,6 +303,11 @@ async function getAdminSnapshot(): Promise<{ generatedAt: string; metricCards: M
 }
 
 export default async function AdminPage() {
+  const authenticated = await isAdminAuthenticated();
+  if (!authenticated) {
+    redirect("/auth/login?redirect=%2Fadmin");
+  }
+
   const data = await getAdminSnapshot();
 
   return (
@@ -312,6 +320,9 @@ export default async function AdminPage() {
               <h1 className="mt-2 text-4xl font-semibold text-neutral-950">Agent operations dashboard</h1>
               <p className="mt-3 max-w-3xl text-sm text-neutral-600">Real, read-only KPI cards sourced from server-side OpenClaw state. If a metric is not honestly sourceable here, it stays out or says unavailable plainly.</p>
             </div>
+             <Link href="/auth/logout" className="rounded-2xl border border-black/10 bg-white px-4 py-2 text-sm font-medium text-neutral-700 transition hover:bg-[#fcfaf7]">
+              Log out
+            </Link>
             <div className="rounded-2xl bg-[#fcfaf7] p-4 text-sm text-neutral-600">
               <p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">Freshness</p>
               <p className="mt-2 font-medium text-neutral-900">Generated {formatMountain(data.generatedAt)}</p>
