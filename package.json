@@ -6,10 +6,13 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "qa:smoke": "node scripts/run-qa-smoke.mjs"
   },
   "dependencies": {
-    "lucide-react": "^0.542.0",
+    "@supabase/ssr": "^0.10.2",
+    "@supabase/supabase-js": "^2.103.3",
+    "lucide-react": "^1.8.0",
     "next": "16.1.6",
     "react": "19.2.3",
     "react-dom": "19.2.3"

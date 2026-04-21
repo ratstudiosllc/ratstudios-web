@@ -1,56 +1,47 @@
 import { cookies } from "next/headers";
-import { createHmac, timingSafeEqual } from "node:crypto";
 
-const COOKIE_NAME = "rat_admin_session";
-const SESSION_TTL_SECONDS = 60 * 60 * 12;
+export const ADMIN_SESSION_COOKIE = "rat_admin_gate";
 
-function getSecret() {
-  return process.env.ADMIN_GATE_PASSWORD || process.env.VERCEL_OIDC_TOKEN || "ratstudios-admin-fallback";
+export function getAdminGateConfig() {
+  return {
+    gateUser: process.env.ADMIN_GATE_USER ?? "admin",
+    gatePassword: process.env.ADMIN_GATE_PASSWORD ?? "",
+    allowedEmails: (process.env.ADMIN_ALLOWED_EMAILS ?? "").split(",").map((value) => value.trim().toLowerCase()).filter(Boolean),
+  };
 }
 
-function sign(value: string) {
-  return createHmac("sha256", getSecret()).update(value).digest("hex");
+export function timingSafeEqual(a: string, b: string) {
+  if (a.length !== b.length) return false;
+  let result = 0;
+  for (let i = 0; i < a.length; i += 1) result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return result === 0;
 }
 
-function safeEqual(a: string, b: string) {
-  const ab = Buffer.from(a);
-  const bb = Buffer.from(b);
-  if (ab.length !== bb.length) return false;
-  return timingSafeEqual(ab, bb);
+export function isAllowedAdminUser(username: string) {
+  const normalized = username.trim().toLowerCase();
+  const { gateUser, allowedEmails } = getAdminGateConfig();
+  return timingSafeEqual(normalized, gateUser.trim().toLowerCase()) || allowedEmails.some((email) => timingSafeEqual(normalized, email));
 }
 
 export function isValidAdminLogin(username: string, password: string) {
-  const normalizedUsername = username.trim().toLowerCase();
-  const expectedUser = (process.env.ADMIN_GATE_USER || "admin").trim().toLowerCase();
-  const expectedPass = process.env.ADMIN_GATE_PASSWORD || "";
-  const allowedEmails = (process.env.ADMIN_ALLOWED_EMAILS || "")
-    .split(",")
-    .map((value) => value.trim().toLowerCase())
-    .filter(Boolean);
-
-  const usernameMatches = safeEqual(normalizedUsername, expectedUser)
-    || allowedEmails.some((email) => safeEqual(normalizedUsername, email));
-
-  return usernameMatches && safeEqual(password, expectedPass);
+  const { gatePassword } = getAdminGateConfig();
+  return isAllowedAdminUser(username) && timingSafeEqual(password, gatePassword);
 }
 
 export async function createAdminSession() {
-  const expiresAt = Math.floor(Date.now() / 1000) + SESSION_TTL_SECONDS;
-  const payload = `${expiresAt}`;
-  const token = `${payload}.${sign(payload)}`;
-  const jar = await cookies();
-  jar.set(COOKIE_NAME, token, {
+  const cookieStore = await cookies();
+  cookieStore.set(ADMIN_SESSION_COOKIE, "1", {
     httpOnly: true,
     secure: true,
     sameSite: "lax",
     path: "/",
-    maxAge: SESSION_TTL_SECONDS,
+    maxAge: 60 * 60 * 12,
   });
 }
 
 export async function clearAdminSession() {
-  const jar = await cookies();
-  jar.set(COOKIE_NAME, "", {
+  const cookieStore = await cookies();
+  cookieStore.set(ADMIN_SESSION_COOKIE, "", {
     httpOnly: true,
     secure: true,
     sameSite: "lax",
@@ -60,13 +51,6 @@ export async function clearAdminSession() {
 }
 
 export async function isAdminAuthenticated() {
-  const jar = await cookies();
-  const raw = jar.get(COOKIE_NAME)?.value;
-  if (!raw) return false;
-  const [payload, signature] = raw.split(".");
-  if (!payload || !signature) return false;
-  if (!safeEqual(sign(payload), signature)) return false;
-  const expiresAt = Number(payload);
-  if (!Number.isFinite(expiresAt)) return false;
-  return expiresAt > Math.floor(Date.now() / 1000);
+  const cookieStore = await cookies();
+  return cookieStore.get(ADMIN_SESSION_COOKIE)?.value === "1";
 }
