@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { ADMIN_SESSION_COOKIE, getAdminGateConfig, isAllowedAdminUser, timingSafeEqual } from "@/lib/admin-auth";
+import { ADMIN_SESSION_COOKIE } from "@/lib/admin-gate";
+import { getAdminGateConfig, isAllowedAdminUser, timingSafeEqual } from "@/lib/admin-auth";
 
 export async function POST(request: Request) {
   const formData = await request.formData();

@@ -1,6 +1,5 @@
 import { cookies } from "next/headers";
-
-export const ADMIN_SESSION_COOKIE = "rat_admin_gate";
+import { ADMIN_SESSION_COOKIE } from "@/lib/admin-gate";
 
 export function getAdminGateConfig() {
   return {

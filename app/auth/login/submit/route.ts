@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createAdminSession, isValidAdminLogin } from "@/lib/admin-auth";
+import { ADMIN_SESSION_COOKIE } from "@/lib/admin-gate";
+import { isValidAdminLogin } from "@/lib/admin-auth";
 
 export async function POST(req: NextRequest) {
   const formData = await req.formData();
@@ -12,6 +13,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.redirect(new URL(`/auth/login?redirect=${encodeURIComponent(safeRedirect)}&error=1`, req.url));
   }
 
-  await createAdminSession();
-  return NextResponse.redirect(new URL(safeRedirect, req.url));
+  const response = NextResponse.redirect(new URL(safeRedirect, req.url));
+  response.cookies.set(ADMIN_SESSION_COOKIE, "1", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "lax",
+    path: "/",
+    maxAge: 60 * 60 * 12,
+  });
+  return response;
 }
