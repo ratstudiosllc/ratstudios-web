@@ -139,7 +139,7 @@ export default async function IdeasPage({
         <div className="mt-8 grid gap-5 xl:grid-cols-2">
           {ideas.length === 0 ? <div className="rounded-[28px] border border-black/5 bg-white p-6 shadow-sm text-sm text-neutral-600">{view === "archived" ? "No archived ideas yet." : "No active ideas yet."}</div> : null}
           {ideas.map((idea) => (
-            <Link key={idea.id} href={`/admin/ideas/${idea.slug}`} className="rounded-[28px] border border-black/5 bg-white p-6 shadow-sm transition hover:border-black/10 hover:bg-[#fcfaf7]">
+            <div key={idea.id} className="rounded-[28px] border border-black/5 bg-white p-6 shadow-sm transition hover:border-black/10 hover:bg-[#fcfaf7]">
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.14em] text-orange-500">{idea.industry}</p>
@@ -157,14 +157,16 @@ export default async function IdeasPage({
                   <span className="rounded-full bg-[#fcfaf7] px-3 py-1 text-xs font-semibold text-neutral-700">score {idea.scorecard.weightedTotal}</span>
                 </div>
               </div>
-              <p className="mt-4 text-sm text-neutral-600">{idea.oneSentenceConcept}</p>
-              <div className="mt-5 grid gap-3 md:grid-cols-2">
-                <div className="rounded-2xl bg-[#fcfaf7] p-4"><p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">Best wedge</p><p className="mt-2 text-sm text-neutral-800">{idea.bestWedge}</p></div>
-                <div className="rounded-2xl bg-[#fcfaf7] p-4"><p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">Next validation step</p><p className="mt-2 text-sm text-neutral-800">{idea.nextValidationSteps[0] ?? "No next step recorded"}</p></div>
-                <div className="rounded-2xl bg-[#fcfaf7] p-4"><p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">Memo summary</p><p className="mt-2 text-sm text-neutral-800">{idea.memoSummary}</p></div>
-                <div className="rounded-2xl bg-[#fcfaf7] p-4"><p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">Evidence</p><p className="mt-2 text-sm text-neutral-800">{idea.evidenceSources.length} source{idea.evidenceSources.length === 1 ? "" : "s"} • {idea.researchInputs.length} input{idea.researchInputs.length === 1 ? "" : "s"}</p></div>
-              </div>
-            </Link>
+              <Link href={`/admin/ideas/${idea.slug}`} className="block">
+                <p className="mt-4 text-sm text-neutral-600">{idea.oneSentenceConcept}</p>
+                <div className="mt-5 grid gap-3 md:grid-cols-2">
+                  <div className="rounded-2xl bg-[#fcfaf7] p-4"><p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">Best wedge</p><p className="mt-2 text-sm text-neutral-800">{idea.bestWedge}</p></div>
+                  <div className="rounded-2xl bg-[#fcfaf7] p-4"><p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">Next validation step</p><p className="mt-2 text-sm text-neutral-800">{idea.nextValidationSteps[0] ?? "No next step recorded"}</p></div>
+                  <div className="rounded-2xl bg-[#fcfaf7] p-4"><p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">Memo summary</p><p className="mt-2 text-sm text-neutral-800">{idea.memoSummary}</p></div>
+                  <div className="rounded-2xl bg-[#fcfaf7] p-4"><p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">Evidence</p><p className="mt-2 text-sm text-neutral-800">{idea.evidenceSources.length} source{idea.evidenceSources.length === 1 ? "" : "s"} • {idea.researchInputs.length} input{idea.researchInputs.length === 1 ? "" : "s"}</p></div>
+                </div>
+              </Link>
+            </div>
           ))}
         </div>
       </div>
