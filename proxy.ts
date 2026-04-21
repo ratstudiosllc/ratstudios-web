@@ -23,7 +23,8 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  if (request.cookies.get(ADMIN_SESSION_COOKIE)?.value === "1") {
+  const hasAdminCookie = request.cookies.get(ADMIN_SESSION_COOKIE)?.value === "1";
+  if (hasAdminCookie) {
     return NextResponse.next();
   }
 

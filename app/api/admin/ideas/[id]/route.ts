@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
+import { ADMIN_SESSION_COOKIE } from "@/lib/admin-gate";
 import {
   archiveIdea,
   getIdeaById,
@@ -49,6 +51,11 @@ export async function GET(_: Request, context: { params: Promise<{ id: string }>
 }
 
 export async function PATCH(request: Request, context: { params: Promise<{ id: string }> }) {
+  const cookieStore = await cookies();
+  if (cookieStore.get(ADMIN_SESSION_COOKIE)?.value !== "1") {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const { id } = await context.params;
   const idea = getIdeaById(id);
   if (!idea) return NextResponse.json({ error: "Idea not found" }, { status: 404 });
