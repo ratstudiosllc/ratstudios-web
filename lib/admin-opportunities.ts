@@ -178,14 +178,13 @@ export async function listOpportunityIdeas() {
   return (data ?? []).map((row) => normalizeIdeaRecord(row as Record<string, unknown>));
 }
 
-export async function getOpportunityIdeaById(id: string) {
+export async function getOpportunityIdeaById(idOrSlug: string) {
   const ideas = await listOpportunityIdeas();
-  return ideas.find((idea) => idea.id === id) ?? null;
+  return ideas.find((idea) => idea.id === idOrSlug || idea.slug === idOrSlug) ?? null;
 }
 
 export async function getOpportunityIdeaBySlug(slug: string) {
-  const ideas = await listOpportunityIdeas();
-  return ideas.find((idea) => idea.slug === slug) ?? null;
+  return getOpportunityIdeaById(slug);
 }
 
 export async function createOpportunityIdea(input: {

@@ -1,7 +1,6 @@
-import fs from "node:fs";
-import path from "node:path";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getIdeaBySlug } from "@/lib/ideas-agent";
 import { archiveIdeaAction, promoteIdeaAction } from "./actions";
 
 function safeText(value: unknown, fallback = "Not set") {
@@ -10,28 +9,16 @@ function safeText(value: unknown, fallback = "Not set") {
   return fallback;
 }
 
-function getIdeaBySlugFromFile(slug: string) {
-  const storePath = path.join(process.cwd(), "data", "ideas-store.json");
-  try {
-    const raw = fs.readFileSync(storePath, "utf8");
-    const parsed = JSON.parse(raw) as { ideas?: Array<Record<string, unknown>> };
-    const ideas = Array.isArray(parsed.ideas) ? parsed.ideas : [];
-    return ideas.find((idea) => String(idea.slug ?? "") === slug) ?? null;
-  } catch {
-    return null;
-  }
-}
-
 export default async function IdeaDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const idea = getIdeaBySlugFromFile(slug);
+  const idea = await getIdeaBySlug(slug);
   if (!idea) notFound();
 
   const memoSections = Array.isArray(idea.memoSections) ? idea.memoSections : [];
   const nextSteps = Array.isArray(idea.nextValidationSteps) ? idea.nextValidationSteps : [];
   const evidenceSources = Array.isArray(idea.evidenceSources) ? idea.evidenceSources : [];
   const researchInputs = Array.isArray(idea.researchInputs) ? idea.researchInputs : [];
-  const scorecard = typeof idea.scorecard === "object" && idea.scorecard ? idea.scorecard as Record<string, unknown> : {};
+  const scorecard = typeof idea.scorecard === "object" && idea.scorecard ? idea.scorecard as unknown as Record<string, unknown> : {};
 
   return (
     <div className="min-h-screen bg-[#faf7f2] text-neutral-900">
