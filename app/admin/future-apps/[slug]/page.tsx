@@ -235,6 +235,7 @@ export default async function FutureAppDetailPage({
 
             <div className="border-t border-black/8 pt-8">
               <form action={`/api/admin/future-apps/${app.id}`} method="POST">
+                <input type="hidden" name="action" value="run_evaluation" />
                 <button
                   formAction={`/api/admin/future-apps/${app.id}`}
                   formMethod="post"
