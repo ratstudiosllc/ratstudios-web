@@ -28,7 +28,8 @@ export async function promoteIdeaAction(formData: FormData) {
 
     const result = await promoteIdeaToFutureApps(id);
     redirect(`/admin/future-apps/${result.futureApp.slug}`);
-  } catch {
-    redirect("/admin/ideas?error=promote_failed");
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "promote_failed";
+    redirect(`/admin/ideas?error=${encodeURIComponent(message)}`);
   }
 }
