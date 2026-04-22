@@ -26,10 +26,9 @@ export async function promoteIdeaAction(formData: FormData) {
       throw new Error("Idea id is required");
     }
 
-    promoteIdeaToFutureApps(id);
+    const result = await promoteIdeaToFutureApps(id);
+    redirect(`/admin/future-apps/${result.futureApp.slug}`);
   } catch {
     redirect("/admin/ideas?error=promote_failed");
   }
-
-  redirect("/admin/future-apps?promoted=1");
 }
