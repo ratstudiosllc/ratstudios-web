@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { redirect } from "next/navigation";
+import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { getFutureAppById, runFutureAppEvaluation } from "@/lib/future-apps-agent";
 
 export async function GET(_: Request, context: { params: Promise<{ id: string }> }) {
@@ -35,6 +36,9 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
 
     return NextResponse.json({ app });
   } catch (error) {
+    if (isRedirectError(error)) {
+      throw error;
+    }
     return NextResponse.json({ error: error instanceof Error ? error.message : "Failed to run future app evaluation" }, { status: 400 });
   }
 }
