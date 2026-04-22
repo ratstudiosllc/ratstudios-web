@@ -3,7 +3,7 @@ import { getFutureAppById, runFutureAppEvaluation } from "@/lib/future-apps-agen
 
 export async function GET(_: Request, context: { params: Promise<{ id: string }> }) {
   const { id } = await context.params;
-  const app = getFutureAppById(id);
+  const app = await getFutureAppById(id);
   if (!app) return NextResponse.json({ error: "Future app not found" }, { status: 404 });
   return NextResponse.json({ app });
 }
@@ -18,7 +18,7 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
   }
 
   try {
-    const app = runFutureAppEvaluation(id);
+    const app = await runFutureAppEvaluation(id);
     return NextResponse.json({ app });
   } catch (error) {
     return NextResponse.json({ error: error instanceof Error ? error.message : "Failed to run future app evaluation" }, { status: 400 });

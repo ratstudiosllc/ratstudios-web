@@ -17,9 +17,9 @@ function stageLabel(stage: string) {
   return stage.replaceAll("_", " ");
 }
 
-export default function FutureAppsPage() {
-  const apps = listFutureApps();
-  const summary = getFutureAppsSummary();
+export default async function FutureAppsPage() {
+  const apps = await listFutureApps();
+  const summary = await getFutureAppsSummary();
 
   return (
     <div className="min-h-screen bg-[#faf7f2] text-neutral-900">

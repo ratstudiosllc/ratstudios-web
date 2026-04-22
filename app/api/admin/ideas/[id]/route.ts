@@ -4,7 +4,6 @@ import { ADMIN_SESSION_COOKIE } from "@/lib/admin-gate";
 import {
   archiveIdea,
   getIdeaById,
-  promoteIdea,
   setIdeaFavorite,
   updateIdea,
   type IdeaConfidence,
@@ -14,7 +13,7 @@ import {
   type IdeaWorkflowState,
   type ResearchInput,
 } from "@/lib/ideas-agent";
-import { createFutureAppFromIdea } from "@/lib/future-apps-agent";
+import { promoteOpportunityIdea } from "@/lib/admin-opportunities";
 
 function normalize(value: unknown) {
   if (value === null || value === undefined) return undefined;
@@ -70,7 +69,7 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
       return NextResponse.json({ idea: await setIdeaFavorite(id, body.isFavorite) });
     }
 
-    const updated = updateIdea(id, {
+    const updated = await updateIdea(id, {
       ideaName: normalize(body.ideaName) ?? idea.ideaName,
       oneSentenceConcept: normalize(body.oneSentenceConcept) ?? idea.oneSentenceConcept,
       problemSolved: normalize(body.problemSolved) ?? idea.problemSolved,
@@ -133,7 +132,7 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
   }
 
   if (action === "archive") {
-    return NextResponse.json({ idea: archiveIdea(id) });
+    return NextResponse.json({ idea: await archiveIdea(id) });
   }
 
   if (action === "favorite") {
@@ -145,26 +144,8 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
   }
 
   if (action === "promote") {
-    const promoted = promoteIdea(id);
-    if (!promoted) {
-      return NextResponse.json({ error: "Idea not found" }, { status: 404 });
-    }
-    createFutureAppFromIdea({
-      slug: promoted.slug,
-      name: promoted.ideaName,
-      summary: promoted.memoSummary,
-      problemStatement: promoted.problemSolved,
-      targetUsers: [promoted.targetUser],
-      priorResearchNotes: [
-        promoted.oneSentenceConcept,
-        promoted.bestWedge,
-        promoted.strongestReasonToBuild,
-        promoted.strongestReasonNotToBuild,
-      ].filter(Boolean),
-      bucket: promoted.industry,
-      owner: "Bub",
-    });
-    return NextResponse.json({ idea: promoted });
+    const result = await promoteOpportunityIdea(id);
+    return NextResponse.json(result);
   }
 
   return NextResponse.json({ error: "Unsupported action" }, { status: 400 });

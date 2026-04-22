@@ -65,11 +65,11 @@ export default async function FutureAppDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const app = getFutureAppById(slug);
+  const app = await getFutureAppById(slug);
 
   if (!app) notFound();
 
-  const appLinks = listFutureApps();
+  const appLinks = await listFutureApps();
 
   return (
     <div className="min-h-screen bg-[#faf7f2] text-neutral-900">

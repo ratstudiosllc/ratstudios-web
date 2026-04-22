@@ -339,10 +339,10 @@ export function getAppIssueMetrics(app: StudioApp, tracker: IssueTrackerResponse
   };
 }
 
-export function buildStudioKpis(ops: OpsRunsResponse | null, tracker: IssueTrackerResponse | null): StudioKpi[] {
+export async function buildStudioKpis(ops: OpsRunsResponse | null, tracker: IssueTrackerResponse | null): Promise<StudioKpi[]> {
   const currentApps = getCurrentApps();
   const futureApps = getFutureApps();
-  const ideasSummary = getIdeasAgentSummarySync();
+  const ideasSummary = await getIdeasAgentSummarySync();
   const unresolvedIssues = tracker?.counts.unresolved ?? 0;
   const p1Issues = tracker?.issues.filter((issue) => issue.priority === "P1" && issue.status !== "Resolved").length ?? 0;
   const activeRuns = ops?.runs.filter((run) => ["running", "queued", "retrying"].includes(run.status)).length ?? 0;

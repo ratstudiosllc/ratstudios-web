@@ -350,7 +350,7 @@ export default async function AdminPage() {
 
   const currentApps = getCurrentApps();
   const futureApps = getFutureApps();
-  const studioKpis = buildStudioKpis(ops, issues);
+  const studioKpis = await buildStudioKpis(ops, issues);
   const healthAttention = buildHealthAttentionItems(ops, issues);
   const ideasSummary = await getIdeasAgentSummary();
   const qaSmoke = readLatestSmokeResult();

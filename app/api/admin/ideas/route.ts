@@ -24,7 +24,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "ideaName, oneSentenceConcept, problemSolved, targetUser, and productType are required" }, { status: 400 });
   }
 
-  const idea = createIdea({
+  const idea = await createIdea({
     ideaName,
     oneSentenceConcept,
     problemSolved,
