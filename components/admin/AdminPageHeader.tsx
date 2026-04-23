@@ -2,6 +2,7 @@ import Link from "next/link";
 import {
   Activity,
   Building2,
+  FlaskConical,
   LayoutDashboard,
   Layers3,
   Megaphone,
@@ -13,7 +14,7 @@ function cn(...values: Array<string | false | null | undefined>) {
   return values.filter(Boolean).join(" ");
 }
 
-type AdminNavKey = "dashboard" | "current-apps" | "ideas" | "future-apps" | "issues" | "org-chart" | "agent-kpis" | "marketing" | "agent-runs";
+type AdminNavKey = "dashboard" | "current-apps" | "ideas" | "future-apps" | "issues" | "org-chart" | "agent-kpis" | "marketing" | "agent-runs" | "testingpage";
 
 const navItems: Array<{ key: AdminNavKey; href: string; label: string; icon: React.ReactNode }> = [
   { key: "dashboard", href: "/admin", label: "Dashboard", icon: <LayoutDashboard className="h-4 w-4 text-orange-500" /> },
@@ -23,6 +24,7 @@ const navItems: Array<{ key: AdminNavKey; href: string; label: string; icon: Rea
   { key: "issues", href: "/admin/issues", label: "Issues", icon: <Wrench className="h-4 w-4 text-orange-500" /> },
   { key: "org-chart", href: "/admin/org-chart", label: "Org Chart", icon: <Building2 className="h-4 w-4 text-orange-500" /> },
   { key: "agent-kpis", href: "/admin/agent-kpis", label: "Agent KPIs", icon: <Activity className="h-4 w-4 text-orange-500" /> },
+  { key: "testingpage", href: "/admin/testingpage", label: "Preview", icon: <FlaskConical className="h-4 w-4 text-orange-500" /> },
 ];
 
 export function AdminPageHeader({
