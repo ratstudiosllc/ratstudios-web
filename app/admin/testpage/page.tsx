@@ -18,7 +18,7 @@ import {
   Wrench,
 } from "lucide-react";
 
-export const dynamic = "force-static";
+export const dynamic = "force-dynamic";
 
 type Mode = "ops" | "saas";
 
@@ -262,8 +262,9 @@ function PreviewCard({ tile }: { tile: Tile }) {
 export default async function AdminTestPage({ searchParams }: { searchParams: SearchParams }) {
   const resolvedSearchParams = await searchParams;
   const mode = getMode(resolvedSearchParams.mode);
-  const navItems = navByMode[mode];
-  const tiles = tilesByMode[mode];
+  const selectedMode: Mode = mode === "saas" ? "saas" : "ops";
+  const navItems = navByMode[selectedMode];
+  const tiles = tilesByMode[selectedMode];
 
   return (
     <div className="min-h-screen bg-[#faf7f2] text-neutral-900">
@@ -274,12 +275,12 @@ export default async function AdminTestPage({ searchParams }: { searchParams: Se
             <div>
               <h1 className="text-4xl font-bold text-neutral-950">Admin Test Page</h1>
               <div className="mt-4">
-                <ModeToggle currentMode={mode} />
+                <ModeToggle currentMode={selectedMode} />
               </div>
             </div>
             <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
               {navItems.map((item) => (
-                <Link key={`${mode}-${item.label}`} href={item.href} className="rounded-3xl border border-black/5 bg-[#fcfaf7] p-5 shadow-sm transition hover:border-black/10 hover:bg-white">
+                <Link key={`${selectedMode}-${item.label}`} href={item.href} className="rounded-3xl border border-black/5 bg-[#fcfaf7] p-5 shadow-sm transition hover:border-black/10 hover:bg-white">
                   <div className="flex items-start justify-between gap-3">
                     <div className="rounded-2xl bg-white p-3 shadow-sm">{item.icon}</div>
                     <ArrowRight className="h-4 w-4 text-neutral-400" />
@@ -294,7 +295,7 @@ export default async function AdminTestPage({ searchParams }: { searchParams: Se
 
         <div className="mt-8 grid gap-6 xl:grid-cols-2">
           {tiles.map((tile) => (
-            <PreviewCard key={`${mode}-${tile.title}`} tile={tile} />
+            <PreviewCard key={`${selectedMode}-${tile.title}`} tile={tile} />
           ))}
         </div>
 
