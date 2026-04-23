@@ -12,13 +12,11 @@ import {
   MonitorCog,
   Rocket,
   Settings2,
-  ShieldCheck,
   Sparkles,
   Users,
   Wallet,
   Wrench,
 } from "lucide-react";
-import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 
 export const dynamic = "force-static";
 
@@ -264,16 +262,13 @@ function PreviewCard({ tile }: { tile: Tile }) {
 export default async function AdminTestPage({ searchParams }: { searchParams: SearchParams }) {
   const resolvedSearchParams = await searchParams;
   const mode = getMode(resolvedSearchParams.mode);
-  const copy = modeCopy[mode];
   const navItems = navByMode[mode];
   const tiles = tilesByMode[mode];
 
   return (
     <div className="min-h-screen bg-[#faf7f2] text-neutral-900">
       <div className="mx-auto max-w-[1500px] px-6 py-10">
-        <AdminPageHeader title="Admin Test Page" active="testingpage" eyebrow="RaT Studios Admin Preview" />
-
-        <section className="mt-8 overflow-hidden rounded-[32px] border border-black/5 bg-white shadow-sm">
+        <section className="overflow-hidden rounded-[32px] border border-black/5 bg-white shadow-sm">
           <div className="h-2 gradient-bg" />
           <div className="p-8">
             <div>
@@ -303,24 +298,6 @@ export default async function AdminTestPage({ searchParams }: { searchParams: Se
           ))}
         </div>
 
-        <section className="mt-8 rounded-[32px] border border-black/5 bg-white p-6 shadow-sm">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-orange-500">Preview notes</p>
-              <h2 className="mt-2 text-2xl font-semibold text-neutral-950">How to review this iteration</h2>
-              <p className="mt-2 max-w-3xl text-sm text-neutral-600">
-                Internal Ops mode should feel like a studio operating system. SaaS Dashboard mode should feel like a customer/revenue admin system. If one mode feels clearer, that becomes the stronger direction for later promotion work.
-              </p>
-            </div>
-            <div className="rounded-2xl bg-[#fcfaf7] p-4 text-sm text-neutral-700">
-              <div className="flex items-center gap-2 font-medium text-neutral-900">
-                <ShieldCheck className="h-4 w-4 text-orange-500" />
-                Safe preview scope
-              </div>
-              <p className="mt-2">This file is new and isolated. Live /admin behavior remains untouched.</p>
-            </div>
-          </div>
-        </section>
       </div>
     </div>
   );
