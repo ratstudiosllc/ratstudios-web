@@ -41,20 +41,12 @@ type Tile = {
   items: Array<{ label: string; value: string; note: string }>;
 };
 
-const modeCopy: Record<Mode, { label: string; title: string; intro: string; badge: string }> = {
+const modeCopy: Record<Mode, { label: string }> = {
   ops: {
     label: "Internal Ops",
-    title: "Internal Ops preview",
-    intro:
-      "This route previews a studio-first control surface: portfolio ops, internal workflows, and cross-team execution visibility without changing the live /admin dashboard.",
-    badge: "Studio operations orientation",
   },
   saas: {
     label: "SaaS Dashboard",
-    title: "SaaS dashboard preview",
-    intro:
-      "This route previews a future SaaS admin architecture: customer lifecycle, tenant health, billing, and support systems gathered into one executive admin surface.",
-    badge: "SaaS architecture orientation",
   },
 };
 
@@ -251,7 +243,6 @@ function PreviewCard({ tile }: { tile: Tile }) {
         <div>
           <span className={cn("inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em]", tile.accent)}>
             {tile.icon}
-            Preview tile
           </span>
           <h2 className="mt-4 text-2xl font-semibold text-neutral-950">{tile.title}</h2>
           <p className="mt-2 text-sm leading-6 text-neutral-600">{tile.body}</p>
@@ -285,26 +276,9 @@ export default async function AdminTestPage({ searchParams }: { searchParams: Se
         <section className="mt-8 overflow-hidden rounded-[32px] border border-black/5 bg-white shadow-sm">
           <div className="h-2 gradient-bg" />
           <div className="p-8">
-            <span className="inline-flex rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-amber-800">
-              Stable preview route
-            </span>
-            <div className="mt-4 flex flex-wrap items-start justify-between gap-4">
-              <div>
-                <h1 className="text-4xl font-bold text-neutral-950">{copy.title}</h1>
-                <p className="mt-4 max-w-4xl text-base leading-7 text-neutral-700">{copy.intro}</p>
-              </div>
-              <Link href="/admin" className="inline-flex items-center gap-2 rounded-2xl border border-black/10 bg-[#fcfaf7] px-4 py-3 text-sm font-medium text-neutral-800 transition hover:border-black/20 hover:bg-white">
-                Back to live /admin
-              </Link>
-            </div>
-            <div className="mt-6 flex flex-wrap items-center gap-3">
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <h1 className="text-4xl font-bold text-neutral-950">Admin Test Page</h1>
               <ModeToggle currentMode={mode} />
-              <span className="inline-flex items-center gap-2 rounded-2xl border border-dashed border-amber-300 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900">
-                Mode: {copy.label}
-              </span>
-              <span className="inline-flex items-center gap-2 rounded-2xl border border-black/10 bg-[#fcfaf7] px-4 py-3 text-sm font-medium text-neutral-700">
-                {copy.badge}
-              </span>
             </div>
             <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
               {navItems.map((item) => (
