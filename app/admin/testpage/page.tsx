@@ -48,59 +48,54 @@ const modeCopy: Record<Mode, { label: string }> = {
   },
 };
 
+const internalAdminNav: NavItem[] = [
+  {
+    label: "Dashboard",
+    href: "/admin",
+    icon: <LayoutDashboard className="h-4 w-4 text-orange-500" />,
+    note: "Studio-level operating overview and priority visibility.",
+  },
+  {
+    label: "Current Apps",
+    href: "/admin/current-apps",
+    icon: <MonitorCog className="h-4 w-4 text-orange-500" />,
+    note: "Shipping products and active delivery lanes.",
+  },
+  {
+    label: "Ideas",
+    href: "/admin/ideas",
+    icon: <Sparkles className="h-4 w-4 text-orange-500" />,
+    note: "Research and validation flow for future bets.",
+  },
+  {
+    label: "Future Apps",
+    href: "/admin/future-apps",
+    icon: <Rocket className="h-4 w-4 text-orange-500" />,
+    note: "Promoted opportunities being shaped into real bets.",
+  },
+  {
+    label: "Issues",
+    href: "/admin/issues",
+    icon: <Wrench className="h-4 w-4 text-orange-500" />,
+    note: "Incident, QA, and release-followup visibility.",
+  },
+  {
+    label: "Org Chart",
+    href: "/admin/org-chart",
+    icon: <Building2 className="h-4 w-4 text-orange-500" />,
+    note: "Roles, responsibilities, and operating alignment.",
+  },
+  {
+    label: "Agent KPIs",
+    href: "/admin/agent-kpis",
+    icon: <Activity className="h-4 w-4 text-orange-500" />,
+    note: "Automation throughput and reliability tracking.",
+  },
+];
+
 const navByMode: Record<Mode, NavItem[]> = {
-  ops: [
-    {
-      label: "Current Apps",
-      href: "/admin/current-apps",
-      icon: <MonitorCog className="h-4 w-4 text-orange-500" />,
-      note: "Shipping products and active delivery lanes.",
-    },
-    {
-      label: "Ideas Pipeline",
-      href: "/admin/ideas",
-      icon: <Sparkles className="h-4 w-4 text-orange-500" />,
-      note: "Research and validation flow for future bets.",
-    },
-    {
-      label: "Issues Desk",
-      href: "/admin/issues",
-      icon: <Wrench className="h-4 w-4 text-orange-500" />,
-      note: "Incident, QA, and release-followup visibility.",
-    },
-    {
-      label: "Agent KPIs",
-      href: "/admin/agent-kpis",
-      icon: <Activity className="h-4 w-4 text-orange-500" />,
-      note: "Automation throughput and reliability tracking.",
-    },
-  ],
-  saas: [
-    {
-      label: "Customer Health",
-      href: "/admin",
-      icon: <Users className="h-4 w-4 text-orange-500" />,
-      note: "Accounts, churn risk, renewals, and lifecycle ops.",
-    },
-    {
-      label: "Billing Control",
-      href: "/admin",
-      icon: <CreditCard className="h-4 w-4 text-orange-500" />,
-      note: "Payments, plan changes, invoicing, and collections.",
-    },
-    {
-      label: "Support Operations",
-      href: "/admin/issues",
-      icon: <LifeBuoy className="h-4 w-4 text-orange-500" />,
-      note: "Cases, SLA pressure, escalation, and incident links.",
-    },
-    {
-      label: "Revenue Analytics",
-      href: "/admin/marketing",
-      icon: <LineChart className="h-4 w-4 text-orange-500" />,
-      note: "Acquisition, activation, retention, and expansion.",
-    },
-  ],
+  ops: internalAdminNav,
+  saas: internalAdminNav,
 };
 
 const tilesByMode: Record<Mode, Tile[]> = {

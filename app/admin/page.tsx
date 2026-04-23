@@ -8,6 +8,7 @@ import {
   CheckCircle2,
   Clock3,
   DollarSign,
+  LayoutDashboard,
   Layers3,
   Megaphone,
   Sparkles,
@@ -361,6 +362,10 @@ export default async function AdminPage() {
         <div className="rounded-[32px] border border-black/5 bg-white px-6 py-6 shadow-sm">
           <h1 className="text-3xl font-semibold text-orange-500">RaT Studios Admin</h1>
           <div className="mt-5 flex flex-wrap gap-3">
+            <Link href="/admin" className="inline-flex items-center gap-2 rounded-2xl border border-black/10 bg-[#fcfaf7] px-4 py-3 text-sm font-medium text-neutral-800 transition hover:bg-white hover:border-black/20">
+              <LayoutDashboard className="h-4 w-4 text-orange-500" />
+              Dashboard
+            </Link>
             <Link href="/admin/current-apps" className="inline-flex items-center gap-2 rounded-2xl border border-black/10 bg-[#fcfaf7] px-4 py-3 text-sm font-medium text-neutral-800 transition hover:bg-white hover:border-black/20">
               <Layers3 className="h-4 w-4 text-orange-500" />
               Current Apps
