@@ -3,14 +3,12 @@ import {
   Activity,
   ArrowRight,
   BellRing,
-  BookOpenText,
   Briefcase,
   Building2,
   CreditCard,
   LayoutDashboard,
   LifeBuoy,
   LineChart,
-  Megaphone,
   MonitorCog,
   Rocket,
   Settings2,
@@ -286,76 +284,40 @@ export default async function AdminTestPage({ searchParams }: { searchParams: Se
 
         <section className="mt-8 overflow-hidden rounded-[32px] border border-black/5 bg-white shadow-sm">
           <div className="h-2 gradient-bg" />
-          <div className="grid gap-6 p-8 xl:grid-cols-[minmax(0,1.5fr)_minmax(320px,0.8fr)]">
-            <div>
-              <span className="inline-flex rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-amber-800">
-                Stable preview route
-              </span>
-              <div className="mt-4 flex flex-wrap items-start justify-between gap-4">
-                <div>
-                  <h1 className="text-4xl font-bold text-neutral-950">{copy.title}</h1>
-                  <p className="mt-4 max-w-4xl text-base leading-7 text-neutral-700">{copy.intro}</p>
-                </div>
-                <ModeToggle currentMode={mode} />
+          <div className="p-8">
+            <span className="inline-flex rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-amber-800">
+              Stable preview route
+            </span>
+            <div className="mt-4 flex flex-wrap items-start justify-between gap-4">
+              <div>
+                <h1 className="text-4xl font-bold text-neutral-950">{copy.title}</h1>
+                <p className="mt-4 max-w-4xl text-base leading-7 text-neutral-700">{copy.intro}</p>
               </div>
-              <div className="mt-6 flex flex-wrap gap-3">
-                <Link href="/admin" className="inline-flex items-center gap-2 rounded-2xl border border-black/10 bg-[#fcfaf7] px-4 py-3 text-sm font-medium text-neutral-800 transition hover:border-black/20 hover:bg-white">
-                  Back to live /admin
-                </Link>
-                <span className="inline-flex items-center gap-2 rounded-2xl border border-dashed border-amber-300 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900">
-                  Mode: {copy.label}
-                </span>
-              </div>
-            </div>
-            <div className="rounded-[28px] bg-[#fcfaf7] p-6">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-neutral-500">Header controls</p>
-              <div className="mt-4 space-y-3 text-sm leading-6 text-neutral-700">
-                <p>
-                  <span className="font-medium text-neutral-900">Query-param toggle:</span> server-safe mode switching via
-                  <code className="mx-1 rounded bg-white px-2 py-1 text-xs text-neutral-800">?mode=ops</code>
-                  or
-                  <code className="mx-1 rounded bg-white px-2 py-1 text-xs text-neutral-800">?mode=saas</code>.
-                </p>
-                <p>
-                  <span className="font-medium text-neutral-900">Current orientation:</span> {copy.badge}.
-                </p>
-                <p>
-                  This page is isolated at <span className="font-medium text-neutral-900">/admin/testpage</span> so ongoing review can continue without affecting live admin behavior.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="mt-8 rounded-[32px] border border-black/5 bg-white p-6 shadow-sm">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-orange-500">Mode-sensitive navigation</p>
-              <h2 className="mt-2 text-2xl font-semibold text-neutral-950">Visible nav tiles change with the selected dashboard mode</h2>
-              <p className="mt-2 max-w-3xl text-sm text-neutral-600">
-                The preview intentionally swaps the navigation focus so Richard can compare an internal studio admin shape against a future SaaS admin architecture.
-              </p>
-            </div>
-            <div className="rounded-2xl bg-[#fcfaf7] p-4 text-sm text-neutral-700">
-              <div className="flex items-center gap-2 font-medium text-neutral-900">
-                <BookOpenText className="h-4 w-4 text-orange-500" />
-                Review prompt
-              </div>
-              <p className="mt-2">Ask whether the top-level information scent feels right for the selected mode, not whether every metric is final.</p>
-            </div>
-          </div>
-
-          <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            {navItems.map((item) => (
-              <Link key={`${mode}-${item.label}`} href={item.href} className="rounded-3xl border border-black/5 bg-[#fcfaf7] p-5 shadow-sm transition hover:border-black/10 hover:bg-white">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="rounded-2xl bg-white p-3 shadow-sm">{item.icon}</div>
-                  <ArrowRight className="h-4 w-4 text-neutral-400" />
-                </div>
-                <h3 className="mt-4 text-lg font-semibold text-neutral-950">{item.label}</h3>
-                <p className="mt-2 text-sm text-neutral-600">{item.note}</p>
+              <Link href="/admin" className="inline-flex items-center gap-2 rounded-2xl border border-black/10 bg-[#fcfaf7] px-4 py-3 text-sm font-medium text-neutral-800 transition hover:border-black/20 hover:bg-white">
+                Back to live /admin
               </Link>
-            ))}
+            </div>
+            <div className="mt-6 flex flex-wrap items-center gap-3">
+              <ModeToggle currentMode={mode} />
+              <span className="inline-flex items-center gap-2 rounded-2xl border border-dashed border-amber-300 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900">
+                Mode: {copy.label}
+              </span>
+              <span className="inline-flex items-center gap-2 rounded-2xl border border-black/10 bg-[#fcfaf7] px-4 py-3 text-sm font-medium text-neutral-700">
+                {copy.badge}
+              </span>
+            </div>
+            <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+              {navItems.map((item) => (
+                <Link key={`${mode}-${item.label}`} href={item.href} className="rounded-3xl border border-black/5 bg-[#fcfaf7] p-5 shadow-sm transition hover:border-black/10 hover:bg-white">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="rounded-2xl bg-white p-3 shadow-sm">{item.icon}</div>
+                    <ArrowRight className="h-4 w-4 text-neutral-400" />
+                  </div>
+                  <h3 className="mt-4 text-lg font-semibold text-neutral-950">{item.label}</h3>
+                  <p className="mt-2 text-sm text-neutral-600">{item.note}</p>
+                </Link>
+              ))}
+            </div>
           </div>
         </section>
 
