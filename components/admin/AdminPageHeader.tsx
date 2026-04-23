@@ -41,21 +41,25 @@ export function AdminPageHeader({
         <p className="text-3xl font-semibold text-orange-500">{eyebrow}</p>
         <h1 className="mt-3 text-4xl font-bold text-neutral-950">{title}</h1>
         <div className="mt-8 flex flex-wrap gap-3">
-          {navItems
-            .filter((item) => item.key !== active)
-            .map((item) => (
+          {navItems.map((item) => {
+            const isActive = item.key === active;
+            return (
               <Link
                 key={item.key}
                 href={item.href}
+                aria-current={isActive ? "page" : undefined}
                 className={cn(
                   "inline-flex items-center gap-2 rounded-2xl border px-4 py-3 text-sm font-medium transition",
-                  "border-black/10 bg-[#fcfaf7] text-neutral-800 hover:bg-white hover:border-black/20"
+                  isActive
+                    ? "border-orange-200 bg-orange-50 text-neutral-950"
+                    : "border-black/10 bg-[#fcfaf7] text-neutral-800 hover:bg-white hover:border-black/20"
                 )}
               >
                 {item.icon}
                 {item.label}
               </Link>
-            ))}
+            );
+          })}
         </div>
       </div>
     </div>

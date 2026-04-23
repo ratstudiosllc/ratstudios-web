@@ -1,35 +1,21 @@
 import Link from "next/link";
 import {
-  Activity,
-  ArrowRight,
   BellRing,
   Briefcase,
   Building2,
-  CreditCard,
   LayoutDashboard,
-  LifeBuoy,
-  LineChart,
-  MonitorCog,
   Rocket,
   Settings2,
-  Sparkles,
   Users,
   Wallet,
-  Wrench,
 } from "lucide-react";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 
 export const dynamic = "force-dynamic";
 
 type Mode = "ops" | "saas";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
-
-type NavItem = {
-  label: string;
-  href: string;
-  icon: React.ReactNode;
-  note: string;
-};
 
 type Tile = {
   title: string;
@@ -46,56 +32,6 @@ const modeCopy: Record<Mode, { label: string }> = {
   saas: {
     label: "SaaS Dashboard",
   },
-};
-
-const internalAdminNav: NavItem[] = [
-  {
-    label: "Dashboard",
-    href: "/admin",
-    icon: <LayoutDashboard className="h-4 w-4 text-orange-500" />,
-    note: "Studio-level operating overview and priority visibility.",
-  },
-  {
-    label: "Current Apps",
-    href: "/admin/current-apps",
-    icon: <MonitorCog className="h-4 w-4 text-orange-500" />,
-    note: "Shipping products and active delivery lanes.",
-  },
-  {
-    label: "Ideas",
-    href: "/admin/ideas",
-    icon: <Sparkles className="h-4 w-4 text-orange-500" />,
-    note: "Research and validation flow for future bets.",
-  },
-  {
-    label: "Future Apps",
-    href: "/admin/future-apps",
-    icon: <Rocket className="h-4 w-4 text-orange-500" />,
-    note: "Promoted opportunities being shaped into real bets.",
-  },
-  {
-    label: "Issues",
-    href: "/admin/issues",
-    icon: <Wrench className="h-4 w-4 text-orange-500" />,
-    note: "Incident, QA, and release-followup visibility.",
-  },
-  {
-    label: "Org Chart",
-    href: "/admin/org-chart",
-    icon: <Building2 className="h-4 w-4 text-orange-500" />,
-    note: "Roles, responsibilities, and operating alignment.",
-  },
-  {
-    label: "Agent KPIs",
-    href: "/admin/agent-kpis",
-    icon: <Activity className="h-4 w-4 text-orange-500" />,
-    note: "Automation throughput and reliability tracking.",
-  },
-];
-
-const navByMode: Record<Mode, NavItem[]> = {
-  ops: internalAdminNav,
-  saas: internalAdminNav,
 };
 
 const tilesByMode: Record<Mode, Tile[]> = {
@@ -258,32 +194,21 @@ export default async function AdminTestPage({ searchParams }: { searchParams: Se
   const resolvedSearchParams = await searchParams;
   const mode = getMode(resolvedSearchParams.mode);
   const selectedMode: Mode = mode === "saas" ? "saas" : "ops";
-  const navItems = navByMode[selectedMode];
   const tiles = tilesByMode[selectedMode];
 
   return (
     <div className="min-h-screen bg-[#faf7f2] text-neutral-900">
       <div className="mx-auto max-w-[1500px] px-6 py-10">
-        <section className="overflow-hidden rounded-[32px] border border-black/5 bg-white shadow-sm">
+        <AdminPageHeader title="Admin Test Page" active="dashboard" eyebrow="RaT Studios Admin Sandbox" />
+
+        <section className="mt-8 overflow-hidden rounded-[32px] border border-black/5 bg-white shadow-sm">
           <div className="h-2 gradient-bg" />
           <div className="p-8">
-            <div>
-              <h1 className="text-4xl font-bold text-neutral-950">Admin Test Page</h1>
-              <div className="mt-4">
-                <ModeToggle currentMode={selectedMode} />
-              </div>
-            </div>
-            <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-              {navItems.map((item) => (
-                <Link key={`${selectedMode}-${item.label}`} href={item.href} className="rounded-3xl border border-black/5 bg-[#fcfaf7] p-5 shadow-sm transition hover:border-black/10 hover:bg-white">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="rounded-2xl bg-white p-3 shadow-sm">{item.icon}</div>
-                    <ArrowRight className="h-4 w-4 text-neutral-400" />
-                  </div>
-                  <h3 className="mt-4 text-lg font-semibold text-neutral-950">{item.label}</h3>
-                  <p className="mt-2 text-sm text-neutral-600">{item.note}</p>
-                </Link>
-              ))}
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-orange-500">Mode switch</p>
+            <h2 className="mt-2 text-2xl font-semibold text-neutral-950">{modeCopy[selectedMode].label}</h2>
+            <p className="mt-2 text-sm text-neutral-600">Switch the dashboard tiles below without changing the fixed internal admin navigation above.</p>
+            <div className="mt-6">
+              <ModeToggle currentMode={selectedMode} />
             </div>
           </div>
         </section>
