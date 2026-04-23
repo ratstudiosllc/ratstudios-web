@@ -276,9 +276,11 @@ export default async function AdminTestPage({ searchParams }: { searchParams: Se
         <section className="mt-8 overflow-hidden rounded-[32px] border border-black/5 bg-white shadow-sm">
           <div className="h-2 gradient-bg" />
           <div className="p-8">
-            <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
               <h1 className="text-4xl font-bold text-neutral-950">Admin Test Page</h1>
-              <ModeToggle currentMode={mode} />
+              <div className="mt-4">
+                <ModeToggle currentMode={mode} />
+              </div>
             </div>
             <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
               {navItems.map((item) => (
