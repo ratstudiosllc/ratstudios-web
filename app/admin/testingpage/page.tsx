@@ -154,7 +154,7 @@ export default function AdminTestingPage() {
               <h1 className="mt-4 text-4xl font-bold text-neutral-950">/admin/testingpage</h1>
               <p className="mt-4 max-w-4xl text-base leading-7 text-neutral-700">
                 This preview is a proposed SaaS-style admin architecture for Richard to evaluate before any main dashboard replacement.
-                It intentionally mixes current visual language with clearly labeled demo content so the structure can be reviewed honestly.
+                It intentionally mixes current visual language with clearly labeled demo content so the structure can be reviewed honestly before we promote it to the main dashboard.
               </p>
               <div className="mt-6 flex flex-wrap gap-3">
                 <Link href="/admin" className="inline-flex items-center gap-2 rounded-2xl border border-black/10 bg-[#fcfaf7] px-4 py-3 text-sm font-medium text-neutral-800 transition hover:bg-white hover:border-black/20">
