@@ -1,10 +1,18 @@
 import Link from "next/link";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { listFutureApps } from "@/lib/future-apps-agent";
 import { getCurrentApps, getAppIssueMetrics } from "@/lib/studio-admin";
 import { getIssueTracker } from "@/lib/issues-tracker";
 
+export const dynamic = "force-dynamic";
+
 export default async function CurrentAppsPage() {
-  const tracker = await getIssueTracker().catch(() => null);
+  const [tracker, promotedFutureApps] = await Promise.all([
+    getIssueTracker().catch(() => null),
+    listFutureApps()
+      .then((apps) => apps.filter((app) => app.stage === "approved_for_planning"))
+      .catch(() => []),
+  ]);
   const apps = getCurrentApps();
 
   return (
@@ -30,6 +38,20 @@ export default async function CurrentAppsPage() {
               </Link>
             );
           })}
+
+          {promotedFutureApps.map((app) => (
+            <Link key={app.id} href={`/admin/future-apps/${app.slug}`} className="rounded-[28px] border border-orange-200 bg-white p-6 shadow-sm transition hover:border-orange-300 hover:bg-[#fcfaf7]">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-orange-500">Promoted current app</p>
+              <h2 className="mt-2 text-2xl font-semibold text-neutral-950">{app.name}</h2>
+              <p className="mt-2 text-sm text-neutral-600">Current app portfolio • {app.status}</p>
+              <p className="mt-4 text-sm text-neutral-600">{app.summary}</p>
+              <div className="mt-5 grid gap-3 md:grid-cols-3">
+                <div className="rounded-2xl bg-[#fcfaf7] p-4"><p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">Owner</p><p className="mt-2 text-lg font-semibold text-neutral-950">{app.owner}</p></div>
+                <div className="rounded-2xl bg-[#fcfaf7] p-4"><p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">Next milestone</p><p className="mt-2 text-sm font-semibold text-neutral-950">{app.nextMilestone}</p></div>
+                <div className="rounded-2xl bg-[#fcfaf7] p-4"><p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">Blocker</p><p className="mt-2 text-sm font-semibold text-neutral-950">{app.currentBlocker}</p></div>
+              </div>
+            </Link>
+          ))}
         </div>
       </div>
     </div>

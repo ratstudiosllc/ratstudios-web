@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { redirect } from "next/navigation";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
-import { getFutureAppById, runFutureAppEvaluation } from "@/lib/future-apps-agent";
+import { getFutureAppById, promoteFutureAppToCurrent, runFutureAppEvaluation } from "@/lib/future-apps-agent";
 
 export async function GET(_: Request, context: { params: Promise<{ id: string }> }) {
   const { id } = await context.params;
@@ -23,15 +23,17 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
     action = String(formData?.get("action") ?? "").trim();
   }
 
-  if (action !== "run_evaluation") {
+  if (action !== "run_evaluation" && action !== "promote_to_current") {
     return NextResponse.json({ error: "Unsupported action" }, { status: 400 });
   }
 
   try {
-    const app = await runFutureAppEvaluation(id);
+    const app = action === "promote_to_current"
+      ? await promoteFutureAppToCurrent(id)
+      : await runFutureAppEvaluation(id);
 
     if (!contentType.includes("application/json")) {
-      redirect(`/admin/future-apps/${app.slug}`);
+      redirect(action === "promote_to_current" ? "/admin/current-apps" : `/admin/future-apps/${app.slug}`);
     }
 
     return NextResponse.json({ app });

@@ -404,6 +404,35 @@ export async function promoteOpportunityIdea(id: string) {
   };
 }
 
+export async function promoteFutureAppToCurrent(idOrSlug: string) {
+  const supabase = createSupabaseAdmin();
+  const current = await getFutureAppById(idOrSlug);
+  if (!current) throw new Error("Future app not found");
+
+  const now = nowIso();
+  const progressNote = "Moved from future app pipeline into current app portfolio.";
+  const progressNotes = current.progressNotes.includes(progressNote)
+    ? current.progressNotes
+    : [...current.progressNotes, progressNote];
+
+  const { data, error } = await supabase
+    .from("admin_future_apps")
+    .update({
+      stage: "approved_for_planning",
+      status: "Current app portfolio",
+      current_blocker: "Needs current-app execution plan and operating metrics",
+      next_milestone: "Define current-app build plan, owner, metrics, and issue lane",
+      progress_notes: progressNotes,
+      updated_at: now,
+    })
+    .eq("id", current.id)
+    .select("*")
+    .single();
+
+  if (error) throw new Error(error.message);
+  return normalizeFutureAppRecord(data as Record<string, unknown>);
+}
+
 export async function listFutureApps() {
   const supabase = createSupabaseAdmin();
   const { data, error } = await supabase

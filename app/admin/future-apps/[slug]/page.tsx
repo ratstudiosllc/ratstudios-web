@@ -233,7 +233,7 @@ export default async function FutureAppDetailPage({
               )}
             </Section>
 
-            <div className="border-t border-black/8 pt-8">
+            <div className="flex flex-wrap gap-3 border-t border-black/8 pt-8">
               <form action={`/api/admin/future-apps/${app.id}`} method="POST">
                 <input type="hidden" name="action" value="run_evaluation" />
                 <button
@@ -242,6 +242,18 @@ export default async function FutureAppDetailPage({
                   className="rounded-xl bg-neutral-950 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800"
                 >
                   Run evaluation
+                </button>
+              </form>
+
+              <form action={`/api/admin/future-apps/${app.id}`} method="POST">
+                <input type="hidden" name="action" value="promote_to_current" />
+                <button
+                  formAction={`/api/admin/future-apps/${app.id}`}
+                  formMethod="post"
+                  disabled={app.stage === "approved_for_planning"}
+                  className="rounded-xl bg-orange-500 px-4 py-2 text-sm font-medium text-white hover:bg-orange-600 disabled:cursor-not-allowed disabled:bg-neutral-300"
+                >
+                  {app.stage === "approved_for_planning" ? "Already in Current Apps" : "Move to Current Apps"}
                 </button>
               </form>
             </div>

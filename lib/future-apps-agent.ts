@@ -2,6 +2,7 @@ import {
   getFutureAppsSummary as getFutureAppsSummaryFromDb,
   getFutureAppById as getFutureAppByIdFromDb,
   listFutureApps as listFutureAppsFromDb,
+  promoteFutureAppToCurrent as promoteFutureAppToCurrentInDb,
   runFutureAppEvaluation as runFutureAppEvaluationInDb,
 } from "@/lib/admin-opportunities";
 
@@ -97,4 +98,8 @@ export async function createFutureAppFromIdea(input: {
 
 export async function runFutureAppEvaluation(id: string) {
   return runFutureAppEvaluationInDb(id);
+}
+
+export async function promoteFutureAppToCurrent(id: string) {
+  return promoteFutureAppToCurrentInDb(id);
 }
