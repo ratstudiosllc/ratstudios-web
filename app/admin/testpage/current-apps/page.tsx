@@ -218,8 +218,19 @@ function StatusPill({ status }: { status: ChecklistStatus }) {
   return <span className={cn("rounded-full border px-2.5 py-1 text-xs font-semibold", copy.className)}>{copy.label}</span>;
 }
 
-export default function CurrentAppsChecklistTestPage() {
+type SearchParams = Promise<Record<string, string | string[] | undefined>>;
+
+function getSelectedAppSlug(value: string | string[] | undefined, fallback: string) {
+  return Array.isArray(value) ? value[0] ?? fallback : value ?? fallback;
+}
+
+export default async function CurrentAppsChecklistTestPage({ searchParams }: { searchParams: SearchParams }) {
   const apps = getCurrentApps();
+  const resolvedSearchParams = await searchParams;
+  const selectedSlug = getSelectedAppSlug(resolvedSearchParams.app, apps[0]?.slug ?? "");
+  const selectedApp = apps.find((app) => app.slug === selectedSlug) ?? apps[0];
+  const selectedCategories = selectedApp ? buildAppChecklist(selectedApp.slug) : [];
+  const selectedSummary = summarize(selectedCategories);
 
   return (
     <div className="min-h-screen bg-[#faf7f2] text-neutral-900">
@@ -228,55 +239,72 @@ export default function CurrentAppsChecklistTestPage() {
 
         <section className="mt-8 overflow-hidden rounded-[32px] border border-black/5 bg-white shadow-sm">
           <div className="h-2 gradient-bg" />
-          <div className="grid gap-6 p-8 lg:grid-cols-[minmax(0,1fr)_320px]">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-orange-500">Launch readiness system</p>
-              <h2 className="mt-2 text-3xl font-semibold text-neutral-950">One checklist model across every current app.</h2>
-              <p className="mt-3 max-w-3xl text-sm leading-6 text-neutral-600">
-                This prototype turns launch readiness into a measurable operating surface: brand, domains, repo hygiene, Vercel, Supabase, auth, payments, QA, legal, marketing, support, and final go/no-go.
-              </p>
-              <div className="mt-6 flex flex-wrap gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">
-                <span className="rounded-full bg-[#fcfaf7] px-3 py-2">Status</span>
-                <span className="rounded-full bg-[#fcfaf7] px-3 py-2">Owner</span>
-                <span className="rounded-full bg-[#fcfaf7] px-3 py-2">Priority</span>
-                <span className="rounded-full bg-[#fcfaf7] px-3 py-2">Evidence</span>
-                <span className="rounded-full bg-[#fcfaf7] px-3 py-2">Launch score</span>
+          <div className="p-8">
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-orange-500">Launch readiness system</p>
+                <h2 className="mt-2 text-3xl font-semibold text-neutral-950">One checklist model across every current app.</h2>
+                <p className="mt-3 max-w-3xl text-sm leading-6 text-neutral-600">
+                  Select an app below to review its launch checklist without scrolling through the whole portfolio.
+                </p>
               </div>
-            </div>
-            <div className="rounded-[28px] bg-[#fcfaf7] p-5">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-neutral-500">Prototype rule</p>
-              <p className="mt-2 text-2xl font-semibold text-neutral-950">No flat checkbox graveyard.</p>
-              <p className="mt-2 text-sm text-neutral-600">Each app gets a score, blocker count, and required-open count so the checklist drives launch decisions instead of becoming busywork.</p>
-              <Link href="/admin/testpage" className="mt-5 inline-flex rounded-xl border border-black/10 bg-white px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-black/[0.03]">
+              <Link href="/admin/testpage" className="rounded-xl border border-black/10 bg-white px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-black/[0.03]">
                 Back to admin test page
               </Link>
+            </div>
+
+            <div className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+              {apps.map((app) => {
+                const categories = buildAppChecklist(app.slug);
+                const summary = summarize(categories);
+                const active = selectedApp?.slug === app.slug;
+                return (
+                  <Link
+                    key={app.slug}
+                    href={`/admin/testpage/current-apps?app=${app.slug}`}
+                    className={cn(
+                      "rounded-2xl border p-4 transition hover:-translate-y-0.5 hover:shadow-sm",
+                      active ? "border-orange-300 bg-orange-50" : "border-black/5 bg-[#fcfaf7] hover:border-black/10 hover:bg-white"
+                    )}
+                  >
+                    <p className="text-xs font-semibold uppercase tracking-[0.12em] text-orange-500">{app.type}</p>
+                    <h3 className="mt-2 text-lg font-semibold text-neutral-950">{app.name}</h3>
+                    <div className="mt-4 flex items-end justify-between gap-3">
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">Ready</p>
+                        <p className="text-2xl font-semibold text-neutral-950">{summary.score}%</p>
+                      </div>
+                      <div className="text-right text-xs text-neutral-500">
+                        <p>{summary.blocked} blocked</p>
+                        <p>{summary.requiredOpen} required open</p>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
             </div>
           </div>
         </section>
 
-        <div className="mt-8 space-y-8">
-          {apps.map((app) => {
-            const categories = buildAppChecklist(app.slug);
-            const summary = summarize(categories);
-            return (
-              <section key={app.slug} className="overflow-hidden rounded-[32px] border border-black/5 bg-white shadow-sm">
-                <div className="grid gap-6 border-b border-black/5 p-6 lg:grid-cols-[minmax(0,1fr)_420px]">
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-orange-500">{app.type}</p>
-                    <h2 className="mt-2 text-2xl font-semibold text-neutral-950">{app.name}</h2>
-                    <p className="mt-2 text-sm text-neutral-600">{app.summary}</p>
-                  </div>
-                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-5 lg:grid-cols-5">
-                    <div className="rounded-2xl bg-[#fcfaf7] p-4"><p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">Score</p><p className="mt-2 text-2xl font-semibold text-neutral-950">{summary.score}%</p></div>
-                    <div className="rounded-2xl bg-[#fcfaf7] p-4"><p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">Done</p><p className="mt-2 text-2xl font-semibold text-emerald-700">{summary.done}</p></div>
-                    <div className="rounded-2xl bg-[#fcfaf7] p-4"><p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">Moving</p><p className="mt-2 text-2xl font-semibold text-sky-700">{summary.inProgress}</p></div>
-                    <div className="rounded-2xl bg-[#fcfaf7] p-4"><p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">Blocked</p><p className="mt-2 text-2xl font-semibold text-red-700">{summary.blocked}</p></div>
-                    <div className="rounded-2xl bg-[#fcfaf7] p-4"><p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">Req open</p><p className="mt-2 text-2xl font-semibold text-neutral-950">{summary.requiredOpen}</p></div>
-                  </div>
-                </div>
+        {selectedApp ? (
+          <section className="mt-8 overflow-hidden rounded-[32px] border border-black/5 bg-white shadow-sm">
+            <div className="grid gap-6 border-b border-black/5 p-6 lg:grid-cols-[minmax(0,1fr)_420px]">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-orange-500">{selectedApp.type}</p>
+                <h2 className="mt-2 text-2xl font-semibold text-neutral-950">{selectedApp.name}</h2>
+                <p className="mt-2 text-sm text-neutral-600">{selectedApp.summary}</p>
+              </div>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-5 lg:grid-cols-5">
+                <div className="rounded-2xl bg-[#fcfaf7] p-4"><p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">Score</p><p className="mt-2 text-2xl font-semibold text-neutral-950">{selectedSummary.score}%</p></div>
+                <div className="rounded-2xl bg-[#fcfaf7] p-4"><p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">Done</p><p className="mt-2 text-2xl font-semibold text-emerald-700">{selectedSummary.done}</p></div>
+                <div className="rounded-2xl bg-[#fcfaf7] p-4"><p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">Moving</p><p className="mt-2 text-2xl font-semibold text-sky-700">{selectedSummary.inProgress}</p></div>
+                <div className="rounded-2xl bg-[#fcfaf7] p-4"><p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">Blocked</p><p className="mt-2 text-2xl font-semibold text-red-700">{selectedSummary.blocked}</p></div>
+                <div className="rounded-2xl bg-[#fcfaf7] p-4"><p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">Req open</p><p className="mt-2 text-2xl font-semibold text-neutral-950">{selectedSummary.requiredOpen}</p></div>
+              </div>
+            </div>
 
-                <div className="grid gap-4 p-6 xl:grid-cols-2">
-                  {categories.map((category) => {
+            <div className="grid gap-4 p-6 xl:grid-cols-2">
+              {selectedCategories.map((category) => {
                     const categorySummary = summarize([category]);
                     return (
                       <div key={category.title} className="rounded-[28px] border border-black/5 bg-[#fcfaf7] p-5">
@@ -309,12 +337,10 @@ export default function CurrentAppsChecklistTestPage() {
                         </div>
                       </div>
                     );
-                  })}
-                </div>
-              </section>
-            );
-          })}
-        </div>
+              })}
+            </div>
+          </section>
+        ) : null}
       </div>
     </div>
   );
