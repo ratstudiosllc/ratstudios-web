@@ -201,14 +201,27 @@ export default async function AdminTestPage({ searchParams }: { searchParams: Se
       <div className="mx-auto max-w-[1500px] px-6 py-10">
         <AdminPageHeader title="Admin Test Page" active="dashboard" eyebrow="RaT Studios Admin Sandbox" />
 
-        <section className="mt-8 overflow-hidden rounded-[32px] border border-black/5 bg-white shadow-sm">
-          <div className="h-2 gradient-bg" />
-          <div className="p-8">
+        <section className="mt-8 grid gap-4 lg:grid-cols-[minmax(0,1fr)_360px]">
+          <div className="overflow-hidden rounded-[32px] border border-black/5 bg-white shadow-sm">
+            <div className="h-2 gradient-bg" />
+            <div className="p-8">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-orange-500">Launch readiness prototype</p>
+              <h2 className="mt-2 text-2xl font-semibold text-neutral-950">Current apps checklist system</h2>
+              <p className="mt-2 text-sm text-neutral-600">Preview a category-based launch checklist with owners, priorities, statuses, evidence slots, and readiness scoring for every current app.</p>
+              <Link href="/admin/testpage/current-apps" className="mt-6 inline-flex rounded-xl border border-black/10 bg-neutral-950 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800">
+                Open current apps test page
+              </Link>
+            </div>
+          </div>
+          <div className="overflow-hidden rounded-[32px] border border-black/5 bg-white shadow-sm">
+            <div className="h-2 gradient-bg" />
+            <div className="p-8">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-orange-500">Mode switch</p>
             <h2 className="mt-2 text-2xl font-semibold text-neutral-950">{modeCopy[selectedMode].label}</h2>
             <p className="mt-2 text-sm text-neutral-600">Switch the dashboard tiles below without changing the fixed internal admin navigation above.</p>
             <div className="mt-6">
               <ModeToggle currentMode={selectedMode} />
+            </div>
             </div>
           </div>
         </section>
