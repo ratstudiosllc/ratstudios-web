@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useMemo, useState } from "react";
 
 type CurrentApp = {
@@ -266,8 +265,6 @@ export function CurrentAppsChecklistClient({ apps }: { apps: CurrentApp[] }) {
 
   const selectedApp = apps.find((app) => app.slug === selectedSlug) ?? apps[0];
   const selectedCategories = selectedApp ? checklists[selectedApp.slug] ?? [] : [];
-  const selectedSummary = summarize(selectedCategories);
-
   const appSummaries = useMemo(
     () => Object.fromEntries(apps.map((app) => [app.slug, summarize(checklists[app.slug] ?? [])])),
     [apps, checklists]
@@ -289,73 +286,48 @@ export function CurrentAppsChecklistClient({ apps }: { apps: CurrentApp[] }) {
 
   return (
     <>
-      <section className="mt-8 overflow-hidden rounded-[32px] border border-black/5 bg-white shadow-sm">
-        <div className="h-2 gradient-bg" />
-        <div className="p-8">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-orange-500">Launch readiness system</p>
-              <h2 className="mt-2 text-3xl font-semibold text-neutral-950">One checklist model across every current app.</h2>
-              <p className="mt-3 max-w-3xl text-sm leading-6 text-neutral-600">
-                Select an app below to review its launch checklist without scrolling through the whole portfolio. The status, priority, and owner pills are editable in this prototype.
-              </p>
-            </div>
-            <Link href="/admin/testpage" className="rounded-xl border border-black/10 bg-white px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-black/[0.03]">
-              Back to admin test page
-            </Link>
-          </div>
-
-          <div className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-5">
-            {apps.map((app) => {
-              const summary = appSummaries[app.slug];
-              const active = selectedApp?.slug === app.slug;
-              return (
-                <button
-                  key={app.slug}
-                  type="button"
-                  onClick={() => setSelectedSlug(app.slug)}
-                  className={cn(
-                    "rounded-2xl border p-4 text-left transition hover:-translate-y-0.5 hover:shadow-sm",
-                    active ? "border-orange-300 bg-orange-50" : "border-black/5 bg-[#fcfaf7] hover:border-black/10 hover:bg-white"
-                  )}
-                >
-                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-orange-500">{app.type}</p>
-                  <h3 className="mt-2 text-lg font-semibold text-neutral-950">{app.name}</h3>
-                  <div className="mt-4 flex items-end justify-between gap-3">
-                    <div>
-                      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">Ready</p>
-                      <p className="text-2xl font-semibold text-neutral-950">{summary.score}%</p>
-                    </div>
-                    <div className="text-right text-xs text-neutral-500">
-                      <p>{summary.blocked} blocked</p>
-                      <p>{summary.requiredOpen} required open</p>
-                    </div>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      </section>
+      <div className="mt-8 grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+        {apps.map((app) => {
+          const summary = appSummaries[app.slug];
+          const active = selectedApp?.slug === app.slug;
+          return (
+            <button
+              key={app.slug}
+              type="button"
+              onClick={() => setSelectedSlug(app.slug)}
+              className={cn(
+                "rounded-2xl border p-4 text-left transition hover:-translate-y-0.5 hover:shadow-sm",
+                active ? "border-orange-300 bg-orange-50" : "border-black/5 bg-white hover:border-black/10 hover:bg-[#fcfaf7]"
+              )}
+            >
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-orange-500">{app.type}</p>
+              <h3 className="mt-2 text-lg font-semibold text-neutral-950">{app.name}</h3>
+              <div className="mt-4 flex items-end justify-between gap-3">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">Ready</p>
+                  <p className="text-2xl font-semibold text-neutral-950">{summary.score}%</p>
+                </div>
+                <div className="text-right text-xs text-neutral-500">
+                  <p>{summary.blocked} blocked</p>
+                  <p>{summary.requiredOpen} required open</p>
+                </div>
+              </div>
+            </button>
+          );
+        })}
+      </div>
 
       {selectedApp ? (
-        <section className="mt-8 overflow-hidden rounded-[32px] border border-black/5 bg-white shadow-sm">
-          <div className="grid gap-6 border-b border-black/5 p-6 lg:grid-cols-[minmax(0,1fr)_420px]">
+        <section className="mt-6">
+          <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-orange-500">{selectedApp.type}</p>
-              <h2 className="mt-2 text-2xl font-semibold text-neutral-950">{selectedApp.name}</h2>
-              <p className="mt-2 text-sm text-neutral-600">{selectedApp.summary}</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-orange-500">Selected app</p>
+              <h2 className="mt-1 text-2xl font-semibold text-neutral-950">{selectedApp.name} checklist</h2>
             </div>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-5 lg:grid-cols-5">
-              <div className="rounded-2xl bg-[#fcfaf7] p-4"><p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">Score</p><p className="mt-2 text-2xl font-semibold text-neutral-950">{selectedSummary.score}%</p></div>
-              <div className="rounded-2xl bg-[#fcfaf7] p-4"><p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">Done</p><p className="mt-2 text-2xl font-semibold text-emerald-700">{selectedSummary.done}</p></div>
-              <div className="rounded-2xl bg-[#fcfaf7] p-4"><p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">Moving</p><p className="mt-2 text-2xl font-semibold text-sky-700">{selectedSummary.inProgress}</p></div>
-              <div className="rounded-2xl bg-[#fcfaf7] p-4"><p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">Blocked</p><p className="mt-2 text-2xl font-semibold text-red-700">{selectedSummary.blocked}</p></div>
-              <div className="rounded-2xl bg-[#fcfaf7] p-4"><p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">Req open</p><p className="mt-2 text-2xl font-semibold text-neutral-950">{selectedSummary.requiredOpen}</p></div>
-            </div>
+            <p className="text-sm text-neutral-500">Edit status, priority, and owner directly on each item.</p>
           </div>
 
-          <div className="grid gap-4 p-6 xl:grid-cols-2">
+          <div className="grid gap-4 xl:grid-cols-2">
             {selectedCategories.map((category, categoryIndex) => {
               const categorySummary = summarize([category]);
               return (
