@@ -214,6 +214,171 @@ export const studioApps: StudioApp[] = [
     ],
   },
   {
+    slug: "storagehq",
+    name: "StorageHQ",
+    type: "Web app",
+    lifecycle: "current",
+    stage: "Active development",
+    status: "Production deployed",
+    owner: "Topher",
+    href: "/admin/apps/storagehq",
+    summary: "Storage facility management SaaS for units, customers, leases, payments, maintenance records, and tenant portal workflows.",
+    currentFocus: "Stabilize production on the renamed StorageHQ stack and finish Supabase schema reconciliation once Docker is available.",
+    nextMilestone: "Complete Docker-backed Supabase db pull and verify the repo schema matches production.",
+    users: {
+      summary: "Early product users are storage operators and tenants moving through the admin and tenant portal flows.",
+      highlights: [
+        "Track operator flow through dashboard, units, customers, leases, and payments",
+        "Keep tenant portal login and account access visible",
+        "Watch for setup friction around Supabase auth and production env vars",
+      ],
+    },
+    marketing: {
+      summary: "Positioning should stay practical: storage operators need cleaner operations, fewer spreadsheet gaps, and a simple tenant portal.",
+      highlights: [
+        "Public URL: https://storagehq.vercel.app",
+        "Lead with unit availability, leases, payments, and maintenance tracking",
+        "Rename cleanup should keep old StorageSheds links from breaking while StorageHQ becomes the brand",
+      ],
+    },
+    revenue: {
+      summary: "Revenue model is likely SaaS subscription by facility or operator, with billing not yet fully instrumented.",
+      highlights: [
+        "Track future Stripe setup separately from core app readiness",
+        "Clarify plan tiers around facility size and tenant portal usage",
+        "Do not treat seeded/demo data as revenue signal",
+      ],
+    },
+    roadmap: {
+      summary: "Near-term roadmap is production hardening, schema hygiene, and then operator-facing workflow depth.",
+      highlights: [
+        "Finish Supabase db pull after Docker is installed",
+        "Keep Vercel production on main",
+        "Validate dashboard, unit, customer, lease, payment, and tenant portal paths after each deploy",
+      ],
+    },
+    issues: {
+      summary: "Track StorageHQ production deploy, Supabase schema reconciliation, route behavior, auth, and tenant portal issues here.",
+      ctaHref: "/admin/issues",
+      ctaLabel: "Open issues",
+    },
+    healthNotes: [
+      "Production is deployed from main",
+      "GitHub/Vercel renamed from StorageSheds to StorageHQ",
+      "Supabase db pull is still Docker-blocked",
+    ],
+  },
+  {
+    slug: "mowpro",
+    name: "MowPro",
+    type: "Web app",
+    lifecycle: "current",
+    stage: "Active development",
+    status: "Production deployed",
+    owner: "Topher",
+    href: "/admin/apps/mowpro",
+    summary: "Lawn care operations SaaS for customers, jobs, invoices, service requests, expenses, settings, and customer portal workflows.",
+    currentFocus: "Keep the production app stable and finish Supabase schema reconciliation once Docker is available.",
+    nextMilestone: "Complete Docker-backed Supabase db pull for the linked MowPro project.",
+    users: {
+      summary: "Primary users are lawn care providers managing jobs and customers, plus customers using the portal.",
+      highlights: [
+        "Track provider flow through customers, jobs, invoices, requests, and settings",
+        "Watch customer portal request submission and invoice viewing",
+        "Validate Supabase auth role routing between provider and customer experiences",
+      ],
+    },
+    marketing: {
+      summary: "Marketing should emphasize a lightweight operating system for solo and small lawn care providers.",
+      highlights: [
+        "Public URL: https://mowpro.vercel.app",
+        "Lead with jobs, invoices, recurring customer service, and request intake",
+        "Differentiate from generic invoicing tools by owning the lawn-care workflow",
+      ],
+    },
+    revenue: {
+      summary: "Likely subscription SaaS for providers, with pricing still needing packaging around customer/job volume.",
+      highlights: [
+        "Model simple monthly pricing for solo operators first",
+        "Track invoice volume and recurring-job usage as future value signals",
+        "Keep billing setup separate from current production hygiene work",
+      ],
+    },
+    roadmap: {
+      summary: "Near-term roadmap is schema hygiene, route verification, and deeper lawn care workflow polish.",
+      highlights: [
+        "Finish Supabase db pull after Docker is installed",
+        "Keep production deploying from main",
+        "Verify login, dashboard, customers, jobs, invoices, requests, and portal flows after changes",
+      ],
+    },
+    issues: {
+      summary: "Track MowPro Supabase reconciliation, provider dashboard behavior, customer portal issues, and billing workflow gaps here.",
+      ctaHref: "/admin/issues",
+      ctaLabel: "Open issues",
+    },
+    healthNotes: [
+      "Production is deployed from main",
+      "Supabase project is linked and migration history repaired",
+      "Final db pull is still Docker-blocked",
+    ],
+  },
+  {
+    slug: "expired-fda",
+    name: "Expired FDA",
+    type: "Web app",
+    lifecycle: "current",
+    stage: "Active development",
+    status: "Production deployed",
+    owner: "Topher",
+    href: "/admin/apps/expired-fda",
+    summary: "Hospital inventory management app for expiration monitoring, FDA recall matching, receiving workflows, reports, and RFID inventory operations.",
+    currentFocus: "Keep the production app stable while turning the fetched Supabase migration history into the source of truth.",
+    nextMilestone: "Use the fetched migration history as the baseline and continue hardening inventory, recalls, reports, and RFID flows.",
+    users: {
+      summary: "Primary users are hospital inventory and materials teams responsible for expiring items, recalls, and location visibility.",
+      highlights: [
+        "Track inventory, expiring items, recall matches, receiving, reports, and RFID usage",
+        "Keep login and protected-route behavior visible",
+        "Use item master and recall matching as core workflow proof points",
+      ],
+    },
+    marketing: {
+      summary: "Positioning should focus on reducing expired inventory risk and speeding recall response for healthcare teams.",
+      highlights: [
+        "Public URL: https://expired-fda-cyan.vercel.app",
+        "Lead with expiration visibility, FDA recall matching, and operational reporting",
+        "RFID workflows can become a stronger enterprise differentiator once validated",
+      ],
+    },
+    revenue: {
+      summary: "Potential B2B healthcare SaaS with value tied to waste reduction, recall response speed, and compliance visibility.",
+      highlights: [
+        "Package around facilities, departments, inventory volume, or recall monitoring",
+        "Quantify avoided expired inventory and recall labor savings",
+        "Keep production/data readiness separate from sales claims until validated",
+      ],
+    },
+    roadmap: {
+      summary: "Near-term roadmap is production hardening, migration-source cleanup, and proving healthcare inventory workflows end to end.",
+      highlights: [
+        "Maintain fetched Supabase migrations in repo",
+        "Verify inventory, expiring, recalls, reports, receiving, and RFID routes after deploys",
+        "Clean up audit/lint warnings deliberately instead of broad forced dependency fixes",
+      ],
+    },
+    issues: {
+      summary: "Track Expired FDA production deploys, Supabase migration history, protected routes, inventory workflows, recalls, reports, and RFID issues here.",
+      ctaHref: "/admin/issues",
+      ctaLabel: "Open issues",
+    },
+    healthNotes: [
+      "Production is deployed from main",
+      "Supabase migration history was fetched into the repo",
+      "Protected routes and login have been smoke-tested",
+    ],
+  },
+  {
     slug: "internal-studio-ops-layer",
     name: "Internal studio ops layer",
     type: "Operations",
@@ -308,6 +473,9 @@ export function groupIssuesByProject(issues: TrackedIssue[]) {
 export function getAppIssueProjectNames(app: StudioApp) {
   if (app.slug === "stitchlogic") return ["StitchLogic"];
   if (app.slug === "agalmanac") return ["AgAlmanac"];
+  if (app.slug === "storagehq") return ["StorageHQ", "StorageSheds"];
+  if (app.slug === "mowpro") return ["MowPro"];
+  if (app.slug === "expired-fda") return ["Expired FDA", "RaT Health"];
   if (app.slug === "internal-studio-ops-layer") return ["RaT Studios"];
   return [];
 }
