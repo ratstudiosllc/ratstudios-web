@@ -1,6 +1,146 @@
 {
   "recommendations": [
     {
+      "id": "rec-2026-05-11-briefs-not-endless-scroll",
+      "slug": "briefs-not-endless-scroll",
+      "title": "Organize RaT Improvement Briefs as dated digests with linked action items, not one endless page",
+      "appProduct": "RaT Ops Admin",
+      "category": "ops",
+      "severity": "medium",
+      "priority": "P1",
+      "effort": "medium",
+      "impact": "high",
+      "rationale": "Daily briefs should be easy to scan today, review by date later, and convert into trackable work without burying decisions in a long scrolling feed.",
+      "riskIfIgnored": "Recommendations will pile up, operators will miss approved work, and the queue will become another graveyard instead of an operating system.",
+      "evidenceLinks": [
+        {
+          "label": "Recommendations queue",
+          "href": "/admin/recommendations"
+        },
+        {
+          "label": "Issues queue",
+          "href": "/admin/issues"
+        }
+      ],
+      "status": "recommended",
+      "approvalNotes": "Recommended by the first RaT Improvement Brief. Proposed structure: /admin/recommendations for atomic recommendation cards, future /admin/improvement-briefs for dated digests, and approved recommendations linked to /admin/issues action items.",
+      "implementationNotes": "Do not implement until approved. Keep brief summaries separate from recommendation records; avoid infinite-scroll daily logs.",
+      "createdAt": "2026-05-11T16:33:00.000Z",
+      "updatedAt": "2026-05-11T16:33:00.000Z"
+    },
+    {
+      "id": "rec-2026-05-11-bub-context-command-guardrail",
+      "slug": "bub-context-command-guardrail",
+      "title": "Add a Bub command-context guardrail for short approvals like \u2018post it\u2019, \u2018fix it\u2019, and \u2018ship it\u2019",
+      "appProduct": "Bub / OpenClaw Ops",
+      "category": "self-improvement",
+      "severity": "high",
+      "priority": "P1",
+      "effort": "small",
+      "impact": "high",
+      "rationale": "Short approval phrases depend on recent context. Bub recently lost the AgAlmanac \u2018post it\u2019 context, which proves approval commands need a mandatory recall/history check before asking a dumb follow-up.",
+      "riskIfIgnored": "Approved work can stall, user trust drops, and the assistant wastes operator attention by forgetting the immediate thread.",
+      "evidenceLinks": [
+        {
+          "label": "AgAlmanac live post example",
+          "href": "https://agalmanac.app/almanac/agalmanac-weekly-market-outlook-may-11-2026"
+        },
+        {
+          "label": "Recommendations queue",
+          "href": "/admin/recommendations"
+        }
+      ],
+      "status": "recommended",
+      "approvalNotes": "Recommended as the required Bub/self-improvement item for the first daily brief.",
+      "implementationNotes": "Do not implement until approved. Proposed behavior: before responding to approval verbs, inspect recent session history and active child/queued work; if one matching pending item exists, act on it instead of asking what to post/fix/ship.",
+      "createdAt": "2026-05-11T16:33:00.000Z",
+      "updatedAt": "2026-05-11T16:33:00.000Z"
+    },
+    {
+      "id": "rec-2026-05-11-agalmanac-metadatabase",
+      "slug": "agalmanac-metadatabase",
+      "title": "Set AgAlmanac metadataBase so social/open-graph URLs resolve to production instead of localhost",
+      "appProduct": "AgAlmanac",
+      "category": "architecture",
+      "severity": "medium",
+      "priority": "P2",
+      "effort": "small",
+      "impact": "medium",
+      "rationale": "The AgAlmanac production build warns that metadataBase is missing, causing social Open Graph and Twitter image URLs to fall back to http://localhost:3000 during metadata resolution.",
+      "riskIfIgnored": "Shared links may have broken or inconsistent preview images, weakening blog/article distribution and making the product look less polished.",
+      "evidenceLinks": [
+        {
+          "label": "AgAlmanac",
+          "href": "https://agalmanac.app"
+        },
+        {
+          "label": "Next.js metadataBase docs",
+          "href": "https://nextjs.org/docs/app/api-reference/functions/generate-metadata#metadatabase"
+        }
+      ],
+      "status": "recommended",
+      "approvalNotes": "Recommended from May 11 build verification output after publishing the AgAlmanac article.",
+      "implementationNotes": "Do not implement until approved. Likely small change in AgAlmanac app/layout.tsx: metadataBase: new URL('https://agalmanac.app').",
+      "createdAt": "2026-05-11T16:33:00.000Z",
+      "updatedAt": "2026-05-11T16:33:00.000Z"
+    },
+    {
+      "id": "rec-2026-05-11-ratops-turbopack-root",
+      "slug": "ratops-turbopack-root",
+      "title": "Set an explicit Turbopack root for ratstudios-web builds",
+      "appProduct": "RaT Ops Admin",
+      "category": "reliability",
+      "severity": "low",
+      "priority": "P3",
+      "effort": "small",
+      "impact": "medium",
+      "rationale": "The ratstudios-web build warns that Next.js is inferring the workspace root from multiple lockfiles and may pick the wrong directory.",
+      "riskIfIgnored": "Build behavior can become brittle as the monorepo/workspace grows, especially if tooling starts resolving files relative to the inferred root.",
+      "evidenceLinks": [
+        {
+          "label": "Next.js Turbopack root docs",
+          "href": "https://nextjs.org/docs/app/api-reference/next-config-js/turbopack#root-directory"
+        },
+        {
+          "label": "RaT Ops Admin",
+          "href": "/admin"
+        }
+      ],
+      "status": "recommended",
+      "approvalNotes": "Recommended from May 11 ratstudios-web build verification output.",
+      "implementationNotes": "Do not implement until approved. Likely small change in next.config.ts to set turbopack.root to the project directory.",
+      "createdAt": "2026-05-11T16:33:00.000Z",
+      "updatedAt": "2026-05-11T16:33:00.000Z"
+    },
+    {
+      "id": "rec-2026-05-11-portfolio-security-audit-cadence",
+      "slug": "portfolio-security-audit-cadence",
+      "title": "Add a weekly portfolio security/dependency audit item to the improvement rhythm",
+      "appProduct": "All Apps",
+      "category": "security",
+      "severity": "medium",
+      "priority": "P2",
+      "effort": "small",
+      "impact": "high",
+      "rationale": "RaT Studios now has multiple active products and admin surfaces. A lightweight weekly audit keeps dependency, auth, secret, and permission drift visible before it becomes an incident.",
+      "riskIfIgnored": "Old packages, permissive policies, stale env vars, and auth/RLS mistakes can accumulate across apps without a clear owner noticing.",
+      "evidenceLinks": [
+        {
+          "label": "GitHub Dependabot docs",
+          "href": "https://docs.github.com/en/code-security/dependabot"
+        },
+        {
+          "label": "OWASP ASVS",
+          "href": "https://owasp.org/www-project-application-security-verification-standard/"
+        }
+      ],
+      "status": "recommended",
+      "approvalNotes": "Recommended as the first portfolio-level security item in the RaT Improvement Brief rhythm.",
+      "implementationNotes": "Do not implement until approved. Proposed output: Friday security section with npm audit/dependency review, auth/RLS review notes, and top risks by app.",
+      "createdAt": "2026-05-11T16:33:00.000Z",
+      "updatedAt": "2026-05-11T16:33:00.000Z"
+    },
+    {
       "id": "rec-2026-05-11-central-recommendations-queue",
       "slug": "central-recommendations-queue",
       "title": "Create a central Recommendations / Approval Queue in RaT Ops Admin",
