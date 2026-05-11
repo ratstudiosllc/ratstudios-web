@@ -6,6 +6,7 @@ export const revalidate = 120;
 import { getIssueTracker } from "@/lib/issues-tracker";
 import { IssueActionButtons } from "@/components/admin/IssueActionButtons";
 import { IssuePrioritySelect } from "@/components/admin/IssuePrioritySelect";
+import { IssueOperatorNoteForm } from "@/components/admin/IssueOperatorNoteForm";
 
 function priorityClasses(priority: string) {
   if (priority === "P1") return "bg-red-100 text-red-800 border-red-200";
@@ -148,7 +149,8 @@ export default async function AdminIssuesPage({
               <h2 className="mt-3 text-xl font-semibold text-neutral-950">#{issue.number} {issue.title}</h2>
               {issue.summary ? <p className="mt-2 text-sm text-neutral-600">{issue.summary}</p> : null}
               {issue.currentState ? <p className="mt-2 text-sm text-neutral-500">State: {issue.currentState}</p> : null}
-              {issue.nextStep ? <p className="mt-2 text-sm text-neutral-500">Next: {issue.nextStep}</p> : null}
+              {issue.nextStep ? <p className="mt-2 whitespace-pre-line text-sm text-neutral-500">Next: {issue.nextStep}</p> : null}
+              <IssueOperatorNoteForm issueId={issue.id} />
               <p className="mt-2 text-xs text-neutral-400">Committed {issue.committed} • Pushed {issue.pushed} • Deployed {issue.deployed}</p>
             </div>
           ))}

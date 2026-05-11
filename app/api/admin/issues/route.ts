@@ -103,6 +103,18 @@ export async function POST(request: Request) {
   const nextStep = normalizeString(body.nextStep);
   if (body.nextStep !== undefined) patch.next_step = nextStep ?? null;
 
+  const operatorNote = normalizeString(body.operatorNote);
+  if (body.operatorNote !== undefined) {
+    if (!operatorNote) {
+      return NextResponse.json({ error: "operatorNote cannot be empty" }, { status: 400 });
+    }
+    const existing = await getTrackedIssueById(issueId);
+    const stamp = new Date().toISOString();
+    const appendedNote = `[${stamp}] Operator note: ${operatorNote}`;
+    patch.next_step = [existing.nextStep, appendedNote].filter(Boolean).join("\n\n");
+    if (!patch.current_state && existing.currentState) patch.current_state = existing.currentState;
+  }
+
   const commits = normalizeString(body.commits);
   if (body.commits !== undefined) patch.commits = commits ?? "";
 

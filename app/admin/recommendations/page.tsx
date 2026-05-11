@@ -86,7 +86,7 @@ export default async function RecommendationsPage({
   const priorityValue = firstParam(resolvedSearchParams.priority);
   const statusValue = firstParam(resolvedSearchParams.status);
 
-  const allRecommendations = listRecommendations();
+  const allRecommendations = await listRecommendations();
   const summary = getRecommendationsSummary(allRecommendations);
   const options = getRecommendationFilterOptions(allRecommendations);
   const recommendations = allRecommendations
@@ -108,13 +108,13 @@ export default async function RecommendationsPage({
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-orange-500">Approval queue</p>
               <h1 className="mt-2 text-3xl font-semibold text-neutral-950">Recommendations / Approval Queue</h1>
               <p className="mt-3 max-w-3xl text-sm text-neutral-600">
-                Durable queue for agent and app improvement recommendations. Operators can record approval decisions and convert approved work into tracked action items without auto-implementing anything.
+                Durable queue for agent and app improvement recommendations. Approve queues implementation by creating a tracked issue for Bub/agents; reject and defer only record the decision.
               </p>
             </div>
             <div className="rounded-2xl bg-[#fcfaf7] p-4 text-sm text-neutral-600">
               <p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">Source</p>
-              <p className="mt-2 font-medium text-neutral-900">File-backed JSON</p>
-              <p className="mt-1">data/recommendations-store.json</p>
+              <p className="mt-2 font-medium text-neutral-900">Supabase-backed</p>
+              <p className="mt-1">Falls back to local JSON display when the table is unavailable.</p>
             </div>
           </div>
         </section>
@@ -122,7 +122,7 @@ export default async function RecommendationsPage({
         <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
           <SummaryCard label="Total" value={summary.total} helper="All captured recommendations" />
           <SummaryCard label="Recommended" value={summary.recommended} helper="Awaiting operator decision" />
-          <SummaryCard label="Approved" value={summary.approved} helper="Cleared but not yet implemented" />
+          <SummaryCard label="Approved" value={summary.approved} helper="Queued as tracked issues" />
           <SummaryCard label="Implemented" value={summary.implemented} helper="Done and retained for audit" />
           <SummaryCard label="High impact" value={summary.highImpact} helper="High expected business or ops value" />
         </div>

@@ -38,7 +38,7 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json({
-      recommendations: listRecommendations(),
+      recommendations: await listRecommendations(),
       updatedRecommendation,
     });
   } catch (error) {

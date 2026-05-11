@@ -5,11 +5,11 @@ import { useRouter } from "next/navigation";
 import type { AdminRecommendation, RecommendationAction } from "@/lib/recommendations";
 
 const actions: Array<{ action: RecommendationAction; label: string; tone: string; help: string }> = [
-  { action: "approve", label: "Approve", tone: "bg-sky-600 text-white hover:bg-sky-700", help: "Approve for future implementation." },
+  { action: "approve", label: "Approve + queue", tone: "bg-sky-600 text-white hover:bg-sky-700", help: "Approve and immediately create a tracked implementation issue." },
   { action: "reject", label: "Reject", tone: "bg-red-600 text-white hover:bg-red-700", help: "Deny and keep the decision audit." },
   { action: "defer", label: "Defer", tone: "bg-neutral-200 text-neutral-800 hover:bg-neutral-300", help: "Keep it visible, but not active." },
   { action: "mark_implemented", label: "Mark implemented", tone: "bg-emerald-600 text-white hover:bg-emerald-700", help: "Record that work is already done." },
-  { action: "convert_to_issue", label: "Convert to issue", tone: "bg-neutral-950 text-white hover:bg-neutral-800", help: "Create or record a tracked action item. Does not auto-implement." },
+  { action: "convert_to_issue", label: "Convert to issue", tone: "bg-neutral-950 text-white hover:bg-neutral-800", help: "Create or record a tracked action item." },
 ];
 
 export function RecommendationActionPanel({ recommendation }: { recommendation: AdminRecommendation }) {
@@ -48,7 +48,7 @@ export function RecommendationActionPanel({ recommendation }: { recommendation: 
           throw new Error(typeof payload.error === "string" ? payload.error : "Recommendation action failed");
         }
         setNotes("");
-        setMessage("Decision saved.");
+        setMessage(action === "approve" ? "Approved and queued for implementation." : "Decision saved.");
         router.refresh();
       } catch (err) {
         setError(err instanceof Error ? err.message : "Recommendation action failed");
@@ -63,7 +63,7 @@ export function RecommendationActionPanel({ recommendation }: { recommendation: 
       <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">Operator decision</p>
-          <p className="mt-1 text-sm text-neutral-600">Approve, reject, defer, mark implemented, or convert this recommendation into an action item.</p>
+          <p className="mt-1 text-sm text-neutral-600">Approve creates a tracked implementation issue for Bub/agents right away. Reject and defer only save the decision audit.</p>
           {lastDecision ? <p className="mt-2 text-xs text-neutral-500">Last decision: {lastDecision}</p> : null}
           {recommendation.convertedIssueId ? <p className="mt-1 text-xs font-medium text-neutral-700">Action item: {recommendation.convertedIssueId}</p> : null}
         </div>
