@@ -1,0 +1,32 @@
+{
+  "recommendations": [
+    {
+      "id": "rec-2026-05-11-central-recommendations-queue",
+      "slug": "central-recommendations-queue",
+      "title": "Create a central Recommendations / Approval Queue in RaT Ops Admin",
+      "appProduct": "RaT Ops Admin",
+      "category": "ops",
+      "severity": "medium",
+      "priority": "P2",
+      "effort": "small",
+      "impact": "high",
+      "rationale": "Agent and app improvement recommendations need a durable place to be reviewed, approved, rejected, deferred, and later audited instead of disappearing in chat threads.",
+      "riskIfIgnored": "Good recommendations get lost, duplicated, or implemented without explicit operator approval, which weakens prioritization and accountability.",
+      "evidenceLinks": [
+        {
+          "label": "Admin dashboard",
+          "href": "/admin"
+        },
+        {
+          "label": "Recommendations queue route",
+          "href": "/admin/recommendations"
+        }
+      ],
+      "status": "implemented",
+      "approvalNotes": "Approved for implementation as the first durable queue item.",
+      "implementationNotes": "Implemented as a file-backed JSON recommendations source with a read-only admin queue. No automation is attached to approvals.",
+      "createdAt": "2026-05-11T15:22:00.000Z",
+      "updatedAt": "2026-05-11T15:22:00.000Z"
+    }
+  ]
+}
