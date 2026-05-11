@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { RecommendationActionPanel } from "@/components/admin/RecommendationActionPanel";
 import {
   getRecommendationFilterOptions,
   getRecommendationsSummary,
@@ -107,7 +108,7 @@ export default async function RecommendationsPage({
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-orange-500">Approval queue</p>
               <h1 className="mt-2 text-3xl font-semibold text-neutral-950">Recommendations / Approval Queue</h1>
               <p className="mt-3 max-w-3xl text-sm text-neutral-600">
-                Durable, read-only queue for agent and app improvement recommendations. This page records recommendations and approval decisions only; it does not automate implementation.
+                Durable queue for agent and app improvement recommendations. Operators can record approval decisions and convert approved work into tracked action items without auto-implementing anything.
               </p>
             </div>
             <div className="rounded-2xl bg-[#fcfaf7] p-4 text-sm text-neutral-600">
@@ -189,9 +190,17 @@ export default async function RecommendationsPage({
                 </div>
                 <div className="rounded-2xl bg-[#fcfaf7] p-4">
                   <p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">Implementation notes</p>
-                  <p className="mt-2 text-sm text-neutral-800">{item.implementationNotes || "No implementation notes recorded yet."}</p>
+                  <p className="mt-2 whitespace-pre-line text-sm text-neutral-800">{item.implementationNotes || "No implementation notes recorded yet."}</p>
+                </div>
+                <div className="rounded-2xl bg-[#fcfaf7] p-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">Decision audit</p>
+                  <p className="mt-2 whitespace-pre-line text-sm text-neutral-800">{item.decisionNotes || "No decision notes recorded yet."}</p>
+                  {item.decisionAt ? <p className="mt-2 text-xs text-neutral-500">Decision at {formatDate(item.decisionAt)}{item.decisionBy ? ` by ${item.decisionBy}` : ""}</p> : null}
+                  {item.convertedIssueId ? <p className="mt-1 text-xs font-medium text-neutral-700">Converted action item: {item.convertedIssueId}</p> : null}
                 </div>
               </div>
+
+              <RecommendationActionPanel recommendation={item} />
 
               {item.evidenceLinks.length ? (
                 <div className="mt-5 flex flex-wrap gap-2">
