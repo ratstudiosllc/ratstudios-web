@@ -352,7 +352,7 @@ async function createIssueFromRecommendation(recommendation: AdminRecommendation
       project: recommendation.appProduct,
       priority: issuePriorityForRecommendation(recommendation.priority),
       title: recommendation.title,
-      status: "New",
+      status: "In Progress",
       identified: now.slice(0, 10),
       committed: "No",
       pushed: "No",
@@ -360,8 +360,8 @@ async function createIssueFromRecommendation(recommendation: AdminRecommendation
       owner_agent: "execution",
       commits: "",
       summary: recommendation.rationale,
-      current_state: `Approved recommendation ${recommendation.id}; agent implementation requested by operator.`,
-      next_step: notes || recommendation.implementationNotes || "Agent execution requested. Implement the smallest safe change, then commit/push and mark Needs Verification.",
+      current_state: `Approved recommendation ${recommendation.id}; execution started immediately by approval workflow.`,
+      next_step: notes || recommendation.implementationNotes || "Implement the smallest safe change, then commit/push and move to Needs Verification.",
       updated_at: now,
     };
 
@@ -376,7 +376,7 @@ async function createIssueFromRecommendation(recommendation: AdminRecommendation
     const createdId = insertedIssue?.id ? String(insertedIssue.id) : `admin-issues-${createdNumber}`;
     return {
       issueId: createdId,
-      note: `Queued implementation as Supabase admin issue #${createdNumber}.`,
+      note: `Started implementation as Supabase admin issue #${createdNumber}.`,
     };
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown issue creation error";
