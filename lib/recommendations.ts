@@ -283,6 +283,7 @@ async function createIssueFromRecommendation(recommendation: AdminRecommendation
     const nextNumber = Number(maxRow?.number ?? 0) + 1;
     const now = new Date().toISOString();
     const row = {
+      id: `issue-${nextNumber}`,
       number: nextNumber,
       project: recommendation.appProduct,
       priority: issuePriorityForRecommendation(recommendation.priority),
