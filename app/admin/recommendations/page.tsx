@@ -61,21 +61,6 @@ async function getScheduleStatus() {
   }
 }
 
-function optionalDate(value: unknown) {
-  return typeof value === "string" && value.length ? formatDate(value) : "Not recorded yet";
-}
-
-async function getScheduleStatus() {
-  try {
-    return { schedule: await getDailyRecommendationsSchedule(), error: null as string | null };
-  } catch (error) {
-    return {
-      schedule: null,
-      error: error instanceof Error ? error.message : "Schedule status is unavailable",
-    };
-  }
-}
-
 function statusClasses(status: AdminRecommendation["status"]) {
   const styles: Record<AdminRecommendation["status"], string> = {
     recommended: "bg-amber-100 text-amber-800",
