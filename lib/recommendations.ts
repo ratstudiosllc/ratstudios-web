@@ -49,6 +49,8 @@ export interface AdminRecommendation {
   updatedAt: string;
 }
 
+const unresolvedRecommendationStatuses = new Set<RecommendationStatus>(["recommended", "approved", "deferred"]);
+
 interface RecommendationsStoreData {
   recommendations: AdminRecommendation[];
 }
@@ -194,6 +196,56 @@ function rowFromRecommendation(recommendation: AdminRecommendation) {
   };
 }
 
+function normalizeFingerprintPart(value: string) {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+export function getRecommendationFingerprint(recommendation: Pick<AdminRecommendation, "appProduct" | "category" | "title">) {
+  return [recommendation.appProduct, recommendation.category, recommendation.title]
+    .map((part) => normalizeFingerprintPart(part))
+    .join(":");
+}
+
+function mergeDuplicateRecommendation(existing: AdminRecommendation, incoming: AdminRecommendation): AdminRecommendation {
+  return {
+    ...incoming,
+    id: existing.id,
+    slug: existing.slug,
+    status: existing.status,
+    decisionBy: existing.decisionBy,
+    decisionAt: existing.decisionAt,
+    decisionNotes: existing.decisionNotes,
+    convertedIssueId: existing.convertedIssueId,
+    actionHistory: existing.actionHistory,
+    createdAt: existing.createdAt,
+    updatedAt: incoming.updatedAt,
+  };
+}
+
+function suppressDuplicateRecommendations(existingRecommendations: AdminRecommendation[], incomingRecommendations: AdminRecommendation[]) {
+  const unresolvedByFingerprint = new Map<string, AdminRecommendation>();
+  for (const recommendation of existingRecommendations) {
+    if (!unresolvedRecommendationStatuses.has(recommendation.status)) continue;
+    const fingerprint = getRecommendationFingerprint(recommendation);
+    const current = unresolvedByFingerprint.get(fingerprint);
+    if (!current || Date.parse(recommendation.updatedAt) > Date.parse(current.updatedAt)) {
+      unresolvedByFingerprint.set(fingerprint, recommendation);
+    }
+  }
+
+  const pendingByFingerprint = new Map<string, AdminRecommendation>();
+  return incomingRecommendations.map((recommendation) => {
+    const fingerprint = getRecommendationFingerprint(recommendation);
+    const duplicate = pendingByFingerprint.get(fingerprint) ?? unresolvedByFingerprint.get(fingerprint);
+    const merged = duplicate ? mergeDuplicateRecommendation(duplicate, recommendation) : recommendation;
+    pendingByFingerprint.set(fingerprint, merged);
+    return merged;
+  });
+}
+
 function createRecommendationsSupabase() {
   try {
     return createSupabaseAdmin();
@@ -241,12 +293,24 @@ export async function persistSupabaseRecommendation(recommendation: AdminRecomme
 export async function upsertRecommendations(recommendations: AdminRecommendation[]) {
   if (recommendations.length === 0) return { count: 0 };
   const supabase = createSupabaseAdmin();
+  const { data: existingData, error: existingError } = await supabase
+    .from("admin_recommendations")
+    .select("*")
+    .in("status", Array.from(unresolvedRecommendationStatuses));
+
+  if (existingError) throw new Error(existingError.message);
+
+  const dedupedRecommendations = suppressDuplicateRecommendations(
+    (existingData ?? []).map((row) => recommendationFromRow(row as DbRecommendationRow)),
+    recommendations,
+  );
+
   const { error } = await supabase
     .from("admin_recommendations")
-    .upsert(recommendations.map(rowFromRecommendation), { onConflict: "id" });
+    .upsert(dedupedRecommendations.map(rowFromRecommendation), { onConflict: "id" });
 
   if (error) throw new Error(error.message);
-  return { count: recommendations.length };
+  return { count: dedupedRecommendations.length };
 }
 
 async function insertSupabaseDecision(recommendation: AdminRecommendation, entry: RecommendationActionHistoryEntry) {
