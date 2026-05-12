@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "qa:smoke": "node scripts/run-qa-smoke.mjs",
-    "recommendations:update": "node scripts/update-daily-recommendations.mjs"
+    "recommendations:update": "node scripts/update-daily-recommendations.mjs",
+    "issues:dispatch": "node scripts/run-issue-dispatcher.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.10.2",

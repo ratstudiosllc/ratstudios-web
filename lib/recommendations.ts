@@ -1,6 +1,8 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
+import { enqueueIssueRun as enqueueDispatcherIssueRun } from "@/lib/issue-runner";
 import { createSupabaseAdmin } from "@/lib/supabase-admin";
+import type { TrackedIssue } from "@/lib/issues-tracker";
 
 export type RecommendationCategory = "self-improvement" | "architecture" | "UI/UX" | "security" | "ops" | "growth" | "product" | "reliability" | "other";
 export type RecommendationSeverity = "low" | "medium" | "high" | "critical";
@@ -352,7 +354,7 @@ async function createIssueFromRecommendation(recommendation: AdminRecommendation
       project: recommendation.appProduct,
       priority: issuePriorityForRecommendation(recommendation.priority),
       title: recommendation.title,
-      status: "In Progress",
+      status: "Triaged",
       identified: now.slice(0, 10),
       committed: "No",
       pushed: "No",
@@ -360,7 +362,7 @@ async function createIssueFromRecommendation(recommendation: AdminRecommendation
       owner_agent: "execution",
       commits: "",
       summary: recommendation.rationale,
-      current_state: `Approved recommendation ${recommendation.id}; execution started immediately by approval workflow.`,
+      current_state: `Approved recommendation ${recommendation.id}; queued by approval workflow.`,
       next_step: notes || recommendation.implementationNotes || "Implement the smallest safe change, then commit/push and move to Needs Verification.",
       updated_at: now,
     };
@@ -374,9 +376,31 @@ async function createIssueFromRecommendation(recommendation: AdminRecommendation
 
     const createdNumber = Number(insertedIssue?.number ?? nextNumber);
     const createdId = insertedIssue?.id ? String(insertedIssue.id) : `admin-issues-${createdNumber}`;
+    const issue: TrackedIssue = {
+      id: createdId,
+      number: createdNumber,
+      project: row.project,
+      priority: row.priority,
+      title: row.title,
+      status: "Triaged",
+      identified: row.identified,
+      committed: row.committed,
+      pushed: row.pushed,
+      deployed: row.deployed,
+      ownerAgent: row.owner_agent,
+      commits: row.commits,
+      summary: row.summary,
+      currentState: row.current_state,
+      nextStep: row.next_step,
+      updatedAt: row.updated_at,
+    };
+    const queued = await enqueueDispatcherIssueRun(issue, "recommendation-approval");
+    const queueNote = queued.queued
+      ? `Queued dispatcher run ${queued.runId}.`
+      : `Dispatcher run not queued: ${queued.reason ?? "unknown reason"}`;
     return {
       issueId: createdId,
-      note: `Started implementation as Supabase admin issue #${createdNumber}.`,
+      note: `Created Supabase admin issue #${createdNumber}. ${queueNote}`,
     };
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown issue creation error";
