@@ -2,7 +2,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { createSupabaseAdmin } from "@/lib/supabase-admin";
 
-export type RecommendationCategory = "self-improvement" | "architecture" | "UI/UX" | "security" | "ops" | "growth" | "product" | "other";
+export type RecommendationCategory = "self-improvement" | "architecture" | "UI/UX" | "security" | "ops" | "growth" | "product" | "reliability" | "other";
 export type RecommendationSeverity = "low" | "medium" | "high" | "critical";
 export type RecommendationPriority = "P1" | "P2" | "P3" | "P4";
 export type RecommendationEffort = "small" | "medium" | "large";
@@ -229,13 +229,24 @@ async function tryGetSupabaseRecommendation(recommendationId: string) {
   return { supabase, recommendation: data ? recommendationFromRow(data as DbRecommendationRow) : null, available: true };
 }
 
-async function persistSupabaseRecommendation(recommendation: AdminRecommendation) {
+export async function persistSupabaseRecommendation(recommendation: AdminRecommendation) {
   const supabase = createSupabaseAdmin();
   const { error } = await supabase
     .from("admin_recommendations")
     .upsert(rowFromRecommendation(recommendation), { onConflict: "id" });
 
   if (error) throw new Error(error.message);
+}
+
+export async function upsertRecommendations(recommendations: AdminRecommendation[]) {
+  if (recommendations.length === 0) return { count: 0 };
+  const supabase = createSupabaseAdmin();
+  const { error } = await supabase
+    .from("admin_recommendations")
+    .upsert(recommendations.map(rowFromRecommendation), { onConflict: "id" });
+
+  if (error) throw new Error(error.message);
+  return { count: recommendations.length };
 }
 
 async function insertSupabaseDecision(recommendation: AdminRecommendation, entry: RecommendationActionHistoryEntry) {

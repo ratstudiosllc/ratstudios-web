@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "qa:smoke": "node scripts/run-qa-smoke.mjs"
+    "qa:smoke": "node scripts/run-qa-smoke.mjs",
+    "recommendations:update": "node scripts/update-daily-recommendations.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.10.2",
