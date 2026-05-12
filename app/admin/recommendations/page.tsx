@@ -45,6 +45,44 @@ function formatDate(dateString: string) {
   }).format(date);
 }
 
+function formatDigestDate(dateString: string) {
+  const date = new Date(dateString);
+  if (Number.isNaN(date.getTime())) return dateString;
+  return new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/Denver",
+    weekday: "short",
+    year: "numeric",
+    month: "short",
+    day: "2-digit",
+  }).format(date);
+}
+
+function digestKey(dateString: string) {
+  const date = new Date(dateString);
+  if (Number.isNaN(date.getTime())) return dateString;
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Denver",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(date);
+}
+
+function groupRecommendationsByDigest(recommendations: AdminRecommendation[]) {
+  const groups = new Map<string, AdminRecommendation[]>();
+  for (const item of recommendations) {
+    const key = digestKey(item.createdAt);
+    groups.set(key, [...(groups.get(key) ?? []), item]);
+  }
+  return Array.from(groups.entries()).map(([key, items]) => ({
+    key,
+    label: formatDigestDate(items[0]?.createdAt ?? key),
+    items,
+    linkedActionItems: items.filter((item) => Boolean(item.convertedIssueId)).length,
+    p1Recommended: items.filter((item) => item.priority === "P1" && item.status === "recommended").length,
+  }));
+}
+
 function statusClasses(status: AdminRecommendation["status"]) {
   const styles: Record<AdminRecommendation["status"], string> = {
     recommended: "bg-amber-100 text-amber-800",
@@ -100,6 +138,8 @@ export default async function RecommendationsPage({
     .filter((item) => (impactValue ? item.impact === impactValue : true));
 
   const hasFilters = Boolean(appValue || categoryValue || priorityValue || statusValue || impactValue);
+  const p1RecommendedCount = allRecommendations.filter((item) => item.priority === "P1" && item.status === "recommended").length;
+  const digestGroups = groupRecommendationsByDigest(recommendations);
 
   return (
     <div className="min-h-screen bg-[#faf7f2] text-neutral-900">
@@ -109,6 +149,13 @@ export default async function RecommendationsPage({
         <section className="mt-8 rounded-[32px] border border-black/5 bg-white p-6 shadow-sm">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-orange-500">Approval queue</p>
           <h1 className="mt-2 text-3xl font-semibold text-neutral-950">Recommendations / Approval Queue</h1>
+          <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+            <p className="font-semibold">Morning approval habit</p>
+            <p className="mt-1">After the 5:00am Mountain daily run, check P1 recommendations before the day’s agent work starts.</p>
+            <Link href="/admin/recommendations?priority=P1&status=recommended" className="mt-3 inline-flex rounded-xl bg-white px-3 py-2 text-xs font-semibold text-amber-900 shadow-sm hover:bg-amber-100">
+              Review {p1RecommendedCount} P1 recommended item{p1RecommendedCount === 1 ? "" : "s"} →
+            </Link>
+          </div>
         </section>
 
         <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
@@ -151,7 +198,20 @@ export default async function RecommendationsPage({
           {recommendations.length === 0 ? (
             <div className="rounded-[28px] border border-black/5 bg-white p-6 text-sm text-neutral-600 shadow-sm">No recommendations match these filters.</div>
           ) : null}
-          {recommendations.map((item) => (
+          {digestGroups.map((group) => (
+            <section key={group.key} className="grid gap-4 rounded-[32px] border border-black/5 bg-white/60 p-4 shadow-sm">
+              <div className="flex flex-wrap items-center justify-between gap-3 px-2">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-orange-500">RaT Improvement Brief</p>
+                  <h2 className="mt-1 text-xl font-semibold text-neutral-950">{group.label}</h2>
+                </div>
+                <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-neutral-700">
+                  <span className="rounded-full bg-white px-3 py-1 shadow-sm">{group.items.length} recommendation{group.items.length === 1 ? "" : "s"}</span>
+                  <Link href="/admin/issues" className="rounded-full bg-white px-3 py-1 shadow-sm hover:bg-[#fcfaf7]">{group.linkedActionItems} linked action item{group.linkedActionItems === 1 ? "" : "s"}</Link>
+                  {group.p1Recommended ? <Link href="/admin/recommendations?priority=P1&status=recommended" className="rounded-full bg-red-50 px-3 py-1 text-red-800 shadow-sm hover:bg-red-100">{group.p1Recommended} P1 needs approval</Link> : null}
+                </div>
+              </div>
+              {group.items.map((item) => (
             <article key={item.id} className="rounded-[28px] border border-black/5 bg-white p-6 shadow-sm">
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
@@ -192,7 +252,7 @@ export default async function RecommendationsPage({
                   <p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">Decision audit</p>
                   <p className="mt-2 whitespace-pre-line text-sm text-neutral-800">{item.decisionNotes || "No decision notes recorded yet."}</p>
                   {item.decisionAt ? <p className="mt-2 text-xs text-neutral-500">Decision at {formatDate(item.decisionAt)}{item.decisionBy ? ` by ${item.decisionBy}` : ""}</p> : null}
-                  {item.convertedIssueId ? <p className="mt-1 text-xs font-medium text-neutral-700">Converted action item: {item.convertedIssueId}</p> : null}
+                  {item.convertedIssueId ? <p className="mt-1 text-xs font-medium text-neutral-700">Converted action item: <Link href="/admin/issues" className="underline underline-offset-2 hover:text-neutral-950">{item.convertedIssueId}</Link></p> : null}
                 </div>
               </div>
 
@@ -208,6 +268,8 @@ export default async function RecommendationsPage({
                 </div>
               ) : null}
             </article>
+              ))}
+            </section>
           ))}
         </div>
       </div>
