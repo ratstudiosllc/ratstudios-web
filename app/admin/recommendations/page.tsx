@@ -15,6 +15,7 @@ type RecommendationSearchParams = {
   category?: string | string[];
   priority?: string | string[];
   status?: string | string[];
+  impact?: string | string[];
 };
 
 function firstParam(value: string | string[] | undefined) {
@@ -65,13 +66,14 @@ function priorityClasses(priority: AdminRecommendation["priority"]) {
   return styles[priority];
 }
 
-function SummaryCard({ label, value, helper }: { label: string; value: number; helper: string }) {
+function SummaryCard({ label, value, helper, href }: { label: string; value: number; helper: string; href: string }) {
   return (
-    <div className="rounded-[28px] border border-black/5 bg-white p-5 shadow-sm">
+    <Link href={href} className="group rounded-[28px] border border-black/5 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-orange-200 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-orange-300">
       <p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">{label}</p>
       <p className="mt-2 text-3xl font-semibold text-neutral-950">{value}</p>
       <p className="mt-1 text-sm text-neutral-500">{helper}</p>
-    </div>
+      <p className="mt-3 text-xs font-semibold text-orange-500 opacity-0 transition group-hover:opacity-100 group-focus:opacity-100">View list →</p>
+    </Link>
   );
 }
 
@@ -85,6 +87,7 @@ export default async function RecommendationsPage({
   const categoryValue = firstParam(resolvedSearchParams.category);
   const priorityValue = firstParam(resolvedSearchParams.priority);
   const statusValue = firstParam(resolvedSearchParams.status);
+  const impactValue = firstParam(resolvedSearchParams.impact);
 
   const allRecommendations = await listRecommendations();
   const summary = getRecommendationsSummary(allRecommendations);
@@ -93,9 +96,10 @@ export default async function RecommendationsPage({
     .filter((item) => (appValue ? item.appProduct === appValue : true))
     .filter((item) => (categoryValue ? item.category === categoryValue : true))
     .filter((item) => (priorityValue ? item.priority === priorityValue : true))
-    .filter((item) => (statusValue ? item.status === statusValue : true));
+    .filter((item) => (statusValue ? item.status === statusValue : true))
+    .filter((item) => (impactValue ? item.impact === impactValue : true));
 
-  const hasFilters = Boolean(appValue || categoryValue || priorityValue || statusValue);
+  const hasFilters = Boolean(appValue || categoryValue || priorityValue || statusValue || impactValue);
 
   return (
     <div className="min-h-screen bg-[#faf7f2] text-neutral-900">
@@ -103,28 +107,16 @@ export default async function RecommendationsPage({
         <AdminPageHeader title="Recommendations" active="recommendations" />
 
         <section className="mt-8 rounded-[32px] border border-black/5 bg-white p-6 shadow-sm">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-orange-500">Approval queue</p>
-              <h1 className="mt-2 text-3xl font-semibold text-neutral-950">Recommendations / Approval Queue</h1>
-              <p className="mt-3 max-w-3xl text-sm text-neutral-600">
-                Durable queue for agent and app improvement recommendations. Approve queues implementation by creating a tracked issue for Bub/agents; reject and defer only record the decision.
-              </p>
-            </div>
-            <div className="rounded-2xl bg-[#fcfaf7] p-4 text-sm text-neutral-600">
-              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">Source</p>
-              <p className="mt-2 font-medium text-neutral-900">Supabase-backed</p>
-              <p className="mt-1">Falls back to local JSON display when the table is unavailable.</p>
-            </div>
-          </div>
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-orange-500">Approval queue</p>
+          <h1 className="mt-2 text-3xl font-semibold text-neutral-950">Recommendations / Approval Queue</h1>
         </section>
 
         <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-          <SummaryCard label="Total" value={summary.total} helper="All captured recommendations" />
-          <SummaryCard label="Recommended" value={summary.recommended} helper="Awaiting operator decision" />
-          <SummaryCard label="Approved" value={summary.approved} helper="Queued as tracked issues" />
-          <SummaryCard label="Implemented" value={summary.implemented} helper="Done and retained for audit" />
-          <SummaryCard label="High impact" value={summary.highImpact} helper="High expected business or ops value" />
+          <SummaryCard label="Total" value={summary.total} helper="All captured recommendations" href="/admin/recommendations" />
+          <SummaryCard label="Recommended" value={summary.recommended} helper="Awaiting operator decision" href="/admin/recommendations?status=recommended" />
+          <SummaryCard label="Approved" value={summary.approved} helper="Queued as tracked issues" href="/admin/recommendations?status=approved" />
+          <SummaryCard label="Implemented" value={summary.implemented} helper="Done and retained for audit" href="/admin/recommendations?status=implemented" />
+          <SummaryCard label="High impact" value={summary.highImpact} helper="High expected business or ops value" href="/admin/recommendations?impact=high" />
         </div>
 
         <form action="/admin/recommendations" method="GET" className="mt-8 rounded-[28px] border border-black/5 bg-white p-4 shadow-sm">
@@ -145,6 +137,10 @@ export default async function RecommendationsPage({
             <select name="status" defaultValue={statusValue ?? ""} className="rounded-xl border border-black/10 bg-white px-3 py-2 text-sm text-neutral-700">
               <option value="">All statuses</option>
               {options.statuses.map((status) => <option key={status} value={status}>{label(status)}</option>)}
+            </select>
+            <select name="impact" defaultValue={impactValue ?? ""} className="rounded-xl border border-black/10 bg-white px-3 py-2 text-sm text-neutral-700">
+              <option value="">All impact levels</option>
+              {options.impacts.map((impact) => <option key={impact} value={impact}>{label(impact)}</option>)}
             </select>
             <button className="rounded-xl bg-neutral-950 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800">Apply</button>
             {hasFilters ? <Link href="/admin/recommendations" className="text-sm text-neutral-500 underline underline-offset-2">Clear</Link> : null}

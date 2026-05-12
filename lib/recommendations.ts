@@ -451,5 +451,6 @@ export function getRecommendationFilterOptions(recommendations: AdminRecommendat
     categories: Array.from(new Set(recommendations.map((item) => item.category))).sort((a, b) => a.localeCompare(b)),
     priorities: Array.from(new Set(recommendations.map((item) => item.priority))).sort((a, b) => a.localeCompare(b)),
     statuses: Array.from(new Set(recommendations.map((item) => item.status))).sort((a, b) => a.localeCompare(b)),
+    impacts: Array.from(new Set(recommendations.map((item) => item.impact))).sort((a, b) => a.localeCompare(b)),
   };
 }
