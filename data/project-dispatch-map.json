@@ -1,0 +1,29 @@
+{
+  "projects": {
+    "AgAlmanac": {
+      "repo": "/Users/topher/.openclaw/workspace/agalmanac",
+      "dispatchable": true
+    },
+    "RaT Ops Admin": {
+      "repo": "/Users/topher/workspaces/personal/ratstudios-web",
+      "dispatchable": true
+    },
+    "RaT Studios": {
+      "repo": "/Users/topher/workspaces/personal/ratstudios-web",
+      "dispatchable": true
+    },
+    "StitchLogic": {
+      "repo": "/Users/topher/Documents/GitHub/stitchlogic-ios",
+      "dispatchable": true
+    }
+  },
+  "aliases": {
+    "RaT Ops Admin": "RaT Ops Admin",
+    "RaT Studios": "RaT Studios",
+    "AgAlmanac": "AgAlmanac",
+    "StitchLogic": "StitchLogic",
+    "StitchLogic iOS": "StitchLogic",
+    "StitchLogic PWA": "StitchLogic",
+    "All Apps": "RaT Studios"
+  }
+}

@@ -1,30 +1,19 @@
 import { createSupabaseAdmin } from "@/lib/supabase-admin";
 import { applyIssueAction } from "@/lib/issue-automation";
 import { getIssueTracker, type TrackedIssue } from "@/lib/issues-tracker";
+import { getDispatchableProjectRepos, resolveProjectDispatch } from "@/lib/project-dispatch";
 
-const ALLOWED_PROJECT_REPOS = {
-  AgAlmanac: "/Users/topher/.openclaw/workspace/agalmanac",
-  "RaT Ops Admin": "/Users/topher/workspaces/personal/ratstudios-web",
-  "RaT Studios": "/Users/topher/workspaces/personal/ratstudios-web",
-  StitchLogic: "/Users/topher/Documents/GitHub/stitchlogic-ios",
-} as const;
-
-const ALLOWED_PROJECTS = new Set<string>(Object.keys(ALLOWED_PROJECT_REPOS));
-type AllowedProject = keyof typeof ALLOWED_PROJECT_REPOS;
-
-function isAllowedProject(project: string): project is AllowedProject {
-  return Object.prototype.hasOwnProperty.call(ALLOWED_PROJECT_REPOS, project);
-}
+const DISPATCHABLE_PROJECT_REPOS = getDispatchableProjectRepos();
+const ALLOWED_PROJECTS = new Set<string>(
+  Object.entries(DISPATCHABLE_PROJECT_REPOS)
+    .filter(([, config]) => config.dispatchable)
+    .map(([project]) => project),
+);
 
 function ownerAgentForIssue(issue: TrackedIssue) {
   const text = `${issue.project} ${issue.title} ${issue.summary ?? ""} ${issue.currentState ?? ""} ${issue.nextStep ?? ""}`.toLowerCase();
   if (text.includes("marketing") || text.includes("seo") || text.includes("content") || text.includes("growth")) return "marketing";
   return "execution";
-}
-
-function repoForProject(project: string) {
-  if (!isAllowedProject(project)) throw new Error(`Project is not allowlisted for dispatcher: ${project}`);
-  return ALLOWED_PROJECT_REPOS[project];
 }
 
 function nowIso() {
@@ -33,7 +22,8 @@ function nowIso() {
 
 
 export async function enqueueIssueRun(issue: TrackedIssue, source = "issue-dispatcher") {
-  if (!isAllowedProject(issue.project)) return { queued: false, reason: "Project is not allowlisted." };
+  const route = resolveProjectDispatch(issue.project);
+  if (!route.dispatchable || !route.repo) return { queued: false, reason: route.reason ?? "Project is not allowlisted." };
 
   const supabase = createSupabaseAdmin();
   const { data: existing, error: existingError } = await supabase
@@ -53,12 +43,12 @@ export async function enqueueIssueRun(issue: TrackedIssue, source = "issue-dispa
     .insert({
       issue_id: issue.id,
       issue_number: issue.number,
-      project: issue.project,
+      project: route.project,
       owner_agent: ownerAgent,
       task_title: issue.title,
       source,
       status: "queued",
-      cwd: repoForProject(issue.project),
+      cwd: route.repo,
       created_at: now,
       updated_at: now,
     })

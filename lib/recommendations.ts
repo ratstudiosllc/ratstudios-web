@@ -1,6 +1,7 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { enqueueIssueRun as enqueueDispatcherIssueRun } from "@/lib/issue-runner";
+import { resolveProjectDispatch } from "@/lib/project-dispatch";
 import { createSupabaseAdmin } from "@/lib/supabase-admin";
 import type { TrackedIssue } from "@/lib/issues-tracker";
 
@@ -332,6 +333,25 @@ async function insertSupabaseDecision(recommendation: AdminRecommendation, entry
   }
 }
 
+function isActiveDispatcherRunReason(reason: string | undefined) {
+  return Boolean(reason?.toLowerCase().includes("active run already exists"));
+}
+
+async function markIssueBlockedForDispatcherFailure(issueId: string, reason: string) {
+  const supabase = createSupabaseAdmin();
+  const { error } = await supabase
+    .from("admin_issues")
+    .update({
+      status: "Blocked",
+      current_state: `Recommendation approval could not queue a dispatcher run: ${reason}`,
+      next_step: "Fix the dispatcher queue blocker, then queue this issue again from the admin workflow.",
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", issueId);
+
+  return error ? error.message : null;
+}
+
 async function enqueueExistingRecommendationIssue(convertedIssueId: string) {
   const supabase = createSupabaseAdmin();
   const { data, error } = await supabase
@@ -363,9 +383,17 @@ async function enqueueExistingRecommendationIssue(convertedIssueId: string) {
   };
 
   const queued = await enqueueDispatcherIssueRun(issue, "recommendation-approval");
-  return queued.queued
-    ? `Queued dispatcher run ${queued.runId} for ${convertedIssueId}.`
-    : `Dispatcher run not queued for ${convertedIssueId}: ${queued.reason ?? "unknown reason"}`;
+  if (queued.queued) return `Queued dispatcher run ${queued.runId} for ${convertedIssueId}.`;
+
+  const reason = queued.reason ?? "unknown reason";
+  if (!isActiveDispatcherRunReason(reason)) {
+    const blockError = await markIssueBlockedForDispatcherFailure(convertedIssueId, reason);
+    return blockError
+      ? `Dispatcher run not queued for ${convertedIssueId}: ${reason}. Could not mark issue Blocked: ${blockError}`
+      : `Dispatcher run not queued for ${convertedIssueId}: ${reason}. Marked issue Blocked with the queue failure reason.`;
+  }
+
+  return `Dispatcher run not queued for ${convertedIssueId}: ${reason}`;
 }
 
 async function createIssueFromRecommendation(recommendation: AdminRecommendation, notes?: string) {
@@ -384,22 +412,28 @@ async function createIssueFromRecommendation(recommendation: AdminRecommendation
 
     const nextNumber = Number(maxRow?.number ?? 0) + 1;
     const now = new Date().toISOString();
+    const route = resolveProjectDispatch(recommendation.appProduct);
+    const isDispatchable = route.dispatchable && Boolean(route.repo);
     const row = {
       id: `issue-${nextNumber}`,
       number: nextNumber,
-      project: recommendation.appProduct,
+      project: route.project,
       priority: issuePriorityForRecommendation(recommendation.priority),
       title: recommendation.title,
-      status: "Triaged",
+      status: isDispatchable ? "Triaged" : "Blocked",
       identified: now.slice(0, 10),
       committed: "No",
       pushed: "No",
       deployed: "No",
-      owner_agent: "execution",
+      owner_agent: isDispatchable ? "execution" : "orchestrator",
       commits: "",
       summary: recommendation.rationale,
-      current_state: `Approved recommendation ${recommendation.id}; queued by approval workflow.`,
-      next_step: notes || recommendation.implementationNotes || "Implement the smallest safe change, then commit/push and move to Needs Verification.",
+      current_state: isDispatchable
+        ? `Approved recommendation ${recommendation.id}; queued by approval workflow.`
+        : `Approved recommendation ${recommendation.id}, but automatic dispatch is blocked: ${route.reason ?? "No dispatcher route is configured."}`,
+      next_step: isDispatchable
+        ? notes || recommendation.implementationNotes || "Implement the smallest safe change, then commit/push and move to Needs Verification."
+        : "Add an explicit safe dispatcher mapping or route this recommendation to a human/planning backlog before execution.",
       updated_at: now,
     };
 
@@ -418,7 +452,7 @@ async function createIssueFromRecommendation(recommendation: AdminRecommendation
       project: row.project,
       priority: row.priority,
       title: row.title,
-      status: "Triaged",
+      status: row.status,
       identified: row.identified,
       committed: row.committed,
       pushed: row.pushed,
@@ -430,10 +464,37 @@ async function createIssueFromRecommendation(recommendation: AdminRecommendation
       nextStep: row.next_step,
       updatedAt: row.updated_at,
     };
-    const queued = await enqueueDispatcherIssueRun(issue, "recommendation-approval");
-    const queueNote = queued.queued
-      ? `Queued dispatcher run ${queued.runId}.`
-      : `Dispatcher run not queued: ${queued.reason ?? "unknown reason"}`;
+
+    if (!isDispatchable) {
+      return {
+        issueId: createdId,
+        note: `Created Supabase admin issue #${createdNumber}. Blocked from automatic dispatch: ${route.reason ?? "No dispatcher route is configured."}`,
+      };
+    }
+
+    let queueNote: string;
+    try {
+      const queued = await enqueueDispatcherIssueRun(issue, "recommendation-approval");
+      if (queued.queued) {
+        queueNote = `Queued dispatcher run ${queued.runId}.`;
+      } else {
+        const reason = queued.reason ?? "unknown reason";
+        if (isActiveDispatcherRunReason(reason)) {
+          queueNote = `Dispatcher run not queued: ${reason}`;
+        } else {
+          const blockError = await markIssueBlockedForDispatcherFailure(createdId, reason);
+          queueNote = blockError
+            ? `Dispatcher run not queued: ${reason}. Could not mark issue Blocked: ${blockError}`
+            : `Dispatcher run not queued: ${reason}. Marked issue Blocked with the queue failure reason.`;
+        }
+      }
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : "unknown error";
+      const blockError = await markIssueBlockedForDispatcherFailure(createdId, reason);
+      queueNote = blockError
+        ? `Dispatcher enqueue failed: ${reason}. Could not mark issue Blocked: ${blockError}`
+        : `Dispatcher enqueue failed: ${reason}. Marked issue Blocked with the queue failure reason.`;
+    }
     return {
       issueId: createdId,
       note: `Created Supabase admin issue #${createdNumber}. ${queueNote}`,

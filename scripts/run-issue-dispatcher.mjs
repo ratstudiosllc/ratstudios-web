@@ -7,12 +7,12 @@ import { createClient } from "@supabase/supabase-js";
 const execFileAsync = promisify(execFile);
 
 const repoRoot = new URL("..", import.meta.url).pathname.replace(/\/$/, "");
-const allowedProjectRepos = new Map([
-  ["AgAlmanac", "/Users/topher/.openclaw/workspace/agalmanac"],
-  ["RaT Ops Admin", "/Users/topher/workspaces/personal/ratstudios-web"],
-  ["RaT Studios", "/Users/topher/workspaces/personal/ratstudios-web"],
-  ["StitchLogic", "/Users/topher/Documents/GitHub/stitchlogic-ios"],
-]);
+const dispatchConfig = JSON.parse(readFileSync(`${repoRoot}/data/project-dispatch-map.json`, "utf8"));
+const allowedProjectRepos = new Map(
+  Object.entries(dispatchConfig.projects || {})
+    .filter(([, config]) => config && config.dispatchable === true)
+    .map(([project, config]) => [project, config.repo]),
+);
 
 function loadEnvFile(path) {
   if (!existsSync(path)) return;

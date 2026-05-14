@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import type { AdminRecommendation, RecommendationAction } from "@/lib/recommendations";
 
 const actions: Array<{ action: RecommendationAction; label: string; tone: string; help: string }> = [
-  { action: "approve", label: "Approve + queue", tone: "bg-sky-600 text-white hover:bg-sky-700", help: "Approve and immediately create a tracked implementation issue." },
+  { action: "approve", label: "Approve + queue", tone: "bg-sky-600 text-white hover:bg-sky-700", help: "Approve, create a tracked implementation issue, and queue dispatch when a safe project route exists." },
   { action: "reject", label: "Reject", tone: "bg-red-600 text-white hover:bg-red-700", help: "Deny and keep the decision audit." },
   { action: "defer", label: "Defer", tone: "bg-neutral-200 text-neutral-800 hover:bg-neutral-300", help: "Keep it visible, but not active." },
   { action: "mark_implemented", label: "Mark implemented", tone: "bg-emerald-600 text-white hover:bg-emerald-700", help: "Record that work is already done." },
@@ -48,7 +48,15 @@ export function RecommendationActionPanel({ recommendation }: { recommendation: 
           throw new Error(typeof payload.error === "string" ? payload.error : "Recommendation action failed");
         }
         setNotes("");
-        setMessage(action === "approve" ? "Approved and queued for implementation." : "Decision saved.");
+        const updated = payload.updatedRecommendation as AdminRecommendation | undefined;
+        const decisionNotes = updated?.decisionNotes ?? "";
+        if (action === "approve" && decisionNotes.toLowerCase().includes("blocked")) {
+          setMessage("Approved and converted to a tracked issue, but dispatch is blocked. See the decision audit for the exact reason.");
+        } else if (action === "approve" && decisionNotes.toLowerCase().includes("queued dispatcher run")) {
+          setMessage("Approved, converted to a tracked issue, and queued for dispatcher execution.");
+        } else {
+          setMessage(action === "approve" ? "Approved and decision audit updated." : "Decision saved.");
+        }
         router.refresh();
       } catch (err) {
         setError(err instanceof Error ? err.message : "Recommendation action failed");
