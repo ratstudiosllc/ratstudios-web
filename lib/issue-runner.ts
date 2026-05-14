@@ -4,6 +4,7 @@ import { getIssueTracker, type TrackedIssue } from "@/lib/issues-tracker";
 
 const ALLOWED_PROJECT_REPOS = {
   AgAlmanac: "/Users/topher/.openclaw/workspace/agalmanac",
+  "RaT Ops Admin": "/Users/topher/workspaces/personal/ratstudios-web",
   "RaT Studios": "/Users/topher/workspaces/personal/ratstudios-web",
   StitchLogic: "/Users/topher/Documents/GitHub/stitchlogic-ios",
 } as const;

@@ -9,6 +9,7 @@ const execFileAsync = promisify(execFile);
 const repoRoot = new URL("..", import.meta.url).pathname.replace(/\/$/, "");
 const allowedProjectRepos = new Map([
   ["AgAlmanac", "/Users/topher/.openclaw/workspace/agalmanac"],
+  ["RaT Ops Admin", "/Users/topher/workspaces/personal/ratstudios-web"],
   ["RaT Studios", "/Users/topher/workspaces/personal/ratstudios-web"],
   ["StitchLogic", "/Users/topher/Documents/GitHub/stitchlogic-ios"],
 ]);

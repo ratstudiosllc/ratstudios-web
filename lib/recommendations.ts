@@ -228,20 +228,20 @@ function mergeDuplicateRecommendation(existing: AdminRecommendation, incoming: A
 }
 
 function suppressDuplicateRecommendations(existingRecommendations: AdminRecommendation[], incomingRecommendations: AdminRecommendation[]) {
-  const unresolvedByFingerprint = new Map<string, AdminRecommendation>();
+  const existingByFingerprint = new Map<string, AdminRecommendation>();
   for (const recommendation of existingRecommendations) {
-    if (!unresolvedRecommendationStatuses.has(recommendation.status)) continue;
+    if (recommendation.status === "rejected") continue;
     const fingerprint = getRecommendationFingerprint(recommendation);
-    const current = unresolvedByFingerprint.get(fingerprint);
+    const current = existingByFingerprint.get(fingerprint);
     if (!current || Date.parse(recommendation.updatedAt) > Date.parse(current.updatedAt)) {
-      unresolvedByFingerprint.set(fingerprint, recommendation);
+      existingByFingerprint.set(fingerprint, recommendation);
     }
   }
 
   const pendingByFingerprint = new Map<string, AdminRecommendation>();
   return incomingRecommendations.map((recommendation) => {
     const fingerprint = getRecommendationFingerprint(recommendation);
-    const duplicate = pendingByFingerprint.get(fingerprint) ?? unresolvedByFingerprint.get(fingerprint);
+    const duplicate = pendingByFingerprint.get(fingerprint) ?? existingByFingerprint.get(fingerprint);
     const merged = duplicate ? mergeDuplicateRecommendation(duplicate, recommendation) : recommendation;
     pendingByFingerprint.set(fingerprint, merged);
     return merged;
@@ -330,6 +330,42 @@ async function insertSupabaseDecision(recommendation: AdminRecommendation, entry
   } catch {
     // The decisions table is an audit enhancement; action_history on admin_recommendations is the durable fallback.
   }
+}
+
+async function enqueueExistingRecommendationIssue(convertedIssueId: string) {
+  const supabase = createSupabaseAdmin();
+  const { data, error } = await supabase
+    .from("admin_issues")
+    .select("id, number, project, priority, title, status, identified, committed, pushed, deployed, owner_agent, commits, summary, current_state, next_step, updated_at")
+    .eq("id", convertedIssueId)
+    .maybeSingle();
+
+  if (error) throw new Error(error.message);
+  if (!data) return `Converted issue ${convertedIssueId} was not found.`;
+
+  const issue: TrackedIssue = {
+    id: String(data.id),
+    number: Number(data.number ?? 0),
+    project: String(data.project ?? ""),
+    priority: String(data.priority ?? "P3"),
+    title: String(data.title ?? "Untitled issue"),
+    status: String(data.status ?? "Triaged"),
+    identified: String(data.identified ?? ""),
+    committed: String(data.committed ?? "No"),
+    pushed: String(data.pushed ?? "No"),
+    deployed: String(data.deployed ?? "No"),
+    ownerAgent: normalizeText(data.owner_agent),
+    commits: normalizeText(data.commits) ?? "",
+    summary: normalizeText(data.summary),
+    currentState: normalizeText(data.current_state),
+    nextStep: normalizeText(data.next_step),
+    updatedAt: normalizeText(data.updated_at),
+  };
+
+  const queued = await enqueueDispatcherIssueRun(issue, "recommendation-approval");
+  return queued.queued
+    ? `Queued dispatcher run ${queued.runId} for ${convertedIssueId}.`
+    : `Dispatcher run not queued for ${convertedIssueId}: ${queued.reason ?? "unknown reason"}`;
 }
 
 async function createIssueFromRecommendation(recommendation: AdminRecommendation, notes?: string) {
@@ -462,8 +498,13 @@ async function buildUpdatedRecommendation(current: AdminRecommendation, input: R
     const created = await createIssueFromRecommendation(current, notes);
     convertedIssueId = created.issueId;
     conversionNote = created.note;
-  } else if (input.action === "approve" && convertedIssueId) {
-    conversionNote = `Implementation was already queued as ${convertedIssueId}.`;
+  } else if ((input.action === "approve" || input.action === "convert_to_issue") && convertedIssueId) {
+    try {
+      conversionNote = await enqueueExistingRecommendationIssue(convertedIssueId);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "unknown error";
+      conversionNote = `Implementation was already converted as ${convertedIssueId}, but dispatcher enqueue failed: ${message}`;
+    }
   }
 
   const decisionNotes = [notes, conversionNote].filter(Boolean).join(notes && conversionNote ? "\n" : "") || current.decisionNotes;
