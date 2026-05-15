@@ -43,6 +43,10 @@ const dateSlug = new Intl.DateTimeFormat("en-CA", {
   month: "2-digit",
   day: "2-digit",
 }).format(runDate);
+const mountainWeekday = new Intl.DateTimeFormat("en-US", {
+  timeZone: "America/Denver",
+  weekday: "long",
+}).format(runDate);
 
 function recommendation({ idSuffix, title, app_product, category, severity, priority, effort, impact, rationale, risk_if_ignored, evidence_links, approval_notes, implementation_notes, status = "recommended" }) {
   return {
@@ -145,6 +149,24 @@ const recommendations = [
     implementation_notes: "Do not implement until approved. Consider a simple 8:00am operator review checklist or notification once the daily job has run.",
   }),
 ];
+
+if (mountainWeekday === "Friday") {
+  recommendations.push(recommendation({
+    idSuffix: "portfolio-security-audit",
+    title: "Run the Friday portfolio security/dependency audit",
+    app_product: "RaT Studios",
+    category: "security",
+    severity: "medium",
+    priority: "P2",
+    effort: "small",
+    impact: "high",
+    rationale: "RaT Studios now has multiple active products and admin surfaces, so a lightweight weekly audit should catch dependency, auth, secret, and permission drift before it becomes an incident.",
+    risk_if_ignored: "Dependency vulnerabilities, stale auth/RLS assumptions, leaked secrets, or overbroad permissions can sit unnoticed across the portfolio until they become production incidents.",
+    evidence_links: [{ label: "Dependabot security updates", href: "https://docs.github.com/en/code-security/dependabot" }, { label: "OWASP ASVS", href: "https://owasp.org/www-project-application-security-verification-standard/" }],
+    approval_notes: "Approved recommendation rec-2026-05-11-portfolio-security-audit-cadence; queued by approval workflow.",
+    implementation_notes: "Friday security section: run npm audit/dependency review for each active app, note auth/RLS/permission drift, check secret exposure risk, and list the top portfolio security risks by app.",
+  }));
+}
 
 const unresolvedRecommendationStatuses = ["recommended", "approved", "deferred"];
 

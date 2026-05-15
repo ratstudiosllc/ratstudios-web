@@ -47,8 +47,19 @@ export function getNextFiveAmMountain(from = new Date()) {
   return fallback.toISOString();
 }
 
-function makeRecommendation(input: Omit<AdminRecommendation, "createdAt" | "updatedAt" | "status"> & { dateSlug: string; now: string; status?: AdminRecommendation["status"] }): AdminRecommendation {
-  const { dateSlug, now, status = "recommended", ...recommendation } = input;
+function getMountainWeekday(date = new Date()) {
+  return new Intl.DateTimeFormat("en-US", {
+    timeZone: TIME_ZONE,
+    weekday: "long",
+  }).format(date);
+}
+
+function isFridayMountain(date = new Date()) {
+  return getMountainWeekday(date) === "Friday";
+}
+
+function makeRecommendation(input: Omit<AdminRecommendation, "createdAt" | "updatedAt" | "status"> & { now: string; status?: AdminRecommendation["status"] }): AdminRecommendation {
+  const { now, status = "recommended", ...recommendation } = input;
   return {
     ...recommendation,
     status,
@@ -61,9 +72,8 @@ export function buildDailyRecommendations(date = new Date()): AdminRecommendatio
   const dateSlug = getMountainDateSlug(date);
   const now = date.toISOString();
 
-  return [
+  const recommendations = [
     makeRecommendation({
-      dateSlug,
       now,
       id: `rec-${dateSlug}-recommendations-five-am-cadence`,
       slug: `${dateSlug}-recommendations-five-am-cadence`,
@@ -85,7 +95,6 @@ export function buildDailyRecommendations(date = new Date()): AdminRecommendatio
       status: "implemented",
     }),
     makeRecommendation({
-      dateSlug,
       now,
       id: `rec-${dateSlug}-schedule-run-status-card`,
       slug: `${dateSlug}-schedule-run-status-card`,
@@ -106,7 +115,6 @@ export function buildDailyRecommendations(date = new Date()): AdminRecommendatio
       implementationNotes: "Do not implement until approved. Add a compact schedule status card above the queue summary using /api/admin/schedules data.",
     }),
     makeRecommendation({
-      dateSlug,
       now,
       id: `rec-${dateSlug}-recommendations-dedupe-policy`,
       slug: `${dateSlug}-recommendations-dedupe-policy`,
@@ -126,7 +134,6 @@ export function buildDailyRecommendations(date = new Date()): AdminRecommendatio
       implementationNotes: "Do not implement until approved. Add fingerprinting by app/category/title root cause and update existing open recommendations instead of inserting duplicates.",
     }),
     makeRecommendation({
-      dateSlug,
       now,
       id: `rec-${dateSlug}-agalmanac-check-db-cleanup`,
       slug: `${dateSlug}-agalmanac-check-db-cleanup`,
@@ -147,7 +154,6 @@ export function buildDailyRecommendations(date = new Date()): AdminRecommendatio
       implementationNotes: "Do not implement until approved. Update scripts/check-db.mjs to verify rainfall_logs plus expected columns and notification preference columns instead of nonexistent rainfall_events/notification_prefs tables.",
     }),
     makeRecommendation({
-      dateSlug,
       now,
       id: `rec-${dateSlug}-daily-approval-window`,
       slug: `${dateSlug}-daily-approval-window`,
@@ -168,4 +174,29 @@ export function buildDailyRecommendations(date = new Date()): AdminRecommendatio
       implementationNotes: "Do not implement until approved. Consider a simple 8:00am operator review checklist or notification once the daily job has run.",
     }),
   ];
+
+  if (isFridayMountain(date)) {
+    recommendations.push(makeRecommendation({
+      now,
+      id: `rec-${dateSlug}-portfolio-security-audit`,
+      slug: `${dateSlug}-portfolio-security-audit`,
+      title: "Run the Friday portfolio security/dependency audit",
+      appProduct: "RaT Studios",
+      category: "security",
+      severity: "medium",
+      priority: "P2",
+      effort: "small",
+      impact: "high",
+      rationale: "RaT Studios now has multiple active products and admin surfaces, so a lightweight weekly audit should catch dependency, auth, secret, and permission drift before it becomes an incident.",
+      riskIfIgnored: "Dependency vulnerabilities, stale auth/RLS assumptions, leaked secrets, or overbroad permissions can sit unnoticed across the portfolio until they become production incidents.",
+      evidenceLinks: [
+        { label: "Dependabot security updates", href: "https://docs.github.com/en/code-security/dependabot" },
+        { label: "OWASP ASVS", href: "https://owasp.org/www-project-application-security-verification-standard/" },
+      ],
+      approvalNotes: "Approved recommendation rec-2026-05-11-portfolio-security-audit-cadence; queued by approval workflow.",
+      implementationNotes: "Friday security section: run npm audit/dependency review for each active app, note auth/RLS/permission drift, check secret exposure risk, and list the top portfolio security risks by app.",
+    }));
+  }
+
+  return recommendations;
 }
