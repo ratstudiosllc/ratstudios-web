@@ -12,6 +12,24 @@ export interface AppSectionSeed {
   ctaHref?: string;
 }
 
+export type LaunchChecklistStatus = "done" | "in_progress" | "blocked" | "not_started";
+export type LaunchChecklistPriority = "Required" | "Recommended" | "Later";
+
+export interface LaunchChecklistItem {
+  id: string;
+  label: string;
+  status: LaunchChecklistStatus;
+  priority: LaunchChecklistPriority;
+  owner: string;
+  note: string;
+}
+
+export interface LaunchChecklistSection {
+  title: string;
+  summary: string;
+  items: LaunchChecklistItem[];
+}
+
 export interface StudioApp {
   slug: string;
   name: string;
@@ -34,6 +52,7 @@ export interface StudioApp {
     ctaLabel?: string;
   };
   healthNotes: string[];
+  launchChecklist?: LaunchChecklistSection[];
   pipeline?: {
     category: string;
     blocker: string;
@@ -317,10 +336,51 @@ export const studioApps: StudioApp[] = [
       ctaHref: "/admin/issues",
       ctaLabel: "Open issues",
     },
+    launchChecklist: [
+      {
+        title: "Production domain and deploy",
+        summary: "Make mowpro.app the canonical production home before public traffic.",
+        items: [
+          { id: "domain-vercel", label: "Add mowpro.app to the Vercel MowPro project", status: "not_started", priority: "Required", owner: "Topher", note: "Current live alias is mowpro.vercel.app; mowpro.app is not attached to the Vercel project yet." },
+          { id: "domain-dns", label: "Configure DNS and verify HTTPS for mowpro.app", status: "not_started", priority: "Required", owner: "Topher", note: "Point apex/www to Vercel, wait for certificate issuance, and confirm redirects." },
+          { id: "deploy-local-changes", label: "Review, commit, and deploy current local launch changes", status: "in_progress", priority: "Required", owner: "Bub", note: "Repo has launch-relevant changes that need review before production becomes the source of truth." },
+        ],
+      },
+      {
+        title: "Supabase, auth, and security",
+        summary: "Fix the production data layer before letting real users in.",
+        items: [
+          { id: "schema-reconcile", label: "Reconcile live Supabase schema with app-required tables and columns", status: "blocked", priority: "Required", owner: "Topher", note: "The app expects newer fields for seasonal mode, job status, invoices, expenses, estimates, snow events, and payment settings." },
+          { id: "grants-rls", label: "Fix grants/RLS permissions on newer production tables", status: "blocked", priority: "Required", owner: "Topher", note: "Live audit found permission problems on newer tables; this is the biggest launch blocker." },
+          { id: "auth-redirects", label: "Update Supabase Auth Site URL and Redirect URLs for mowpro.app", status: "not_started", priority: "Required", owner: "Topher", note: "Signup, customer invites, password resets, and callback routing must use the final domain." },
+          { id: "role-isolation", label: "Run provider/customer cross-account isolation test", status: "not_started", priority: "Required", owner: "Bub", note: "Verify providers cannot see each other and customer portal users only see their own records." },
+        ],
+      },
+      {
+        title: "Launch policy, billing, and support",
+        summary: "Make the public promise match what the app can actually support.",
+        items: [
+          { id: "legal-pages", label: "Add Privacy Policy and Terms of Service", status: "not_started", priority: "Required", owner: "Bub", note: "Required because MowPro stores customer names, addresses, phone numbers, invoices, requests, and payment instructions." },
+          { id: "support-contact", label: "Add support/contact path and footer links", status: "not_started", priority: "Required", owner: "Bub", note: "Users need a visible support route before launch." },
+          { id: "billing-model", label: "Choose free beta vs paid Stripe launch", status: "not_started", priority: "Required", owner: "Richard", note: "Recommendation: launch as controlled free beta first; wire Stripe after plumbing is stable." },
+          { id: "auth-emails", label: "Brand Supabase invite and password reset emails", status: "not_started", priority: "Recommended", owner: "Topher", note: "Customer invites should feel like MowPro, not raw Supabase system email." },
+        ],
+      },
+      {
+        title: "QA, SEO, and operations",
+        summary: "Finish the boring launch guardrails: workflow QA, discoverability, monitoring, and backups.",
+        items: [
+          { id: "workflow-qa", label: "Complete end-to-end workflow QA", status: "not_started", priority: "Required", owner: "Bub", note: "Provider signup, customers, schedules, jobs, invoices, expenses, reports, customer portal, requests, and mobile smoke test." },
+          { id: "seo-metadata", label: "Improve metadata, canonical URL, social preview, sitemap/robots, and app icons", status: "not_started", priority: "Recommended", owner: "Bub", note: "Current metadata is too generic for a real public launch." },
+          { id: "monitoring", label: "Confirm backups, uptime monitoring, and production error tracking", status: "not_started", priority: "Recommended", owner: "Topher", note: "At minimum confirm Supabase backups and add uptime monitoring; Sentry or equivalent is preferred." },
+        ],
+      },
+    ],
     healthNotes: [
       "Production is deployed from main",
       "Supabase project is linked and migration history repaired",
       "Final db pull is still Docker-blocked",
+      "mowpro.app launch readiness is blocked on domain wiring, Supabase grants/schema, auth redirects, legal pages, and QA",
     ],
   },
   {

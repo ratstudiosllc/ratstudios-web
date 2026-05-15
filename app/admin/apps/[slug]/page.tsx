@@ -6,6 +6,7 @@ import {
   getAppIssueMetrics,
   getAppIssues,
   type StudioApp,
+  type LaunchChecklistItem,
 } from "@/lib/studio-admin";
 import { formatMountainTimestamp } from "@/lib/issues-tracker";
 import { getIssueTracker } from "@/lib/issues-tracker";
@@ -39,6 +40,82 @@ function Kpi({ label, value, helper }: { label: string; value: string; helper: s
       <p className="mt-2 text-2xl font-semibold text-neutral-950">{value}</p>
       <p className="mt-1 text-sm text-neutral-500">{helper}</p>
     </div>
+  );
+}
+
+
+const checklistStatusCopy: Record<LaunchChecklistItem["status"], { label: string; className: string }> = {
+  done: { label: "Done", className: "border-emerald-200 bg-emerald-50 text-emerald-800" },
+  in_progress: { label: "In progress", className: "border-sky-200 bg-sky-50 text-sky-800" },
+  blocked: { label: "Blocked", className: "border-red-200 bg-red-50 text-red-800" },
+  not_started: { label: "Not started", className: "border-neutral-200 bg-neutral-50 text-neutral-600" },
+};
+
+const checklistPriorityClass: Record<LaunchChecklistItem["priority"], string> = {
+  Required: "border-neutral-950 bg-neutral-950 text-white",
+  Recommended: "border-orange-200 bg-orange-100 text-orange-800",
+  Later: "border-neutral-200 bg-neutral-100 text-neutral-600",
+};
+
+function LaunchChecklist({ product }: { product: StudioApp }) {
+  if (!product.launchChecklist?.length) return null;
+
+  const items = product.launchChecklist.flatMap((section) => section.items);
+  const requiredOpen = items.filter((item) => item.priority === "Required" && item.status !== "done").length;
+  const blocked = items.filter((item) => item.status === "blocked").length;
+  const done = items.filter((item) => item.status === "done").length;
+
+  return (
+    <section className="mt-8 rounded-[32px] border border-black/5 bg-white p-6 shadow-sm">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-orange-500">Launch readiness</p>
+          <h2 className="mt-2 text-xl font-semibold text-neutral-950">Launch checklist</h2>
+          <p className="mt-2 max-w-3xl text-sm text-neutral-600">Items that must be closed before MowPro moves from controlled beta to public launch.</p>
+        </div>
+        <div className="grid grid-cols-3 gap-2 text-center text-xs sm:min-w-72">
+          <div className="rounded-2xl border border-black/5 bg-[#fcfaf7] p-3">
+            <p className="font-semibold text-neutral-950">{items.length}</p>
+            <p className="mt-1 text-neutral-500">Total</p>
+          </div>
+          <div className="rounded-2xl border border-red-100 bg-red-50 p-3">
+            <p className="font-semibold text-red-800">{requiredOpen}</p>
+            <p className="mt-1 text-red-700">Required open</p>
+          </div>
+          <div className="rounded-2xl border border-orange-100 bg-orange-50 p-3">
+            <p className="font-semibold text-orange-800">{blocked}</p>
+            <p className="mt-1 text-orange-700">Blocked</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-6 grid gap-5 lg:grid-cols-2">
+        {product.launchChecklist.map((section) => (
+          <div key={section.title} className="rounded-[24px] border border-black/5 bg-[#fcfaf7] p-5">
+            <h3 className="text-base font-semibold text-neutral-950">{section.title}</h3>
+            <p className="mt-2 text-sm text-neutral-600">{section.summary}</p>
+            <div className="mt-4 space-y-3">
+              {section.items.map((item) => {
+                const status = checklistStatusCopy[item.status];
+                return (
+                  <div key={item.id} className="rounded-2xl border border-black/5 bg-white p-4">
+                    <div className="flex flex-wrap items-center gap-2 text-xs">
+                      <span className={`rounded-full border px-2.5 py-1 font-semibold ${status.className}`}>{status.label}</span>
+                      <span className={`rounded-full border px-2.5 py-1 font-semibold ${checklistPriorityClass[item.priority]}`}>{item.priority}</span>
+                      <span className="rounded-full border border-black/5 bg-[#fcfaf7] px-2.5 py-1 font-semibold text-neutral-600">{item.owner}</span>
+                    </div>
+                    <p className="mt-3 text-sm font-semibold text-neutral-950">{item.label}</p>
+                    <p className="mt-1 text-sm leading-6 text-neutral-600">{item.note}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <p className="mt-4 text-xs text-neutral-500">Progress: {done} done, {requiredOpen} required still open. Recommendation: controlled beta only until required items are complete.</p>
+    </section>
   );
 }
 
@@ -144,6 +221,8 @@ export default async function ProductAdminPage({
             </div>
           </aside>
         </div>
+
+        <LaunchChecklist product={product} />
 
         <div className="mt-8 grid gap-6 lg:grid-cols-2 xl:grid-cols-3">
           <SectionCard title="Issues" summary={product.issues.summary} highlights={[
