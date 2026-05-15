@@ -206,8 +206,8 @@ function normalizeFingerprintPart(value: string) {
     .replace(/^-+|-+$/g, "");
 }
 
-export function getRecommendationFingerprint(recommendation: Pick<AdminRecommendation, "appProduct" | "category" | "title">) {
-  return [recommendation.appProduct, recommendation.category, recommendation.title]
+export function getRecommendationFingerprint(recommendation: Pick<AdminRecommendation, "appProduct" | "category" | "title" | "rationale">) {
+  return [recommendation.appProduct, recommendation.category, recommendation.title, recommendation.rationale]
     .map((part) => normalizeFingerprintPart(part))
     .join(":");
 }

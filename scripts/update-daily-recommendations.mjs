@@ -146,7 +146,78 @@ const recommendations = [
   }),
 ];
 
-const { error } = await supabase.from("admin_recommendations").upsert(recommendations, { onConflict: "id" });
+const unresolvedRecommendationStatuses = ["recommended", "approved", "deferred"];
+
+function normalizeFingerprintPart(value) {
+  return String(value ?? "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function recommendationFingerprint(recommendation) {
+  return [recommendation.app_product, recommendation.category, recommendation.title, recommendation.rationale]
+    .map((part) => normalizeFingerprintPart(part))
+    .join(":");
+}
+
+function newestRecommendation(current, candidate) {
+  if (!current) return candidate;
+  const currentUpdated = Date.parse(current.updated_at ?? current.created_at ?? "");
+  const candidateUpdated = Date.parse(candidate.updated_at ?? candidate.created_at ?? "");
+  return candidateUpdated > currentUpdated ? candidate : current;
+}
+
+function mergeDuplicateRecommendation(existing, incoming) {
+  return {
+    ...incoming,
+    id: existing.id,
+    slug: existing.slug,
+    status: existing.status,
+    approval_notes: existing.approval_notes ?? incoming.approval_notes,
+    decision_by: existing.decision_by ?? null,
+    decision_at: existing.decision_at ?? null,
+    decision_notes: existing.decision_notes ?? null,
+    converted_issue_id: existing.converted_issue_id ?? null,
+    action_history: Array.isArray(existing.action_history) ? existing.action_history : [],
+    created_at: existing.created_at ?? incoming.created_at,
+    updated_at: incoming.updated_at,
+  };
+}
+
+async function suppressDuplicateRecommendations(incomingRecommendations) {
+  const { data, error } = await supabase
+    .from("admin_recommendations")
+    .select("*")
+    .in("status", unresolvedRecommendationStatuses);
+
+  if (error) throw new Error(error.message);
+
+  const existingByFingerprint = new Map();
+  for (const recommendation of data ?? []) {
+    const fingerprint = recommendationFingerprint(recommendation);
+    existingByFingerprint.set(fingerprint, newestRecommendation(existingByFingerprint.get(fingerprint), recommendation));
+  }
+
+  const pendingByFingerprint = new Map();
+  return incomingRecommendations.map((recommendation) => {
+    const fingerprint = recommendationFingerprint(recommendation);
+    const duplicate = pendingByFingerprint.get(fingerprint) ?? existingByFingerprint.get(fingerprint);
+    const merged = duplicate ? mergeDuplicateRecommendation(duplicate, recommendation) : recommendation;
+    pendingByFingerprint.set(fingerprint, merged);
+    return merged;
+  });
+}
+
+let dedupedRecommendations;
+try {
+  dedupedRecommendations = await suppressDuplicateRecommendations(recommendations);
+} catch (dedupeError) {
+  console.error(dedupeError.message);
+  process.exit(1);
+}
+
+const { error } = await supabase.from("admin_recommendations").upsert(dedupedRecommendations, { onConflict: "id" });
 if (error) {
   console.error(error.message);
   process.exit(1);
@@ -174,4 +245,4 @@ if (scheduleError) {
   process.exit(1);
 }
 
-console.log(JSON.stringify({ ok: true, date: dateSlug, upserted: recommendations.length }, null, 2));
+console.log(JSON.stringify({ ok: true, date: dateSlug, upserted: dedupedRecommendations.length }, null, 2));
