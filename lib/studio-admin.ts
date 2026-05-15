@@ -297,8 +297,8 @@ export const studioApps: StudioApp[] = [
     owner: "Topher",
     href: "/admin/apps/mowpro",
     summary: "Lawn care operations SaaS for customers, jobs, invoices, service requests, expenses, settings, and customer portal workflows.",
-    currentFocus: "Keep the production app stable and finish Supabase schema reconciliation once Docker is available.",
-    nextMilestone: "Complete Docker-backed Supabase db pull for the linked MowPro project.",
+    currentFocus: "Finish launch QA now that RLS hardening, auth URLs, legal pages, email templates, and mowpro.app DNS/HTTPS are in place.",
+    nextMilestone: "Complete provider/customer auth QA and manual launch checklist before public beta traffic.",
     users: {
       summary: "Primary users are lawn care providers managing jobs and customers, plus customers using the portal.",
       highlights: [
@@ -310,9 +310,9 @@ export const studioApps: StudioApp[] = [
     marketing: {
       summary: "Marketing should emphasize a lightweight operating system for solo and small lawn care providers.",
       highlights: [
-        "Public URL: https://mowpro.vercel.app",
+        "Public URL: https://mowpro.app",
+        "Launch positioning is controlled free beta until Stripe billing is wired",
         "Lead with jobs, invoices, recurring customer service, and request intake",
-        "Differentiate from generic invoicing tools by owning the lawn-care workflow",
       ],
     },
     revenue: {
@@ -326,9 +326,9 @@ export const studioApps: StudioApp[] = [
     roadmap: {
       summary: "Near-term roadmap is schema hygiene, route verification, and deeper lawn care workflow polish.",
       highlights: [
-        "Finish Supabase db pull after Docker is installed",
+        "Run provider/customer auth QA on mowpro.app",
         "Keep production deploying from main",
-        "Verify login, dashboard, customers, jobs, invoices, requests, and portal flows after changes",
+        "Verify login, dashboard, customers, jobs, invoices, requests, and portal flows after launch-hardening changes",
       ],
     },
     issues: {
@@ -341,46 +341,46 @@ export const studioApps: StudioApp[] = [
         title: "Production domain and deploy",
         summary: "Make mowpro.app the canonical production home before public traffic.",
         items: [
-          { id: "domain-vercel", label: "Add mowpro.app to the Vercel MowPro project", status: "not_started", priority: "Required", owner: "Topher", note: "Current live alias is mowpro.vercel.app; mowpro.app is not attached to the Vercel project yet." },
-          { id: "domain-dns", label: "Configure DNS and verify HTTPS for mowpro.app", status: "not_started", priority: "Required", owner: "Topher", note: "Point apex/www to Vercel, wait for certificate issuance, and confirm redirects." },
-          { id: "deploy-local-changes", label: "Review, commit, and deploy current local launch changes", status: "in_progress", priority: "Required", owner: "Bub", note: "Repo has launch-relevant changes that need review before production becomes the source of truth." },
+          { id: "domain-vercel", label: "Add mowpro.app to the Vercel MowPro project", status: "done", priority: "Required", owner: "Topher", note: "mowpro.app and www.mowpro.app are attached to the Vercel MowPro project." },
+          { id: "domain-dns", label: "Configure DNS and verify HTTPS for mowpro.app", status: "done", priority: "Required", owner: "Topher", note: "Cloudflare authoritative DNS resolves apex/www to 76.76.21.21 and HTTPS returns 200 for both domains." },
+          { id: "deploy-local-changes", label: "Review, commit, and deploy current local launch changes", status: "done", priority: "Required", owner: "Bub", note: "Launch hardening changes have been committed and pushed through main." },
         ],
       },
       {
         title: "Supabase, auth, and security",
         summary: "Fix the production data layer before letting real users in.",
         items: [
-          { id: "schema-reconcile", label: "Reconcile live Supabase schema with app-required tables and columns", status: "blocked", priority: "Required", owner: "Topher", note: "The app expects newer fields for seasonal mode, job status, invoices, expenses, estimates, snow events, and payment settings." },
-          { id: "grants-rls", label: "Fix grants/RLS permissions on newer production tables", status: "blocked", priority: "Required", owner: "Topher", note: "Live audit found permission problems on newer tables; this is the biggest launch blocker." },
-          { id: "auth-redirects", label: "Update Supabase Auth Site URL and Redirect URLs for mowpro.app", status: "not_started", priority: "Required", owner: "Topher", note: "Signup, customer invites, password resets, and callback routing must use the final domain." },
-          { id: "role-isolation", label: "Run provider/customer cross-account isolation test", status: "not_started", priority: "Required", owner: "Bub", note: "Verify providers cannot see each other and customer portal users only see their own records." },
+          { id: "schema-reconcile", label: "Reconcile live Supabase schema with app-required tables and columns", status: "done", priority: "Required", owner: "Topher", note: "Schema/app column checks passed during launch hardening; final Docker db pull remains optional documentation hygiene." },
+          { id: "grants-rls", label: "Fix grants/RLS permissions on newer production tables", status: "done", priority: "Required", owner: "Topher", note: "RLS and grants were hardened in production with follow-up trigger execute revokes." },
+          { id: "auth-redirects", label: "Update Supabase Auth Site URL and Redirect URLs for mowpro.app", status: "done", priority: "Required", owner: "Topher", note: "Supabase Auth Site URL and redirect allowlist now include mowpro.app, www, Vercel alias, and localhost." },
+          { id: "role-isolation", label: "Run provider/customer cross-account isolation test", status: "not_started", priority: "Required", owner: "Bub", note: "Still needs real browser QA: provider/provider isolation and customer portal record isolation." },
         ],
       },
       {
         title: "Launch policy, billing, and support",
         summary: "Make the public promise match what the app can actually support.",
         items: [
-          { id: "legal-pages", label: "Add Privacy Policy and Terms of Service", status: "not_started", priority: "Required", owner: "Bub", note: "Required because MowPro stores customer names, addresses, phone numbers, invoices, requests, and payment instructions." },
-          { id: "support-contact", label: "Add support/contact path and footer links", status: "not_started", priority: "Required", owner: "Bub", note: "Users need a visible support route before launch." },
-          { id: "billing-model", label: "Choose free beta vs paid Stripe launch", status: "not_started", priority: "Required", owner: "Richard", note: "Recommendation: launch as controlled free beta first; wire Stripe after plumbing is stable." },
-          { id: "auth-emails", label: "Brand Supabase invite and password reset emails", status: "not_started", priority: "Recommended", owner: "Topher", note: "Customer invites should feel like MowPro, not raw Supabase system email." },
+          { id: "legal-pages", label: "Add Privacy Policy and Terms of Service", status: "done", priority: "Required", owner: "Bub", note: "Privacy, Terms, Billing/Cancellation, and footer/legal routes are live; attorney review still recommended before paid launch." },
+          { id: "support-contact", label: "Add support/contact path and footer links", status: "done", priority: "Required", owner: "Bub", note: "Support/contact path and public support email are live." },
+          { id: "billing-model", label: "Choose free beta vs paid Stripe launch", status: "done", priority: "Required", owner: "Richard", note: "Decision: launch as controlled free beta first; wire Stripe after plumbing is stable." },
+          { id: "auth-emails", label: "Brand Supabase invite and password reset emails", status: "done", priority: "Recommended", owner: "Topher", note: "Supabase invite, confirmation, recovery, magic-link, and email-change templates are branded for MowPro and use {{ .ConfirmationURL }}." },
         ],
       },
       {
         title: "QA, SEO, and operations",
         summary: "Finish the boring launch guardrails: workflow QA, discoverability, monitoring, and backups.",
         items: [
-          { id: "workflow-qa", label: "Complete end-to-end workflow QA", status: "not_started", priority: "Required", owner: "Bub", note: "Provider signup, customers, schedules, jobs, invoices, expenses, reports, customer portal, requests, and mobile smoke test." },
-          { id: "seo-metadata", label: "Improve metadata, canonical URL, social preview, sitemap/robots, and app icons", status: "not_started", priority: "Recommended", owner: "Bub", note: "Current metadata is too generic for a real public launch." },
-          { id: "monitoring", label: "Confirm backups, uptime monitoring, and production error tracking", status: "not_started", priority: "Recommended", owner: "Topher", note: "At minimum confirm Supabase backups and add uptime monitoring; Sentry or equivalent is preferred." },
+          { id: "workflow-qa", label: "Complete end-to-end workflow QA", status: "in_progress", priority: "Required", owner: "Bub", note: "Still outstanding: provider signup/login/logout, forgot/reset password, customer invite callback, portal, invoice PDF, estimate conversion, reports, and mobile smoke." },
+          { id: "seo-metadata", label: "Improve metadata, canonical URL, social preview, sitemap/robots, and app icons", status: "done", priority: "Recommended", owner: "Bub", note: "Metadata, canonical domain, robots, sitemap, manifest, and launch smoke checks are in place." },
+          { id: "monitoring", label: "Confirm backups, uptime monitoring, and production error tracking", status: "in_progress", priority: "Recommended", owner: "Topher", note: "Vercel Web Analytics is enabled. Still outstanding: Supabase backup/PITR confirmation, uptime monitoring, and optional Sentry/error tracking." },
         ],
       },
     ],
     healthNotes: [
       "Production is deployed from main",
-      "Supabase project is linked and migration history repaired",
-      "Final db pull is still Docker-blocked",
-      "mowpro.app launch readiness is blocked on domain wiring, Supabase grants/schema, auth redirects, legal pages, and QA",
+      "mowpro.app and www.mowpro.app resolve and return HTTPS 200",
+      "Supabase RLS/grants, Auth URLs, branded Auth emails, legal pages, support page, and free-beta launch copy are complete",
+      "Remaining launch work is manual auth/workflow QA, Supabase backups/PITR confirmation, uptime/error monitoring, and attorney review before paid launch",
     ],
   },
   {
