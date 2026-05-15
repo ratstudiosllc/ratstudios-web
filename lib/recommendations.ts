@@ -52,7 +52,7 @@ export interface AdminRecommendation {
   updatedAt: string;
 }
 
-const unresolvedRecommendationStatuses = new Set<RecommendationStatus>(["recommended", "approved", "deferred"]);
+const skipRequeueIssueStatuses = new Set(["In Progress", "Needs Verification", "Ready for QA", "Resolved", "Closed", "Implemented", "Blocked"]);
 
 interface RecommendationsStoreData {
   recommendations: AdminRecommendation[];
@@ -299,7 +299,7 @@ export async function upsertRecommendations(recommendations: AdminRecommendation
   const { data: existingData, error: existingError } = await supabase
     .from("admin_recommendations")
     .select("*")
-    .in("status", Array.from(unresolvedRecommendationStatuses));
+    .neq("status", "rejected");
 
   if (existingError) throw new Error(existingError.message);
 
@@ -381,6 +381,10 @@ async function enqueueExistingRecommendationIssue(convertedIssueId: string) {
     nextStep: normalizeText(data.next_step),
     updatedAt: normalizeText(data.updated_at),
   };
+
+  if (skipRequeueIssueStatuses.has(issue.status)) {
+    return `Converted issue ${convertedIssueId} is already ${issue.status}; dispatcher was not requeued. Use an explicit retry action if this needs another run.`;
+  }
 
   const queued = await enqueueDispatcherIssueRun(issue, "recommendation-approval");
   if (queued.queued) return `Queued dispatcher run ${queued.runId} for ${convertedIssueId}.`;

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { RecommendationActionPanel } from "@/components/admin/RecommendationActionPanel";
 import { getDailyRecommendationsSchedule } from "@/lib/daily-recommendations";
+import { createSupabaseAdmin } from "@/lib/supabase-admin";
 import {
   getRecommendationFilterOptions,
   getRecommendationsSummary,
@@ -91,6 +92,87 @@ function priorityClasses(priority: AdminRecommendation["priority"]) {
     P4: "border-neutral-200 bg-white text-neutral-600",
   };
   return styles[priority];
+}
+
+
+type RecommendationExecutionState = {
+  issueNumber?: number;
+  issueStatus?: string;
+  issueUpdatedAt?: string;
+  runStatus?: string;
+  runUpdatedAt?: string;
+  warning?: string;
+};
+
+async function getRecommendationExecutionStates(recommendations: AdminRecommendation[]) {
+  const convertedIds = recommendations.map((item) => item.convertedIssueId).filter((id): id is string => Boolean(id));
+  const states = new Map<string, RecommendationExecutionState>();
+
+  for (const item of recommendations) {
+    if (item.status === "approved" && !item.convertedIssueId) {
+      states.set(item.id, { warning: "Approved but no linked issue was recorded." });
+    }
+  }
+
+  if (!convertedIds.length) return states;
+
+  try {
+    const supabase = createSupabaseAdmin();
+    const { data: issues, error: issuesError } = await supabase
+      .from("admin_issues")
+      .select("id, number, status, updated_at")
+      .in("id", convertedIds);
+    if (issuesError) throw new Error(issuesError.message);
+
+    const issueById = new Map((issues ?? []).map((issue) => [String(issue.id), issue]));
+    const { data: runs, error: runsError } = await supabase
+      .from("admin_issue_runs")
+      .select("issue_id, status, updated_at")
+      .in("issue_id", convertedIds)
+      .order("created_at", { ascending: false });
+    if (runsError) throw new Error(runsError.message);
+
+    const latestRunByIssueId = new Map<string, { status?: string; updated_at?: string }>();
+    for (const run of runs ?? []) {
+      const issueId = String(run.issue_id);
+      if (!latestRunByIssueId.has(issueId)) latestRunByIssueId.set(issueId, run);
+    }
+
+    for (const item of recommendations) {
+      if (!item.convertedIssueId) continue;
+      const issue = issueById.get(item.convertedIssueId);
+      const run = latestRunByIssueId.get(item.convertedIssueId);
+      const state: RecommendationExecutionState = {
+        issueNumber: issue?.number ? Number(issue.number) : undefined,
+        issueStatus: issue?.status ? String(issue.status) : undefined,
+        issueUpdatedAt: issue?.updated_at ? String(issue.updated_at) : undefined,
+        runStatus: run?.status ? String(run.status) : undefined,
+        runUpdatedAt: run?.updated_at ? String(run.updated_at) : undefined,
+      };
+      if (item.status === "approved" && !issue) state.warning = "Approved but linked issue was not found.";
+      else if (item.status === "approved" && issue && !run) state.warning = "Approved issue exists, but no dispatcher run was recorded.";
+      else if (item.status === "approved" && run?.status === "completed" && issue?.status === "In Progress") state.warning = "Dispatcher completed, but issue still needs final status reconciliation.";
+      states.set(item.id, state);
+    }
+  } catch (error) {
+    states.set("__error__", { warning: error instanceof Error ? error.message : "Execution state unavailable" });
+  }
+
+  return states;
+}
+
+function ExecutionStateCard({ state }: { state?: RecommendationExecutionState }) {
+  if (!state || (!state.issueStatus && !state.runStatus && !state.warning)) return null;
+  return (
+    <div className={cn("rounded-2xl p-4", state.warning ? "bg-amber-50" : "bg-[#fcfaf7]")}>
+      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">Execution state</p>
+      {state.issueStatus ? <p className="mt-2 text-sm font-semibold text-neutral-900">Issue {state.issueNumber ? `#${state.issueNumber}` : ""}: {state.issueStatus}</p> : null}
+      {state.runStatus ? <p className="mt-1 text-sm text-neutral-700">Latest dispatcher run: {label(state.runStatus)}</p> : null}
+      {state.issueUpdatedAt ? <p className="mt-1 text-xs text-neutral-500">Issue updated {formatDate(state.issueUpdatedAt)}</p> : null}
+      {state.runUpdatedAt ? <p className="mt-1 text-xs text-neutral-500">Run updated {formatDate(state.runUpdatedAt)}</p> : null}
+      {state.warning ? <p className="mt-2 text-sm font-medium text-amber-800">{state.warning}</p> : null}
+    </div>
+  );
 }
 
 function SummaryCard({ label, value, helper, href }: { label: string; value: number; helper: string; href: string }) {
@@ -189,6 +271,7 @@ export default async function RecommendationsPage({
     getScheduleStatus(),
     listRecommendations(),
   ]);
+  const executionStates = await getRecommendationExecutionStates(allRecommendations);
   const summary = getRecommendationsSummary(allRecommendations);
   const options = getRecommendationFilterOptions(allRecommendations);
   const p1RecommendedCount = allRecommendations.filter((item) => item.priority === "P1" && item.status === "recommended").length;
@@ -297,6 +380,7 @@ export default async function RecommendationsPage({
                   {item.decisionAt ? <p className="mt-2 text-xs text-neutral-500">Decision at {formatDate(item.decisionAt)}{item.decisionBy ? ` by ${item.decisionBy}` : ""}</p> : null}
                   {item.convertedIssueId ? <p className="mt-1 text-xs font-medium text-neutral-700">Converted action item: {item.convertedIssueId}</p> : null}
                 </div>
+                <ExecutionStateCard state={executionStates.get(item.id)} />
               </div>
 
               <RecommendationActionPanel recommendation={item} />

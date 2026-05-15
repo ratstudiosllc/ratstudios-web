@@ -34,6 +34,10 @@ const args = new Set(process.argv.slice(2));
 const limit = Math.max(1, Number(process.argv.find((arg) => arg.startsWith("--limit="))?.split("=")[1] ?? "1"));
 const dispatcherId = process.env.OPENCLAW_DISPATCHER_ID || `ratstudios-local-dispatcher-${process.pid}`;
 const dryRun = args.has("--dry-run");
+const staleRunningAfterMs = Math.max(
+  30 * 60 * 1000,
+  Number(process.env.OPENCLAW_DISPATCH_STALE_RUNNING_MS || 60 * 60 * 1000),
+);
 
 function createSupabaseAdmin() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -97,6 +101,45 @@ async function markRun(id, patch) {
   if (error) throw new Error(error.message);
 }
 
+async function recoverStaleRuns() {
+  const cutoff = new Date(Date.now() - staleRunningAfterMs).toISOString();
+  const { data: staleRuns, error: selectError } = await supabase
+    .from("admin_issue_runs")
+    .select("id, issue_id, issue_number, claimed_by, started_at, updated_at")
+    .in("status", ["running", "retrying"])
+    .lt("updated_at", cutoff);
+  if (selectError) throw new Error(selectError.message);
+  if (!staleRuns?.length) return [];
+
+  const recovered = [];
+  for (const run of staleRuns) {
+    const message = `Recovered stale dispatcher run claimed by ${run.claimed_by || "unknown"}; no heartbeat since ${run.updated_at || run.started_at || "unknown"}.`;
+    const { error: runError } = await supabase
+      .from("admin_issue_runs")
+      .update({
+        status: "queued",
+        claimed_by: null,
+        claimed_at: null,
+        started_at: null,
+        failure_category: "stale_dispatch_claim_recovered",
+        failure_message: message,
+        updated_at: nowIso(),
+      })
+      .eq("id", run.id)
+      .in("status", ["running", "retrying"]);
+    if (runError) throw new Error(runError.message);
+
+    await supabase.from("admin_issues").update({
+      status: "Triaged",
+      current_state: message,
+      next_step: "Dispatcher recovered this stale run and put it back in the queue for automatic retry.",
+      updated_at: nowIso(),
+    }).eq("id", run.issue_id);
+    recovered.push({ runId: run.id, issueNumber: run.issue_number });
+  }
+  return recovered;
+}
+
 async function getIssue(issueId) {
   const { data, error } = await supabase
     .from("admin_issues")
@@ -128,8 +171,87 @@ async function spawnWorker(issue) {
   return { raw, sessionId: parseRunId(stdout) || sessionId, ownerAgent: agent.ownerAgent, cwd };
 }
 
+function parseWorkerJson(raw) {
+  try {
+    const start = raw.indexOf("{");
+    const end = raw.lastIndexOf("}");
+    if (start === -1 || end === -1 || end <= start) return null;
+    return JSON.parse(raw.slice(start, end + 1));
+  } catch {
+    return null;
+  }
+}
+
+function getWorkerVisibleText(raw) {
+  const parsed = parseWorkerJson(raw);
+  const payloadText = parsed?.result?.payloads
+    ?.map((payload) => typeof payload?.text === "string" ? payload.text : "")
+    ?.filter(Boolean)
+    ?.join("\n\n");
+  return payloadText || parsed?.result?.meta?.finalAssistantVisibleText || parsed?.finalAssistantVisibleText || "";
+}
+
+function workerYielded(raw) {
+  const parsed = parseWorkerJson(raw);
+  const meta = parsed?.result?.meta ?? parsed?.meta ?? {};
+  return meta?.yielded === true || meta?.stopReason === "end_turn" || meta?.completion?.stopReason === "end_turn" || meta?.livenessState === "paused";
+}
+
+async function reconcileIssueAfterWorker(issue, raw, spawned) {
+  const { data: current, error } = await supabase
+    .from("admin_issues")
+    .select("id, status, current_state, next_step, commits, committed, pushed, deployed")
+    .eq("id", issue.id)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  if (!current) return { reconciled: false, reason: "Issue disappeared after worker run." };
+
+  const genericDispatcherState = current.status === "In Progress"
+    && current.current_state === "Agent spawned and actively working this issue."
+    && current.next_step === "Wait for worker result, then move to Needs Verification or Blocked.";
+  if (!genericDispatcherState) return { reconciled: false, reason: "Worker updated issue directly." };
+
+  const text = getWorkerVisibleText(raw);
+  const lower = text.toLowerCase();
+  const patch = {
+    owner_agent: spawned.ownerAgent,
+    updated_at: nowIso(),
+  };
+
+  if (lower.includes("needs verification")) {
+    Object.assign(patch, {
+      status: "Needs Verification",
+      current_state: text.slice(0, 900) || "Worker completed and reported Needs Verification.",
+      next_step: "Human verification required before closure.",
+    });
+  } else if (lower.includes("blocked")) {
+    Object.assign(patch, {
+      status: "Blocked",
+      current_state: text.slice(0, 900) || "Worker reported this issue is blocked.",
+      next_step: "Review the blocker, then requeue or close manually.",
+    });
+  } else if (workerYielded(raw)) {
+    Object.assign(patch, {
+      status: "In Progress",
+      current_state: "Worker session yielded/paused after dispatch. Agent action started, but no final result has been reconciled yet.",
+      next_step: `Resume or inspect worker session ${spawned.sessionId}, then update this issue to Needs Verification or Blocked.`,
+    });
+  } else {
+    Object.assign(patch, {
+      status: "Needs Verification",
+      current_state: text.slice(0, 900) || "Worker process completed successfully but did not write a final issue status.",
+      next_step: `Verify worker session ${spawned.sessionId}; then close, requeue, or mark blocked as appropriate.`,
+    });
+  }
+
+  const { error: updateError } = await supabase.from("admin_issues").update(patch).eq("id", issue.id);
+  if (updateError) throw new Error(updateError.message);
+  return { reconciled: true, status: patch.status };
+}
+
 const started = [];
 const failed = [];
+const recovered = await recoverStaleRuns();
 
 for (let i = 0; i < limit; i += 1) {
   const run = await claimNextQueuedRun();
@@ -145,24 +267,29 @@ for (let i = 0; i < limit; i += 1) {
       continue;
     }
 
-    const spawned = await spawnWorker(issue);
     await supabase.from("admin_issues").update({
-      owner_agent: spawned.ownerAgent,
+      owner_agent: chooseAgent(issue).ownerAgent,
       status: "In Progress",
       current_state: "Agent spawned and actively working this issue.",
       next_step: "Wait for worker result, then move to Needs Verification or Blocked.",
       updated_at: nowIso(),
     }).eq("id", issue.id);
+
+    const spawned = await spawnWorker(issue);
+    const reconciliation = await reconcileIssueAfterWorker(issue, spawned.raw, spawned);
     await markRun(run.id, {
-      status: "completed",
+      status: workerYielded(spawned.raw) ? "running" : "completed",
       owner_agent: spawned.ownerAgent,
       run_id: spawned.sessionId,
       cwd: spawned.cwd,
       raw_spawn_result: spawned.raw,
-      completed_at: nowIso(),
+      result_summary: reconciliation.reconciled
+        ? `Dispatcher reconciled worker result to ${reconciliation.status}.`
+        : reconciliation.reason,
+      completed_at: workerYielded(spawned.raw) ? null : nowIso(),
       duration_ms: Math.max(0, Date.now() - startedAt),
     });
-    started.push({ runId: run.id, issueNumber: run.issue_number, sessionId: spawned.sessionId, project: issue.project });
+    started.push({ runId: run.id, issueNumber: run.issue_number, sessionId: spawned.sessionId, project: issue.project, reconciliation });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     await markRun(run.id, {
@@ -176,4 +303,4 @@ for (let i = 0; i < limit; i += 1) {
   }
 }
 
-console.log(JSON.stringify({ ok: true, started, failed }, null, 2));
+console.log(JSON.stringify({ ok: true, recovered, started, failed }, null, 2));
