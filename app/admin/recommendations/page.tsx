@@ -104,6 +104,14 @@ type RecommendationExecutionState = {
   warning?: string;
 };
 
+type ExecutionSummary = {
+  queued: number;
+  running: number;
+  needsVerification: number;
+  blocked: number;
+  missingRun: number;
+};
+
 async function getRecommendationExecutionStates(recommendations: AdminRecommendation[]) {
   const convertedIds = recommendations.map((item) => item.convertedIssueId).filter((id): id is string => Boolean(id));
   const states = new Map<string, RecommendationExecutionState>();
@@ -173,6 +181,36 @@ function ExecutionStateCard({ state }: { state?: RecommendationExecutionState })
       {state.warning ? <p className="mt-2 text-sm font-medium text-amber-800">{state.warning}</p> : null}
     </div>
   );
+}
+
+function summarizeExecutionStates(recommendations: AdminRecommendation[], states: Map<string, RecommendationExecutionState>): ExecutionSummary {
+  const summary: ExecutionSummary = { queued: 0, running: 0, needsVerification: 0, blocked: 0, missingRun: 0 };
+
+  for (const item of recommendations) {
+    if (item.status !== "approved") continue;
+    const state = states.get(item.id);
+    if (!state?.runStatus && !state?.issueStatus) {
+      summary.missingRun += 1;
+      continue;
+    }
+    if (state.runStatus === "queued") summary.queued += 1;
+    if (state.runStatus === "running" || state.issueStatus === "In Progress") summary.running += 1;
+    if (state.issueStatus === "Needs Verification") summary.needsVerification += 1;
+    if (state.issueStatus === "Blocked") summary.blocked += 1;
+  }
+
+  return summary;
+}
+
+function approvedHelper(execution: ExecutionSummary) {
+  const parts = [
+    `${execution.queued} actually queued`,
+    `${execution.running} running`,
+    `${execution.needsVerification} needs verification`,
+    `${execution.blocked} blocked`,
+  ];
+  if (execution.missingRun) parts.push(`${execution.missingRun} missing run`);
+  return parts.join(" · ");
 }
 
 function SummaryCard({ label, value, helper, href }: { label: string; value: number; helper: string; href: string }) {
@@ -272,6 +310,7 @@ export default async function RecommendationsPage({
     listRecommendations(),
   ]);
   const executionStates = await getRecommendationExecutionStates(allRecommendations);
+  const executionSummary = summarizeExecutionStates(allRecommendations, executionStates);
   const summary = getRecommendationsSummary(allRecommendations);
   const options = getRecommendationFilterOptions(allRecommendations);
   const p1RecommendedCount = allRecommendations.filter((item) => item.priority === "P1" && item.status === "recommended").length;
@@ -300,7 +339,7 @@ export default async function RecommendationsPage({
         <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
           <SummaryCard label="Total" value={summary.total} helper="All captured recommendations" href="/admin/recommendations" />
           <SummaryCard label="Recommended" value={summary.recommended} helper="Awaiting operator decision" href="/admin/recommendations?status=recommended" />
-          <SummaryCard label="Approved" value={summary.approved} helper="Queued as tracked issues" href="/admin/recommendations?status=approved" />
+          <SummaryCard label="Approved" value={summary.approved} helper={approvedHelper(executionSummary)} href="/admin/recommendations?status=approved" />
           <SummaryCard label="Implemented" value={summary.implemented} helper="Done and retained for audit" href="/admin/recommendations?status=implemented" />
           <SummaryCard label="High impact" value={summary.highImpact} helper="High expected business or ops value" href="/admin/recommendations?impact=high" />
         </div>
