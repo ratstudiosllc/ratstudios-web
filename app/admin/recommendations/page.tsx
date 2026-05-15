@@ -50,6 +50,17 @@ function optionalDate(value: unknown) {
   return typeof value === "string" && value.length ? formatDate(value) : "Not recorded yet";
 }
 
+function mountainDateKey(value: Date | string) {
+  const date = typeof value === "string" ? new Date(value) : value;
+  if (Number.isNaN(date.getTime())) return null;
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Denver",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(date);
+}
+
 async function getScheduleStatus() {
   try {
     return { schedule: await getDailyRecommendationsSchedule(), error: null as string | null };
@@ -130,6 +141,38 @@ function ScheduleStatusCard({ schedule, error }: { schedule: Record<string, unkn
   );
 }
 
+function MorningApprovalCue({ schedule, p1RecommendedCount }: { schedule: Record<string, unknown> | null; p1RecommendedCount: number }) {
+  const lastStatus = typeof schedule?.last_status === "string" ? schedule.last_status : null;
+  const lastRunAt = typeof schedule?.last_run_at === "string" ? schedule.last_run_at : null;
+  const ranToday = Boolean(lastRunAt && mountainDateKey(lastRunAt) === mountainDateKey(new Date()));
+  const readyForReview = lastStatus === "completed" && ranToday;
+
+  return (
+    <section className={cn("mt-4 rounded-[28px] border p-5 shadow-sm", readyForReview ? "border-orange-200 bg-orange-50" : "border-black/5 bg-white")}>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-orange-500">8:00am operator review</p>
+          <h2 className="mt-2 text-xl font-semibold text-neutral-950">Morning P1 approval checklist</h2>
+          <p className="mt-1 text-sm text-neutral-600">
+            {readyForReview
+              ? `Daily recommendations ran today. Review ${p1RecommendedCount} recommended P1 ${p1RecommendedCount === 1 ? "item" : "items"} before agents start execution work.`
+              : "Waiting for today’s 5:00am recommendation job before prompting the operator review."}
+          </p>
+        </div>
+        <Link href="/admin/recommendations?priority=P1&status=recommended" className="rounded-xl bg-neutral-950 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800">
+          Review P1 queue
+        </Link>
+      </div>
+      <ol className="mt-4 grid gap-2 text-sm text-neutral-700 md:grid-cols-3">
+        <li className="rounded-2xl bg-white/70 p-3">1. Open recommended P1 cards.</li>
+        <li className="rounded-2xl bg-white/70 p-3">2. Approve, defer, or reject each urgent item.</li>
+        <li className="rounded-2xl bg-white/70 p-3">3. Confirm approved work appears in Issues.</li>
+      </ol>
+      {lastRunAt ? <p className="mt-3 text-xs text-neutral-500">Last daily job: {formatDate(lastRunAt)}</p> : null}
+    </section>
+  );
+}
+
 export default async function RecommendationsPage({
   searchParams,
 }: {
@@ -148,6 +191,7 @@ export default async function RecommendationsPage({
   ]);
   const summary = getRecommendationsSummary(allRecommendations);
   const options = getRecommendationFilterOptions(allRecommendations);
+  const p1RecommendedCount = allRecommendations.filter((item) => item.priority === "P1" && item.status === "recommended").length;
   const recommendations = allRecommendations
     .filter((item) => (appValue ? item.appProduct === appValue : true))
     .filter((item) => (categoryValue ? item.category === categoryValue : true))
@@ -168,6 +212,7 @@ export default async function RecommendationsPage({
         </section>
 
         <ScheduleStatusCard schedule={schedule} error={scheduleError} />
+        <MorningApprovalCue schedule={schedule} p1RecommendedCount={p1RecommendedCount} />
 
         <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
           <SummaryCard label="Total" value={summary.total} helper="All captured recommendations" href="/admin/recommendations" />

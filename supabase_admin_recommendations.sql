@@ -46,5 +46,29 @@ create table if not exists public.admin_recommendation_decisions (
 create index if not exists admin_recommendation_decisions_recommendation_id_idx
   on public.admin_recommendation_decisions(recommendation_id, created_at desc);
 
+create table if not exists public.admin_schedules (
+  id uuid primary key,
+  owner_user_id uuid,
+  project text not null,
+  agent_name text not null,
+  task_title text not null,
+  cron_expression text not null,
+  timezone text not null default 'America/Denver',
+  environment text not null default 'prod',
+  enabled boolean not null default true,
+  owner_label text,
+  task_payload jsonb not null default '{}'::jsonb,
+  last_run_at timestamptz,
+  next_run_at timestamptz,
+  last_status text not null default 'pending',
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  constraint admin_schedules_last_status_check check (last_status in ('pending', 'completed', 'failed'))
+);
+
+create index if not exists admin_schedules_enabled_idx on public.admin_schedules(enabled);
+create index if not exists admin_schedules_next_run_at_idx on public.admin_schedules(next_run_at);
+create index if not exists admin_schedules_updated_at_idx on public.admin_schedules(updated_at desc);
+
 -- Optional seed example. Insert existing data/recommendations-store.json rows through the app/admin flow
 -- or a one-time script; runtime display still falls back to local JSON for rows not yet in Supabase.
