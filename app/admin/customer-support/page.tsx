@@ -15,6 +15,7 @@ import {
   XCircle,
 } from "lucide-react";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import supportPolicy from "@/data/customer-support-agent-policy.json";
 
 export const revalidate = 300;
 
@@ -158,6 +159,81 @@ export default function CustomerSupportPage() {
             <p className="mt-2 text-2xl font-semibold text-neutral-950">Low blast radius</p>
             <p className="mt-1 text-sm text-neutral-500">Useful support context without external actions.</p>
           </div>
+        </section>
+
+        <section className="mt-8 grid gap-6 xl:grid-cols-[1fr_1fr]">
+          <Card
+            eyebrow="Exact permissions"
+            title="What the agent can do"
+            body={supportPolicy.purpose}
+            icon={<CheckCircle2 className="h-5 w-5" />}
+          >
+            <div className="space-y-3">
+              {supportPolicy.canDo.map((permission) => (
+                <div key={permission} className="flex gap-3 rounded-2xl bg-emerald-50 p-4 text-sm leading-6 text-emerald-900">
+                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
+                  <p>{permission}</p>
+                </div>
+              ))}
+            </div>
+          </Card>
+
+          <Card
+            eyebrow="Exact restrictions"
+            title="What the agent cannot do"
+            body="These restrictions are enforced by OAuth scope validation and repeated in the agent policy."
+            icon={<XCircle className="h-5 w-5" />}
+          >
+            <div className="space-y-3">
+              {supportPolicy.cannotDo.map((restriction) => (
+                <div key={restriction} className="flex gap-3 rounded-2xl bg-red-50 p-4 text-sm leading-6 text-red-900">
+                  <XCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                  <p>{restriction}</p>
+                </div>
+              ))}
+            </div>
+          </Card>
+        </section>
+
+        <section className="mt-6 grid gap-6 xl:grid-cols-[1fr_1fr]">
+          <Card
+            eyebrow="Gmail OAuth"
+            title="Allowed and forbidden scopes"
+            body="The runner refuses to start if configured scopes include anything outside the allowed list or inside the forbidden list."
+            icon={<KeyRound className="h-5 w-5" />}
+          >
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="rounded-2xl bg-emerald-50 p-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-emerald-700">Allowed</p>
+                <div className="mt-3 space-y-2">
+                  {supportPolicy.gmail.allowedScopes.map((scope) => (
+                    <p key={scope} className="break-all rounded-xl bg-white px-3 py-2 text-xs font-medium text-emerald-900">{scope}</p>
+                  ))}
+                </div>
+              </div>
+              <div className="rounded-2xl bg-red-50 p-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-red-700">Forbidden</p>
+                <div className="mt-3 space-y-2">
+                  {supportPolicy.gmail.forbiddenScopes.map((scope) => (
+                    <p key={scope} className="break-all rounded-xl bg-white px-3 py-2 text-xs font-medium text-red-900">{scope}</p>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </Card>
+
+          <Card
+            eyebrow="Files to review"
+            title="Behavior control files"
+            body="These are the files Topher and Richard should review before live Gmail access is connected."
+            icon={<FileText className="h-5 w-5" />}
+          >
+            <div className="space-y-3">
+              {supportPolicy.reviewFiles.map((file) => (
+                <div key={file} className="rounded-2xl bg-[#fcfaf7] px-4 py-3 font-mono text-sm text-neutral-800">{file}</div>
+              ))}
+            </div>
+          </Card>
         </section>
 
         <section className="mt-8 grid gap-6 xl:grid-cols-[1fr_1fr]">

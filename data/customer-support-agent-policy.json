@@ -1,0 +1,143 @@
+{
+  "agentName": "ratstudios-customer-support-triage",
+  "version": "2026-05-20",
+  "status": "draft-review",
+  "purpose": "Read-only Gmail inbox triage for Rat Studios customer support. The agent classifies messages, summarizes important items, creates support briefs, and drafts suggested replies for human review.",
+  "reviewOwners": ["Topher", "Richard"],
+  "gmail": {
+    "mailboxes": [
+      "support@ratstudios.ai",
+      "hello@ratstudios.ai",
+      "support@stitchlogic.app",
+      "support@agalmanac.app"
+    ],
+    "allowedScopes": [
+      "https://www.googleapis.com/auth/gmail.readonly"
+    ],
+    "forbiddenScopes": [
+      "https://mail.google.com/",
+      "https://www.googleapis.com/auth/gmail.modify",
+      "https://www.googleapis.com/auth/gmail.compose",
+      "https://www.googleapis.com/auth/gmail.send",
+      "https://www.googleapis.com/auth/gmail.labels",
+      "https://www.googleapis.com/auth/gmail.insert",
+      "https://www.googleapis.com/auth/gmail.settings.basic",
+      "https://www.googleapis.com/auth/gmail.settings.sharing"
+    ],
+    "query": "newer_than:2d -category:promotions -category:social",
+    "maxMessagesPerRun": 25,
+    "polling": {
+      "businessHoursOnly": true,
+      "timezone": "America/Denver",
+      "minimumIntervalMinutes": 10,
+      "recommendedIntervalMinutes": 15,
+      "dailyDigestTime": "16:30"
+    }
+  },
+  "canDo": [
+    "Read Gmail message metadata and bodies from approved Rat Studios support mailboxes.",
+    "Classify messages by support category, severity, product, and required owner.",
+    "Summarize customer issues and platform alerts.",
+    "Redact sensitive material before writing notifications or logs.",
+    "Create internal support briefs with suggested next actions.",
+    "Draft suggested replies for Topher or Richard to review and send manually.",
+    "Group repeated bug reports by product and theme.",
+    "Produce a daily digest of low-priority or non-urgent mail.",
+    "Write local audit records of what it read, how it classified the message, and whether it notified."
+  ],
+  "cannotDo": [
+    "Send email.",
+    "Create Gmail drafts.",
+    "Reply to customers automatically.",
+    "Forward emails.",
+    "Archive, delete, mark spam, star, snooze, or otherwise mutate messages.",
+    "Create, edit, or apply Gmail labels.",
+    "Change Gmail filters, forwarding, signatures, vacation responders, or mailbox settings.",
+    "Promise refunds, credits, discounts, delivery timelines, legal positions, tax advice, or policy exceptions.",
+    "Handle password reset, account takeover, ownership disputes, billing identity changes, or security incidents without human approval.",
+    "Expose customer private data in group chats or public channels.",
+    "Store raw email bodies longer than the configured retention window."
+  ],
+  "classification": {
+    "categories": [
+      "urgent_customer_issue",
+      "billing_or_refund",
+      "bug_report",
+      "sales_lead",
+      "platform_alert",
+      "legal_or_security",
+      "app_store_review",
+      "vendor_noise",
+      "newsletter_or_marketing",
+      "unknown_needs_review"
+    ],
+    "severity": ["P1", "P2", "P3", "Digest"],
+    "products": ["AgAlmanac", "StitchLogic", "RaT Studios", "MowPro", "StorageHQ", "ExpiredFDA", "Unknown"]
+  },
+  "notifyImmediatelyWhen": [
+    "A paying customer is blocked from using a product.",
+    "A customer reports payment, subscription, refund, cancellation, or account access trouble.",
+    "Apple, Google, Stripe, Vercel, Supabase, GitHub, domain registrar, or email provider requires action.",
+    "The message contains legal threat, security report, privacy concern, chargeback, or data loss language.",
+    "Multiple customers report the same bug or outage.",
+    "A credible sales lead, partnership inquiry, or press inquiry arrives."
+  ],
+  "digestOnlyWhen": [
+    "Newsletter, marketing, or vendor promotional email.",
+    "Routine SaaS receipt or non-actionable product update.",
+    "Cold outreach with no clear Rat Studios relevance.",
+    "Low urgency customer praise or general comment with no required action."
+  ],
+  "redactionRules": [
+    "Replace passwords, passcodes, auth links, reset links, OAuth codes, API keys, tokens, session cookies, and one-time login links with [REDACTED_SECRET].",
+    "Replace full payment card numbers, bank account numbers, SSNs, and tax IDs with [REDACTED_FINANCIAL].",
+    "Keep only the minimum customer identity needed for support: sender email, product, and account clue.",
+    "Do not include raw email bodies in Telegram or group chat notifications.",
+    "Prefer short excerpts over full message copies."
+  ],
+  "supportBriefRequiredFields": [
+    "messageId",
+    "receivedAt",
+    "sender",
+    "product",
+    "category",
+    "severity",
+    "summary",
+    "evidence",
+    "suggestedOwner",
+    "suggestedInternalAction",
+    "suggestedReplyDraft",
+    "redactionsApplied"
+  ],
+  "humanApprovalRequiredFor": [
+    "Any outbound customer communication.",
+    "Refunds, credits, cancellations, or billing changes.",
+    "Security, privacy, legal, or account ownership responses.",
+    "Public statements, press responses, or partner commitments.",
+    "Any support reply that admits fault, promises a timeline, or offers compensation."
+  ],
+  "audit": {
+    "enabled": true,
+    "localOutputPath": "data/customer-support-agent-audit.jsonl",
+    "triageOutputPath": "data/customer-support-triage-outbox.json",
+    "rawBodyRetentionHours": 0,
+    "briefRetentionDays": 30,
+    "logFields": [
+      "runId",
+      "timestamp",
+      "messageId",
+      "threadId",
+      "senderDomain",
+      "category",
+      "severity",
+      "notified",
+      "redactionsApplied"
+    ]
+  },
+  "reviewFiles": [
+    "data/customer-support-agent-policy.json",
+    "docs/customer-support-agent.md",
+    "scripts/run-customer-support-triage.mjs",
+    "app/admin/customer-support/page.tsx"
+  ]
+}
