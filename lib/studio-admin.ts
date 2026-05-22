@@ -385,57 +385,114 @@ export const studioApps: StudioApp[] = [
   },
   {
     slug: "expired-fda",
-    name: "Expired FDA",
-    type: "Web app",
+    name: "MedTrack",
+    type: "Healthcare SaaS",
     lifecycle: "current",
     stage: "Active development",
     status: "Production deployed",
     owner: "Topher",
     href: "/admin/apps/expired-fda",
-    summary: "Hospital inventory management app for expiration monitoring, FDA recall matching, receiving workflows, reports, and RFID inventory operations.",
-    currentFocus: "Keep the production app stable while turning the fetched Supabase migration history into the source of truth.",
-    nextMilestone: "Use the fetched migration history as the baseline and continue hardening inventory, recalls, reports, and RFID flows.",
+    summary: "Hospital supply chain intelligence platform for item master cleanup, expiration monitoring, FDA recall matching, receiving workflows, reports, and RFID inventory operations.",
+    currentFocus: "Define and build the governed Item Master import and cleanup workflow without turning AI into a black-box data editor.",
+    nextMilestone: "Stand up the Supabase-backed import foundation: batch ledger, raw row storage, mapping review, and batch health profile.",
     users: {
-      summary: "Primary users are hospital inventory and materials teams responsible for expiring items, recalls, and location visibility.",
+      summary: "Primary users are hospital materials, supply chain, inventory, IT, and compliance teams responsible for item identity, recalls, expirations, and location visibility.",
       highlights: [
-        "Track inventory, expiring items, recall matches, receiving, reports, and RFID usage",
+        "Track item master cleanup, inventory, expiring items, recall matches, receiving, reports, and RFID usage",
         "Keep login and protected-route behavior visible",
-        "Use item master and recall matching as core workflow proof points",
+        "Use item master quality and recall matching as core workflow proof points",
       ],
     },
     marketing: {
-      summary: "Positioning should focus on reducing expired inventory risk and speeding recall response for healthcare teams.",
+      summary: "Positioning should focus on cleaning the item identity foundation that makes recalls, expirations, PARs, backorders, and preference card visibility trustworthy.",
       highlights: [
         "Public URL: https://expired-fda-cyan.vercel.app",
-        "Lead with expiration visibility, FDA recall matching, and operational reporting",
+        "Lead with governed item master cleanup, FDA recall matching, expiration visibility, and operational reporting",
         "RFID workflows can become a stronger enterprise differentiator once validated",
       ],
     },
     revenue: {
-      summary: "Potential B2B healthcare SaaS with value tied to waste reduction, recall response speed, and compliance visibility.",
+      summary: "Potential B2B healthcare SaaS with value tied to item master readiness, waste reduction, recall response speed, and compliance visibility.",
       highlights: [
         "Package around facilities, departments, inventory volume, or recall monitoring",
-        "Quantify avoided expired inventory and recall labor savings",
+        "Quantify item master cleanup labor, avoided expired inventory, and recall response savings",
         "Keep production/data readiness separate from sales claims until validated",
       ],
     },
     roadmap: {
-      summary: "Near-term roadmap is production hardening, migration-source cleanup, and proving healthcare inventory workflows end to end.",
+      summary: "Near-term roadmap is governed item master import/cleanup first, then enrichment, duplicate review, risk queues, and export packets.",
       highlights: [
-        "Maintain fetched Supabase migrations in repo",
-        "Verify inventory, expiring, recalls, reports, receiving, and RFID routes after deploys",
+        "Preserve raw item master files and rows before any cleanup",
+        "Separate deterministic cleanup from LLM-assisted recommendations",
+        "Verify inventory, expiring, recalls, reports, receiving, item master, and RFID routes after deploys",
         "Clean up audit/lint warnings deliberately instead of broad forced dependency fixes",
       ],
     },
     issues: {
-      summary: "Track Expired FDA production deploys, Supabase migration history, protected routes, inventory workflows, recalls, reports, and RFID issues here.",
+      summary: "Track MedTrack production deploys, Supabase migration history, item master cleanup, protected routes, inventory workflows, recalls, reports, and RFID issues here.",
       ctaHref: "/admin/issues",
       ctaLabel: "Open issues",
     },
+    launchChecklist: [
+      {
+        title: "Planning and product boundaries",
+        summary: "Lock the workflow shape before building so MedTrack sells governance, not AI magic.",
+        items: [
+          { id: "item-master-agent-spec", label: "Create Item Master agent import and cleanup process guide", status: "done", priority: "Required", owner: "Bub", note: "Initial governed workflow spec exists with intake, mapping, profiling, normalization, duplicate detection, enrichment, risk, review, and export stages." },
+          { id: "agent-operating-model", label: "Confirm agents are staged workflow roles, not ten independent AI products", status: "done", priority: "Required", owner: "Richard", note: "Decision: one orchestrated MedTrack backend workflow with named agent stages, selective LLM use, and auditable outputs." },
+          { id: "mvp-boundary", label: "Define MVP scope for first build pass", status: "in_progress", priority: "Required", owner: "Richard / Topher", note: "Recommended MVP: Upload -> Intake -> Mapping Review -> Profile -> Normalize -> Findings -> Human Review -> Export. Duplicate detection and AccessGUDID enrichment can follow after the foundation is stable." },
+          { id: "success-criteria", label: "Define pilot success criteria and demo story", status: "not_started", priority: "Required", owner: "Richard", note: "Needed: what a hospital sees after upload, which health scores matter, which exports prove value, and what must be demo-ready for Bingham-style validation." },
+        ],
+      },
+      {
+        title: "Supabase data foundation",
+        summary: "Create the durable database and storage backbone before agent logic runs.",
+        items: [
+          { id: "storage-original-files", label: "Store original item master uploads in Supabase Storage", status: "not_started", priority: "Required", owner: "Topher", note: "Files need checksum, uploader, organization, filename, uploaded timestamp, and import batch linkage." },
+          { id: "import-batch-ledger", label: "Create import batch and raw row tables", status: "not_started", priority: "Required", owner: "Topher", note: "Add item_master_import_batches, item_master_import_files, and item_master_raw_rows so raw hospital data is preserved exactly as received." },
+          { id: "staged-canonical-tables", label: "Create staged canonical item master tables", status: "not_started", priority: "Required", owner: "Topher", note: "Add staged rows and column mappings so weird hospital headers map into MedTrack fields before anything is treated as clean." },
+          { id: "agent-audit-tables", label: "Create agent run, evidence, findings, review, and export tables", status: "not_started", priority: "Required", owner: "Topher", note: "Add item_master_agent_runs, cleanup_findings, agent_evidence, review_decisions, export_batches, and export_rows." },
+          { id: "rls-tenancy", label: "Apply organization-scoped RLS and access rules", status: "not_started", priority: "Required", owner: "Topher", note: "Every import, raw row, finding, decision, and export must be organization-scoped before pilot use." },
+        ],
+      },
+      {
+        title: "Import and profiling workflow",
+        summary: "Build the user-visible upload path and first deterministic cleanup outputs.",
+        items: [
+          { id: "server-parser", label: "Move item master parsing to the backend", status: "not_started", priority: "Required", owner: "Topher", note: "Server-side CSV/XLSX parsing should detect sheets, header rows, row counts, blank/footer rows, and structural warnings." },
+          { id: "mapping-review-ui", label: "Build field mapping review screen", status: "not_started", priority: "Required", owner: "Topher", note: "Show MedTrack field, proposed source column, confidence, samples, required/optional status, and user approval/edit controls." },
+          { id: "batch-profile", label: "Generate batch health profile", status: "not_started", priority: "Required", owner: "Bub", note: "Calculate total rows, unique item numbers, duplicate counts, missing manufacturer/catalog/GTIN, implant risk, extreme cost, and initial readiness scores." },
+          { id: "normalization-pass", label: "Implement safe normalization pass", status: "not_started", priority: "Required", owner: "Bub", note: "Trim whitespace, normalize match keys, normalize UOM aliases, preserve raw/display values, and create low-risk findings only." },
+        ],
+      },
+      {
+        title: "Agent orchestration and LLM layer",
+        summary: "Connect MedTrack events to controlled workers so agents run from app actions, not from a separate chatbot.",
+        items: [
+          { id: "workflow-trigger", label: "Trigger cleanup workflow from Start Cleanup in MedTrack", status: "not_started", priority: "Required", owner: "Topher", note: "MedTrack should create an import batch, enqueue the intake job, and advance stages based on completed jobs and review gates." },
+          { id: "worker-service", label: "Create worker/job service for agent stages", status: "not_started", priority: "Required", owner: "Topher", note: "Jobs should include intake.import_batch, mapping.suggest_columns, profile.batch, normalize.rows, create_findings, and generate_export." },
+          { id: "model-provider", label: "Add model-provider abstraction for hosted or local LLMs", status: "not_started", priority: "Recommended", owner: "Bub", note: "Start hosted enterprise LLM for MVP, keep provider-swappable for Azure OpenAI, Bedrock, OpenAI, or later local/on-prem models." },
+          { id: "confidence-gates", label: "Implement confidence thresholds and review gates", status: "not_started", priority: "Required", owner: "Bub", note: "Auto-safe only for mechanical normalization; require review for fuzzy matches, manufacturer consolidation, duplicate merge, inactivation, charge codes, and implant-impacting changes." },
+        ],
+      },
+      {
+        title: "Review, export, and validation",
+        summary: "Turn findings into human-approved action packets hospitals can trust.",
+        items: [
+          { id: "cleanup-queues", label: "Build cleanup queue views with status and severity", status: "not_started", priority: "Required", owner: "Topher", note: "Queues should include critical implant cleanup, duplicates, missing identifiers, GTIN/UDI enrichment, manufacturer/catalog cleanup, and high-confidence safe fixes." },
+          { id: "review-decisions", label: "Add approve, reject, edit, snooze, and keep-separate decisions", status: "not_started", priority: "Required", owner: "Topher", note: "Every decision needs user, timestamp, original value, suggested value, final value, evidence snapshot, confidence, and reviewer note." },
+          { id: "export-package", label: "Generate MEDITECH-ready cleanup export packages", status: "not_started", priority: "Required", owner: "Bub", note: "Export only approved findings: field update CSV, duplicate workbook, missing identifier report, before/after health report, and audit packet." },
+          { id: "sample-data-validation", label: "Validate against known Bingham-style item master issues", status: "not_started", priority: "Required", owner: "Richard / Bub", note: "Use prior metrics as the first realism check: duplicates, missing manufacturer/catalog, near-empty GTIN/UDI, implant rows, and unused UNSPSC/HCPCS." },
+          { id: "security-review", label: "Document data handling, PHI assumptions, and hospital security posture", status: "not_started", priority: "Recommended", owner: "Richard / Topher", note: "Assume item master data is sensitive even when not PHI. Document redaction, minimal LLM payloads, audit logs, and deployment options." },
+        ],
+      },
+    ],
     healthNotes: [
       "Production is deployed from main",
       "Supabase migration history was fetched into the repo",
       "Protected routes and login have been smoke-tested",
+      "Dashboard route remains /admin/apps/expired-fda for now, but the visible product name is MedTrack",
+      "Item master agent cleanup process is now tracked as a deliberate execution checklist",
     ],
   },
   {
@@ -535,7 +592,7 @@ export function getAppIssueProjectNames(app: StudioApp) {
   if (app.slug === "agalmanac") return ["AgAlmanac"];
   if (app.slug === "storagehq") return ["StorageHQ", "StorageSheds"];
   if (app.slug === "mowpro") return ["MowPro"];
-  if (app.slug === "expired-fda") return ["Expired FDA", "RaT Health"];
+  if (app.slug === "expired-fda") return ["Expired FDA", "MedTrack", "RaT Health"];
   if (app.slug === "internal-studio-ops-layer") return ["RaT Studios"];
   return [];
 }

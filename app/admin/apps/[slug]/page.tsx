@@ -70,8 +70,8 @@ function LaunchChecklist({ product }: { product: StudioApp }) {
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-orange-500">Launch readiness</p>
-          <h2 className="mt-2 text-xl font-semibold text-neutral-950">Launch checklist</h2>
-          <p className="mt-2 max-w-3xl text-sm text-neutral-600">Items that must be closed before MowPro moves from controlled beta to public launch.</p>
+          <h2 className="mt-2 text-xl font-semibold text-neutral-950">Execution checklist</h2>
+          <p className="mt-2 max-w-3xl text-sm text-neutral-600">Status-tracked work items for {product.name}. Required open items should drive the next build priorities.</p>
         </div>
         <div className="grid grid-cols-3 gap-2 text-center text-xs sm:min-w-72">
           <div className="rounded-2xl border border-black/5 bg-[#fcfaf7] p-3">
@@ -114,7 +114,7 @@ function LaunchChecklist({ product }: { product: StudioApp }) {
         ))}
       </div>
 
-      <p className="mt-4 text-xs text-neutral-500">Progress: {done} done, {requiredOpen} required still open. Recommendation: controlled beta only until required items are complete.</p>
+      <p className="mt-4 text-xs text-neutral-500">Progress: {done} done, {requiredOpen} required still open. Recommendation: keep scope deliberate and do not treat unreviewed AI recommendations as production-ready output.</p>
     </section>
   );
 }
