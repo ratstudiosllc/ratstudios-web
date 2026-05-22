@@ -460,8 +460,8 @@ export const studioApps: StudioApp[] = [
         summary: "Build the user-visible upload path and first deterministic cleanup outputs.",
         items: [
           { id: "server-parser", label: "Move item master parsing to the backend", status: "done", priority: "Required", owner: "Topher", note: "Complete: MedTrack now archives the original upload, parses workbook sheets/header rows on the server, stores immutable raw rows, creates suggested mappings, stages canonical rows, and returns preview/warnings to the upload UI." },
-          { id: "mapping-review-ui", label: "Build field mapping review screen", status: "in_progress", priority: "Required", owner: "Topher", note: "Next: turn the current upload mapping controls into the governed review step with proposed source column, confidence, samples, required/optional status, and user approval/edit controls." },
-          { id: "batch-profile", label: "Generate batch health profile", status: "not_started", priority: "Required", owner: "Bub", note: "Calculate total rows, unique item numbers, duplicate counts, missing manufacturer/catalog/GTIN, implant risk, extreme cost, and initial readiness scores." },
+          { id: "mapping-review-ui", label: "Build field mapping review screen", status: "done", priority: "Required", owner: "Topher", note: "Complete: upload review now shows proposed source column, confidence, sample values, required/optional status, and an explicit Approve Mapping gate before import actions unlock." },
+          { id: "batch-profile", label: "Generate batch health profile", status: "in_progress", priority: "Required", owner: "Bub", note: "Next: calculate total rows, unique item numbers, duplicate counts, missing manufacturer/catalog/GTIN, implant risk, extreme cost, and initial readiness scores." },
           { id: "normalization-pass", label: "Implement safe normalization pass", status: "not_started", priority: "Required", owner: "Bub", note: "Trim whitespace, normalize match keys, normalize UOM aliases, preserve raw/display values, and create low-risk findings only." },
         ],
       },
