@@ -90,28 +90,36 @@ function LaunchChecklist({ product }: { product: StudioApp }) {
       </div>
 
       <div className="mt-6 grid gap-5 lg:grid-cols-2">
-        {product.launchChecklist.map((section) => (
+        {product.launchChecklist.map((section, sectionIndex) => {
+          const sectionStartNumber = product.launchChecklist
+            ?.slice(0, sectionIndex)
+            .reduce((count, checklistSection) => count + checklistSection.items.length, 0) ?? 0;
+
+          return (
           <div key={section.title} className="rounded-[24px] border border-black/5 bg-[#fcfaf7] p-5">
-            <h3 className="text-base font-semibold text-neutral-950">{section.title}</h3>
+            <h3 className="text-base font-semibold text-neutral-950">{sectionIndex + 1}. {section.title}</h3>
             <p className="mt-2 text-sm text-neutral-600">{section.summary}</p>
             <div className="mt-4 space-y-3">
-              {section.items.map((item) => {
+              {section.items.map((item, itemIndex) => {
                 const status = checklistStatusCopy[item.status];
+                const taskNumber = sectionStartNumber + itemIndex + 1;
                 return (
                   <div key={item.id} className="rounded-2xl border border-black/5 bg-white p-4">
                     <div className="flex flex-wrap items-center gap-2 text-xs">
+                      <span className="rounded-full border border-neutral-200 bg-neutral-950 px-2.5 py-1 font-semibold text-white">#{taskNumber}</span>
                       <span className={`rounded-full border px-2.5 py-1 font-semibold ${status.className}`}>{status.label}</span>
                       <span className={`rounded-full border px-2.5 py-1 font-semibold ${checklistPriorityClass[item.priority]}`}>{item.priority}</span>
                       <span className="rounded-full border border-black/5 bg-[#fcfaf7] px-2.5 py-1 font-semibold text-neutral-600">{item.owner}</span>
                     </div>
-                    <p className="mt-3 text-sm font-semibold text-neutral-950">{item.label}</p>
+                    <p className="mt-3 text-sm font-semibold text-neutral-950">{taskNumber}. {item.label}</p>
                     <p className="mt-1 text-sm leading-6 text-neutral-600">{item.note}</p>
                   </div>
                 );
               })}
             </div>
           </div>
-        ))}
+          );
+        })}
       </div>
 
       <p className="mt-4 text-xs text-neutral-500">Progress: {done} done, {requiredOpen} required still open. Recommendation: keep scope deliberate and do not treat unreviewed AI recommendations as production-ready output.</p>
