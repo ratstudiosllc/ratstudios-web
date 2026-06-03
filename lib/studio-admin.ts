@@ -415,15 +415,15 @@ export const studioApps: StudioApp[] = [
         summary: "The Capacitor iOS version should be treated as a native field-work app with real iPhone capabilities, not just a web wrapper.",
         status: "Native shell scaffolded",
         owner: "Bub",
-        currentFocus: "Native iOS shell, deep-link foundation, invoice share bridge, photo upload foundation, push token registration, and mobile card cleanup are implemented. Remaining work is real iPhone/TestFlight validation plus APNs scheduling.",
-        nextMilestone: "Fix local Xcode/CoreSimulator tooling, archive the app, and run TestFlight QA on a real iPhone.",
+        currentFocus: "Native iOS shell, deep-link foundation, invoice share bridge, photo upload foundation, push token registration, and mobile card cleanup are implemented locally. Production is held until Supabase migration access is available.",
+        nextMilestone: "Apply the native-app Supabase migration, fix local Xcode/CoreSimulator tooling, archive the app, and run TestFlight QA on a real iPhone.",
         checklist: [
           {
             title: "Capacitor shell",
             summary: "Create the iOS project and native wrapper foundation.",
             items: [
               { id: "ios-capacitor-shell", label: "Add Capacitor dependencies, config, and iOS project", status: "done", priority: "Required", owner: "Bub", note: "Capacitor 8 iOS shell exists with bundle ID ai.ratstudios.mowpro and hosted server URL https://mowpro.app." },
-              { id: "ios-build-smoke", label: "Run local web build and iOS sync smoke", status: "in_progress", priority: "Required", owner: "Bub", note: "Web/admin builds pass and Capacitor sync passes. Local xcodebuild validation is blocked by CoreSimulator/Xcode component mismatch on the Mac." },
+              { id: "ios-build-smoke", label: "Run local web build and iOS sync smoke", status: "blocked", priority: "Required", owner: "Bub", note: "Web/admin builds pass and Capacitor sync passes. Local xcodebuild validation is blocked by CoreSimulator/Xcode component mismatch on the Mac." },
             ],
           },
           {
@@ -432,8 +432,8 @@ export const studioApps: StudioApp[] = [
             items: [
               { id: "ios-deep-links", label: "Add universal links and app deep-link routing", status: "done", priority: "Required", owner: "Bub", note: "Added mowpro:// URL scheme, Associated Domains entitlement, app URL listener, and apple-app-site-association route. Production still needs real APPLE_TEAM_ID." },
               { id: "ios-pdf-share", label: "Add native invoice/estimate PDF share bridge", status: "in_progress", priority: "Required", owner: "Bub", note: "Invoice PDF sharing now uses native iOS share sheet. Estimate sharing remains open because the web app does not yet have an estimate PDF generator." },
-              { id: "ios-camera-photos", label: "Add camera/photo upload workflow", status: "done", priority: "Required", owner: "Bub", note: "Added attachment bucket migration, job_photos/expense_receipts tables, Camera plugin workflow, and upload buttons on job edit and expense records." },
-              { id: "ios-push-reminders", label: "Add push notification foundation", status: "in_progress", priority: "Required", owner: "Bub", note: "Added Push Notifications plugin, permission/register UI, and provider_push_tokens persistence. Scheduled APNs sending pipeline is still needed." },
+              { id: "ios-camera-photos", label: "Add camera/photo upload workflow", status: "in_progress", priority: "Required", owner: "Bub", note: "Added local migration, Camera plugin workflow, and upload buttons on job edit and expense records. Production needs Supabase migration access before deploy." },
+              { id: "ios-push-reminders", label: "Add push notification foundation", status: "in_progress", priority: "Required", owner: "Bub", note: "Added Push Notifications plugin, permission/register UI, and provider_push_tokens persistence. Production needs Supabase migration access and scheduled APNs sending pipeline." },
             ],
           },
           {
