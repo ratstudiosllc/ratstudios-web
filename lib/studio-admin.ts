@@ -30,6 +30,17 @@ export interface LaunchChecklistSection {
   items: LaunchChecklistItem[];
 }
 
+export interface AppPlatformWorkstream {
+  id: string;
+  title: string;
+  summary: string;
+  status: string;
+  owner: string;
+  currentFocus: string;
+  nextMilestone: string;
+  checklist: LaunchChecklistSection[];
+}
+
 export interface StudioApp {
   slug: string;
   name: string;
@@ -53,6 +64,7 @@ export interface StudioApp {
   };
   healthNotes: string[];
   launchChecklist?: LaunchChecklistSection[];
+  platformWorkstreams?: AppPlatformWorkstream[];
   pipeline?: {
     category: string;
     blocker: string;
@@ -373,6 +385,65 @@ export const studioApps: StudioApp[] = [
           { id: "workflow-qa", label: "Complete end-to-end workflow QA", status: "in_progress", priority: "Required", owner: "Bub", note: "Still outstanding: provider signup/login/logout, forgot/reset password, customer invite callback, portal, invoice PDF, estimate conversion, reports, and mobile smoke." },
           { id: "seo-metadata", label: "Improve metadata, canonical URL, social preview, sitemap/robots, and app icons", status: "done", priority: "Recommended", owner: "Bub", note: "Metadata, canonical domain, robots, sitemap, manifest, and launch smoke checks are in place." },
           { id: "monitoring", label: "Confirm backups, uptime monitoring, and production error tracking", status: "in_progress", priority: "Recommended", owner: "Topher", note: "Vercel Web Analytics is enabled. Still outstanding: Supabase backup/PITR confirmation, uptime monitoring, and optional Sentry/error tracking." },
+        ],
+      },
+    ],
+    platformWorkstreams: [
+      {
+        id: "web-app",
+        title: "Web app",
+        summary: "The hosted Next.js/Supabase product remains the source of truth for shared MowPro workflows, data, auth, and launch polish.",
+        status: "Production deployed",
+        owner: "Topher / Bub",
+        currentFocus: "Keep launch QA, customer/provider auth, billing posture, and mobile web cleanup moving without mixing it with native iOS shell work.",
+        nextMilestone: "Complete manual provider/customer QA and mobile card-layout cleanup on the highest-traffic data views.",
+        checklist: [
+          {
+            title: "Shared product and web launch",
+            summary: "Tasks that affect both browser users and the Apple app because the iOS shell loads the hosted product.",
+            items: [
+              { id: "web-provider-customer-qa", label: "Finish provider/customer auth and workflow QA", status: "in_progress", priority: "Required", owner: "Bub", note: "Covers signup/login/logout, forgot/reset password, customer invite callback, portal, invoice PDF, estimates, reports, and mobile smoke." },
+              { id: "web-mobile-card-layouts", label: "Replace priority mobile tables with card views", status: "not_started", priority: "Required", owner: "Bub", note: "Jobs, customers, invoices, estimates, and expenses need iPhone-friendly cards before App Store screenshots and review." },
+              { id: "web-monitoring-backups", label: "Confirm production monitoring and Supabase backup posture", status: "in_progress", priority: "Recommended", owner: "Topher", note: "Vercel Analytics is enabled; uptime monitoring, error tracking, and Supabase PITR/backup confirmation still need final verification." },
+            ],
+          },
+        ],
+      },
+      {
+        id: "apple-app",
+        title: "Apple app",
+        summary: "The Capacitor iOS version should be treated as a native field-work app with real iPhone capabilities, not just a web wrapper.",
+        status: "Native shell scaffolded",
+        owner: "Bub",
+        currentFocus: "Native iOS shell, deep-link foundation, invoice share bridge, photo upload foundation, push token registration, and mobile card cleanup are implemented. Remaining work is real iPhone/TestFlight validation plus APNs scheduling.",
+        nextMilestone: "Fix local Xcode/CoreSimulator tooling, archive the app, and run TestFlight QA on a real iPhone.",
+        checklist: [
+          {
+            title: "Capacitor shell",
+            summary: "Create the iOS project and native wrapper foundation.",
+            items: [
+              { id: "ios-capacitor-shell", label: "Add Capacitor dependencies, config, and iOS project", status: "done", priority: "Required", owner: "Bub", note: "Capacitor 8 iOS shell exists with bundle ID ai.ratstudios.mowpro and hosted server URL https://mowpro.app." },
+              { id: "ios-build-smoke", label: "Run local web build and iOS sync smoke", status: "in_progress", priority: "Required", owner: "Bub", note: "Web/admin builds pass and Capacitor sync passes. Local xcodebuild validation is blocked by CoreSimulator/Xcode component mismatch on the Mac." },
+            ],
+          },
+          {
+            title: "Native App Store value",
+            summary: "Native features that make MowPro an iPhone field-service app instead of a repackaged website.",
+            items: [
+              { id: "ios-deep-links", label: "Add universal links and app deep-link routing", status: "done", priority: "Required", owner: "Bub", note: "Added mowpro:// URL scheme, Associated Domains entitlement, app URL listener, and apple-app-site-association route. Production still needs real APPLE_TEAM_ID." },
+              { id: "ios-pdf-share", label: "Add native invoice/estimate PDF share bridge", status: "in_progress", priority: "Required", owner: "Bub", note: "Invoice PDF sharing now uses native iOS share sheet. Estimate sharing remains open because the web app does not yet have an estimate PDF generator." },
+              { id: "ios-camera-photos", label: "Add camera/photo upload workflow", status: "done", priority: "Required", owner: "Bub", note: "Added attachment bucket migration, job_photos/expense_receipts tables, Camera plugin workflow, and upload buttons on job edit and expense records." },
+              { id: "ios-push-reminders", label: "Add push notification foundation", status: "in_progress", priority: "Required", owner: "Bub", note: "Added Push Notifications plugin, permission/register UI, and provider_push_tokens persistence. Scheduled APNs sending pipeline is still needed." },
+            ],
+          },
+          {
+            title: "App Store submission",
+            summary: "Review-facing materials and QA needed after native features exist.",
+            items: [
+              { id: "ios-review-notes", label: "Write App Review notes around native field-work features", status: "done", priority: "Required", owner: "Bub", note: "AppStore metadata, privacy reference, icon brief, review notes, and submission checklist are drafted in the MowPro repo." },
+              { id: "ios-testflight-qa", label: "Run TestFlight QA on real iPhone", status: "not_started", priority: "Required", owner: "Topher / Richard", note: "Verify auth, deep links, permissions, PDF sharing, photo upload, notifications, keyboard behavior, and weak-signal field workflow." },
+            ],
+          },
         ],
       },
     ],

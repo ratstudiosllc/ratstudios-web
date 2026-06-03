@@ -127,6 +127,87 @@ function LaunchChecklist({ product }: { product: StudioApp }) {
   );
 }
 
+function PlatformWorkstreams({ product }: { product: StudioApp }) {
+  if (!product.platformWorkstreams?.length) return null;
+
+  return (
+    <section className="mt-8 rounded-[32px] border border-black/5 bg-white p-6 shadow-sm">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-orange-500">Platform workstreams</p>
+          <h2 className="mt-2 text-xl font-semibold text-neutral-950">Web app and Apple app lanes</h2>
+          <p className="mt-2 max-w-3xl text-sm text-neutral-600">
+            Web product work and native Apple app work are tracked separately so shared changes, App Store work, and iOS-only features do not blur together.
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-6 grid gap-6 xl:grid-cols-2">
+        {product.platformWorkstreams.map((workstream) => {
+          const items = workstream.checklist.flatMap((section) => section.items);
+          const done = items.filter((item) => item.status === "done").length;
+          const requiredOpen = items.filter((item) => item.priority === "Required" && item.status !== "done").length;
+          const active = items.filter((item) => item.status === "in_progress").length;
+
+          return (
+            <div key={workstream.id} className="rounded-[28px] border border-black/5 bg-[#fcfaf7] p-5">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-orange-500">{workstream.status}</p>
+                  <h3 className="mt-2 text-2xl font-semibold text-neutral-950">{workstream.title}</h3>
+                  <p className="mt-2 text-sm leading-6 text-neutral-600">{workstream.summary}</p>
+                </div>
+                <div className="rounded-2xl border border-black/5 bg-white px-4 py-3 text-sm shadow-sm">
+                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">Owner</p>
+                  <p className="mt-1 font-semibold text-neutral-950">{workstream.owner}</p>
+                </div>
+              </div>
+
+              <div className="mt-5 grid gap-2 sm:grid-cols-3">
+                <Kpi label="Done" value={String(done)} helper="Completed tasks" />
+                <Kpi label="Active" value={String(active)} helper="In progress" />
+                <Kpi label="Req open" value={String(requiredOpen)} helper="Required remaining" />
+              </div>
+
+              <div className="mt-5 rounded-2xl border border-black/5 bg-white p-4">
+                <p className="text-sm font-semibold text-neutral-950">Current focus</p>
+                <p className="mt-1 text-sm leading-6 text-neutral-600">{workstream.currentFocus}</p>
+                <p className="mt-4 text-sm font-semibold text-neutral-950">Next milestone</p>
+                <p className="mt-1 text-sm leading-6 text-neutral-600">{workstream.nextMilestone}</p>
+              </div>
+
+              <div className="mt-5 space-y-4">
+                {workstream.checklist.map((section) => (
+                  <div key={section.title} className="rounded-2xl border border-black/5 bg-white p-4">
+                    <h4 className="text-sm font-semibold text-neutral-950">{section.title}</h4>
+                    <p className="mt-1 text-sm leading-6 text-neutral-600">{section.summary}</p>
+                    <div className="mt-3 space-y-3">
+                      {section.items.map((item) => {
+                        const status = checklistStatusCopy[item.status];
+                        return (
+                          <div key={item.id} className="rounded-xl border border-black/5 bg-[#fcfaf7] p-3">
+                            <div className="flex flex-wrap items-center gap-2 text-xs">
+                              <span className={`rounded-full border px-2.5 py-1 font-semibold ${status.className}`}>{status.label}</span>
+                              <span className={`rounded-full border px-2.5 py-1 font-semibold ${checklistPriorityClass[item.priority]}`}>{item.priority}</span>
+                              <span className="rounded-full border border-black/5 bg-white px-2.5 py-1 font-semibold text-neutral-600">{item.owner}</span>
+                            </div>
+                            <p className="mt-2 text-sm font-semibold text-neutral-950">{item.label}</p>
+                            <p className="mt-1 text-sm leading-6 text-neutral-600">{item.note}</p>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
 function IssueCard({ issue }: { issue: { number: number; title: string; status: string; priority: string; nextStep?: string } }) {
   return (
     <div className="rounded-2xl border border-black/5 bg-[#fcfaf7] p-4">
@@ -229,6 +310,8 @@ export default async function ProductAdminPage({
             </div>
           </aside>
         </div>
+
+        <PlatformWorkstreams product={product} />
 
         <LaunchChecklist product={product} />
 
