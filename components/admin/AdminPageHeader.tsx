@@ -14,6 +14,7 @@ import {
   Rocket,
   Sparkles,
   Wrench,
+  X,
 } from "lucide-react";
 import { orgChartMembers } from "@/lib/org-chart";
 import { getCurrentApps, getFutureApps } from "@/lib/studio-admin";
@@ -93,7 +94,7 @@ export function AdminPageHeader({ active }: { title?: string; active: AdminNavKe
 
   return (
     <div className="flex flex-wrap items-start justify-between gap-4">
-      <nav className="flex flex-wrap gap-3" aria-label="Admin navigation">
+      <nav className="hidden flex-wrap gap-3 md:flex" aria-label="Admin navigation">
         {navItems.map((item) => {
           const isActive = item.key === active;
           return (
@@ -115,12 +116,13 @@ export function AdminPageHeader({ active }: { title?: string; active: AdminNavKe
         })}
       </nav>
 
-      <details className="group relative">
-        <summary className="inline-flex cursor-pointer list-none items-center gap-2 rounded-2xl border border-black/10 bg-neutral-950 px-4 py-3 text-sm font-medium text-white transition hover:bg-neutral-800">
-          <Menu className="h-4 w-4" />
-          All admin pages
+      <details className="admin-pages-menu group relative">
+        <summary className="admin-pages-menu-trigger inline-flex cursor-pointer list-none items-center gap-2 rounded-xl border border-black/10 bg-neutral-950 px-4 py-3 text-sm font-medium text-white transition hover:bg-neutral-800">
+          <Menu className="admin-pages-menu-open-icon h-4 w-4" />
+          <X className="admin-pages-menu-close-icon hidden h-5 w-5" />
+          <span className="admin-pages-menu-label">All admin pages</span>
         </summary>
-        <div className="absolute right-0 z-30 mt-3 max-h-[min(78vh,720px)] w-[min(92vw,760px)] overflow-y-auto rounded-2xl border border-black/10 bg-white p-4 shadow-xl">
+        <div className="admin-pages-menu-panel border border-black/10 bg-white p-4 shadow-xl">
           <div className="grid gap-5 md:grid-cols-2">
             <AdminMenuGroup
               title="Primary"
