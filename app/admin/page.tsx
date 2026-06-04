@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 
 export const revalidate = 0;
 import {
@@ -9,12 +10,8 @@ import {
   Clock3,
   Database,
   DollarSign,
-  LayoutDashboard,
-  Layers3,
   Megaphone,
   Sparkles,
-  Wrench,
-  Building2,
   PauseCircle,
   PlayCircle,
   ShieldAlert,
@@ -414,39 +411,8 @@ export default async function AdminPage() {
       <div className="mx-auto max-w-[1500px] px-6 py-8">
         <div className="rounded-[32px] border border-black/5 bg-white px-6 py-6 shadow-sm">
           <h1 className="text-3xl font-semibold text-orange-500">RaT Studios Admin</h1>
-          <div className="mt-5 flex flex-wrap gap-3">
-            <Link href="/admin" className="inline-flex items-center gap-2 rounded-2xl border border-black/10 bg-[#fcfaf7] px-4 py-3 text-sm font-medium text-neutral-800 transition hover:bg-white hover:border-black/20">
-              <LayoutDashboard className="h-4 w-4 text-orange-500" />
-              Dashboard
-            </Link>
-            <Link href="/admin/current-apps" className="inline-flex items-center gap-2 rounded-2xl border border-black/10 bg-[#fcfaf7] px-4 py-3 text-sm font-medium text-neutral-800 transition hover:bg-white hover:border-black/20">
-              <Layers3 className="h-4 w-4 text-orange-500" />
-              Current Apps
-            </Link>
-            <Link href="/admin/ideas" className="inline-flex items-center gap-2 rounded-2xl border border-black/10 bg-[#fcfaf7] px-4 py-3 text-sm font-medium text-neutral-800 transition hover:bg-white hover:border-black/20">
-              <Sparkles className="h-4 w-4 text-orange-500" />
-              Ideas
-            </Link>
-            <Link href="/admin/future-apps" className="inline-flex items-center gap-2 rounded-2xl border border-black/10 bg-[#fcfaf7] px-4 py-3 text-sm font-medium text-neutral-800 transition hover:bg-white hover:border-black/20">
-              <Megaphone className="h-4 w-4 text-orange-500" />
-              Future Apps
-            </Link>
-            <Link href="/admin/issues" className="inline-flex items-center gap-2 rounded-2xl border border-black/10 bg-[#fcfaf7] px-4 py-3 text-sm font-medium text-neutral-800 transition hover:bg-white hover:border-black/20">
-              <Wrench className="h-4 w-4 text-orange-500" />
-              Issues
-            </Link>
-            <Link href="/admin/recommendations" className="inline-flex items-center gap-2 rounded-2xl border border-black/10 bg-[#fcfaf7] px-4 py-3 text-sm font-medium text-neutral-800 transition hover:bg-white hover:border-black/20">
-              <ListTodo className="h-4 w-4 text-orange-500" />
-              Recommendations
-            </Link>
-            <Link href="/admin/org-chart" className="inline-flex items-center gap-2 rounded-2xl border border-black/10 bg-[#fcfaf7] px-4 py-3 text-sm font-medium text-neutral-800 transition hover:bg-white hover:border-black/20">
-              <Building2 className="h-4 w-4 text-orange-500" />
-              Org Chart
-            </Link>
-            <Link href="/admin/agent-kpis" className="inline-flex items-center gap-2 rounded-2xl border border-black/10 bg-[#fcfaf7] px-4 py-3 text-sm font-medium text-neutral-800 transition hover:bg-white hover:border-black/20">
-              <Activity className="h-4 w-4 text-orange-500" />
-              Agent KPIs
-            </Link>
+          <div className="mt-5">
+            <AdminPageHeader active="dashboard" />
           </div>
         </div>
 

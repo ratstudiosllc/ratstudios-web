@@ -2,15 +2,21 @@ import Link from "next/link";
 import {
   Activity,
   Building2,
+  FlaskConical,
   Globe2,
   Headphones,
   LayoutDashboard,
   Layers3,
   ListTodo,
   Megaphone,
+  Menu,
+  PackageOpen,
+  Rocket,
   Sparkles,
   Wrench,
 } from "lucide-react";
+import { orgChartMembers } from "@/lib/org-chart";
+import { getCurrentApps, getFutureApps } from "@/lib/studio-admin";
 
 function cn(...values: Array<string | false | null | undefined>) {
   return values.filter(Boolean).join(" ");
@@ -31,28 +37,117 @@ const navItems: Array<{ key: AdminNavKey; href: string; label: string; icon: Rea
   { key: "agent-kpis", href: "/admin/agent-kpis", label: "Agent KPIs", icon: <Activity className="h-4 w-4 text-orange-500" /> },
 ];
 
-export function AdminPageHeader({ active }: { title?: string; active: AdminNavKey; eyebrow?: string }) {
+const extraAdminPages = [
+  { href: "/admin/agent-runs", label: "Agent Runs", note: "Execution activity" },
+  { href: "/admin/agent-dashboard", label: "Agent Dashboard", note: "Runtime KPI prototype" },
+  { href: "/admin/marketing", label: "Marketing", note: "Application marketing view" },
+  { href: "/admin/ideas/new", label: "New Idea", note: "Idea intake form" },
+  { href: "/admin/login", label: "Admin Login", note: "Admin gate" },
+];
+
+const sandboxPages = [
+  { href: "/admin/testpage", label: "Admin Test Page", note: "Sandbox dashboard" },
+  { href: "/admin/testingpage", label: "Architecture Preview", note: "Testing/admin preview" },
+  { href: "/admin/testpage/current-apps", label: "Current Apps Checklist Prototype", note: "Sandbox checklist" },
+  { href: "/admin/testpage/app-checklist-structure", label: "App Checklist Structure Test", note: "Sandbox checklist structure" },
+];
+
+function AdminMenuGroup({
+  title,
+  items,
+}: {
+  title: string;
+  items: Array<{ href: string; label: string; note: string }>;
+}) {
   return (
-    <nav className="flex flex-wrap gap-3" aria-label="Admin navigation">
-      {navItems.map((item) => {
-        const isActive = item.key === active;
-        return (
-          <Link
-            key={item.key}
-            href={item.href}
-            aria-current={isActive ? "page" : undefined}
-            className={cn(
-              "inline-flex items-center gap-2 rounded-2xl border px-4 py-3 text-sm font-medium transition",
-              isActive
-                ? "border-orange-200 bg-orange-50 text-neutral-950"
-                : "border-black/10 bg-white text-neutral-800 hover:bg-[#fcfaf7] hover:border-black/20"
-            )}
-          >
-            {item.icon}
-            {item.label}
+    <div>
+      <p className="px-3 text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">{title}</p>
+      <div className="mt-2 grid gap-1">
+        {items.map((item) => (
+          <Link key={item.href} href={item.href} className="rounded-xl px-3 py-2 transition hover:bg-[#fcfaf7]">
+            <span className="block text-sm font-semibold text-neutral-950">{item.label}</span>
+            <span className="mt-0.5 block text-xs text-neutral-500">{item.note}</span>
           </Link>
-        );
-      })}
-    </nav>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export function AdminPageHeader({ active }: { title?: string; active: AdminNavKey; eyebrow?: string }) {
+  const appDetailPages = getCurrentApps().map((app) => ({
+    href: app.href,
+    label: app.name,
+    note: "Current app detail page",
+  }));
+  const futureAppDetailPages = getFutureApps().map((app) => ({
+    href: `/admin/future-apps/${app.slug}`,
+    label: app.name,
+    note: "Future app detail page",
+  }));
+  const orgDetailPages = orgChartMembers.map((member) => ({
+    href: `/admin/org-chart/${member.slug}`,
+    label: member.name,
+    note: member.title,
+  }));
+
+  return (
+    <div className="flex flex-wrap items-start justify-between gap-4">
+      <nav className="flex flex-wrap gap-3" aria-label="Admin navigation">
+        {navItems.map((item) => {
+          const isActive = item.key === active;
+          return (
+            <Link
+              key={item.key}
+              href={item.href}
+              aria-current={isActive ? "page" : undefined}
+              className={cn(
+                "inline-flex items-center gap-2 rounded-2xl border px-4 py-3 text-sm font-medium transition",
+                isActive
+                  ? "border-orange-200 bg-orange-50 text-neutral-950"
+                  : "border-black/10 bg-white text-neutral-800 hover:bg-[#fcfaf7] hover:border-black/20"
+              )}
+            >
+              {item.icon}
+              {item.label}
+            </Link>
+          );
+        })}
+      </nav>
+
+      <details className="group relative">
+        <summary className="inline-flex cursor-pointer list-none items-center gap-2 rounded-2xl border border-black/10 bg-neutral-950 px-4 py-3 text-sm font-medium text-white transition hover:bg-neutral-800">
+          <Menu className="h-4 w-4" />
+          All admin pages
+        </summary>
+        <div className="absolute right-0 z-30 mt-3 max-h-[min(78vh,720px)] w-[min(92vw,760px)] overflow-y-auto rounded-2xl border border-black/10 bg-white p-4 shadow-xl">
+          <div className="grid gap-5 md:grid-cols-2">
+            <AdminMenuGroup
+              title="Primary"
+              items={navItems.map((item) => ({
+                href: item.href,
+                label: item.label,
+                note: item.key === active ? "Current section" : "Admin section",
+              }))}
+            />
+            <AdminMenuGroup title="Utilities" items={extraAdminPages} />
+            <AdminMenuGroup title="Current app details" items={appDetailPages} />
+            <AdminMenuGroup title="Future app details" items={futureAppDetailPages} />
+            <AdminMenuGroup title="Org detail pages" items={orgDetailPages} />
+            <AdminMenuGroup title="Sandboxes and tests" items={sandboxPages} />
+            <div className="rounded-xl bg-[#fcfaf7] p-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">Route families</p>
+              <div className="mt-3 grid gap-2 text-sm text-neutral-700">
+                <div className="flex items-center gap-2"><PackageOpen className="h-4 w-4 text-orange-500" /> /admin/apps/[slug]</div>
+                <div className="flex items-center gap-2"><Rocket className="h-4 w-4 text-orange-500" /> /admin/future-apps/[slug]</div>
+                <div className="flex items-center gap-2"><Sparkles className="h-4 w-4 text-orange-500" /> /admin/ideas/[slug]</div>
+                <div className="flex items-center gap-2"><Building2 className="h-4 w-4 text-orange-500" /> /admin/org-chart/[slug]</div>
+                <div className="flex items-center gap-2"><FlaskConical className="h-4 w-4 text-orange-500" /> /admin/testpage/*</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </details>
+    </div>
   );
 }
