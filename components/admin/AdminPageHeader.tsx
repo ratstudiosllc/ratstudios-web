@@ -19,10 +19,6 @@ import {
 import { orgChartMembers } from "@/lib/org-chart";
 import { getCurrentApps, getFutureApps } from "@/lib/studio-admin";
 
-function cn(...values: Array<string | false | null | undefined>) {
-  return values.filter(Boolean).join(" ");
-}
-
 type AdminNavKey = "dashboard" | "current-apps" | "ideas" | "future-apps" | "issues" | "recommendations" | "customer-support" | "domains" | "org-chart" | "agent-kpis" | "marketing" | "agent-runs";
 
 const navItems: Array<{ key: AdminNavKey; href: string; label: string; icon: React.ReactNode }> = [
@@ -76,6 +72,7 @@ function AdminMenuGroup({
 }
 
 export function AdminPageHeader({ active }: { title?: string; active: AdminNavKey; eyebrow?: string }) {
+  const activeItem = navItems.find((item) => item.key === active) ?? navItems[0];
   const appDetailPages = getCurrentApps().map((app) => ({
     href: app.href,
     label: app.name,
@@ -93,37 +90,26 @@ export function AdminPageHeader({ active }: { title?: string; active: AdminNavKe
   }));
 
   return (
-    <div className="flex flex-wrap items-start justify-between gap-4">
-      <nav className="hidden flex-wrap gap-3 md:flex" aria-label="Admin navigation">
-        {navItems.map((item) => {
-          const isActive = item.key === active;
-          return (
-            <Link
-              key={item.key}
-              href={item.href}
-              aria-current={isActive ? "page" : undefined}
-              className={cn(
-                "inline-flex items-center gap-2 rounded-2xl border px-4 py-3 text-sm font-medium transition",
-                isActive
-                  ? "border-orange-200 bg-orange-50 text-neutral-950"
-                  : "border-black/10 bg-white text-neutral-800 hover:bg-[#fcfaf7] hover:border-black/20"
-              )}
-            >
-              {item.icon}
-              {item.label}
-            </Link>
-          );
-        })}
-      </nav>
-
+    <div className="admin-pages-bar flex items-center justify-between gap-4 rounded-2xl border border-black/10 bg-[#fcfaf7] px-4 py-3">
+      <div className="min-w-0">
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-neutral-500">Admin navigation</p>
+        <div className="mt-1 flex min-w-0 items-center gap-2">
+          {activeItem.icon}
+          <p className="truncate text-sm font-semibold text-neutral-950">{activeItem.label}</p>
+        </div>
+      </div>
       <details className="admin-pages-menu group relative">
-        <summary className="admin-pages-menu-trigger inline-flex cursor-pointer list-none items-center gap-2 rounded-xl border border-black/10 bg-neutral-950 px-4 py-3 text-sm font-medium text-white transition hover:bg-neutral-800">
+        <summary className="admin-pages-menu-trigger inline-flex h-11 cursor-pointer list-none items-center gap-2 rounded-xl border border-black/10 bg-neutral-950 px-4 text-sm font-semibold text-white transition hover:bg-neutral-800">
           <Menu className="admin-pages-menu-open-icon h-4 w-4" />
           <X className="admin-pages-menu-close-icon hidden h-5 w-5" />
-          <span className="admin-pages-menu-label">All admin pages</span>
+          <span className="admin-pages-menu-label hidden sm:inline">All admin pages</span>
         </summary>
         <div className="admin-pages-menu-panel border border-black/10 bg-white p-4 shadow-xl">
-          <div className="grid gap-5 md:grid-cols-2">
+          <div className="mb-4 border-b border-black/10 pb-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-orange-500">RaT Studios Admin</p>
+            <p className="mt-1 text-lg font-semibold text-neutral-950">Every admin page</p>
+          </div>
+          <div className="grid gap-5 lg:grid-cols-3">
             <AdminMenuGroup
               title="Primary"
               items={navItems.map((item) => ({
