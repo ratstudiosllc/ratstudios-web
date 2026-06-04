@@ -79,7 +79,7 @@
     position: absolute;
     inset: auto 0 auto auto;
     margin-top: 0.75rem;
-    width: min(1040px, calc(100vw - 48px));
+    width: min(360px, calc(100vw - 48px));
     max-height: min(78vh, 720px);
     border-radius: 12px;
   }
