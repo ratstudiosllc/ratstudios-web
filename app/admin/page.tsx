@@ -7,6 +7,7 @@ import {
   ArrowRight,
   CheckCircle2,
   Clock3,
+  Database,
   DollarSign,
   LayoutDashboard,
   Layers3,
@@ -31,6 +32,7 @@ import {
 } from "@/lib/studio-admin";
 import { getIdeasAgentSummary } from "@/lib/ideas-agent";
 import { readLatestSmokeResult } from "@/lib/qa-smoke";
+import { getSupabaseKeepaliveRows, type SupabaseKeepaliveRow } from "@/lib/supabase-keepalive";
 
 function cn(...values: Array<string | false | null | undefined>) {
   return values.filter(Boolean).join(" ");
@@ -343,10 +345,61 @@ function formatMountainNow(dateString?: string | null) {
   }).format(date);
 }
 
+function getKeepaliveStatusMeta(status: SupabaseKeepaliveRow["status"]) {
+  if (status === "healthy") return { label: "Healthy", tone: "bg-emerald-100 text-emerald-800", border: "border-emerald-200" };
+  if (status === "stale") return { label: "Stale", tone: "bg-amber-100 text-amber-800", border: "border-amber-200" };
+  if (status === "failing") return { label: "Failing", tone: "bg-red-100 text-red-800", border: "border-red-200" };
+  return { label: "Unknown", tone: "bg-neutral-100 text-neutral-700", border: "border-black/10" };
+}
+
+function SupabaseKeepaliveCard({ item }: { item: SupabaseKeepaliveRow }) {
+  const status = getKeepaliveStatusMeta(item.status);
+  return (
+    <div className={cn("rounded-[28px] border bg-[#fcfaf7] p-5", status.border)}>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-neutral-500">{item.projectRef}</p>
+            <span className={cn("rounded-full px-2.5 py-1 text-xs font-semibold", status.tone)}>{status.label}</span>
+          </div>
+          <h3 className="mt-2 text-xl font-semibold text-neutral-950">{item.appName}</h3>
+          <p className="mt-1 text-sm text-neutral-600">{item.schedule}</p>
+        </div>
+        <div className="rounded-2xl bg-white p-3 text-neutral-700 shadow-sm">
+          <Database className="h-5 w-5" />
+        </div>
+      </div>
+
+      <div className="mt-5 grid gap-3 md:grid-cols-3">
+        <div className="rounded-2xl bg-white p-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">Last success</p>
+          <p className="mt-2 text-sm font-medium text-neutral-900">{formatMountainNow(item.lastSuccessAt)}</p>
+        </div>
+        <div className="rounded-2xl bg-white p-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">Last check</p>
+          <p className="mt-2 text-sm font-medium text-neutral-900">{formatMountainNow(item.lastCheckedAt)}</p>
+        </div>
+        <div className="rounded-2xl bg-white p-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">Latency</p>
+          <p className="mt-2 text-sm font-medium text-neutral-900">{item.lastLatencyMs == null ? "unknown" : `${item.lastLatencyMs}ms`}</p>
+        </div>
+      </div>
+
+      <div className="mt-4 rounded-2xl bg-white p-4 text-sm text-neutral-600">
+        <p className="font-medium text-neutral-900">Health endpoint</p>
+        <p className="mt-1 break-all text-xs text-neutral-500">{item.healthUrl}</p>
+        {item.error ? <p className="mt-3 text-sm text-red-700">Last error: {item.error}</p> : null}
+        {item.consecutiveFailures > 0 ? <p className="mt-2 text-sm text-red-700">Consecutive failures: {item.consecutiveFailures}</p> : null}
+      </div>
+    </div>
+  );
+}
+
 export default async function AdminPage() {
-  const [ops, issues] = await Promise.all([
+  const [ops, issues, supabaseKeepalive] = await Promise.all([
     getOpsRuns().catch(() => null),
     import("@/lib/issues-tracker").then((m) => m.getIssueTracker().catch(() => null)).catch(() => null),
+    getSupabaseKeepaliveRows(),
   ]);
 
   const currentApps = getCurrentApps();
@@ -453,6 +506,26 @@ export default async function AdminPage() {
                 <div className="rounded-2xl bg-white p-4">Median completion time: {formatDuration(ops?.kpis.medianDurationMs ?? null)}</div>
               </div>
             </div>
+          </div>
+        </section>
+
+        <section className="mt-8 rounded-[32px] border border-black/5 bg-white p-6 shadow-sm">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <SectionHeader
+              eyebrow="Supabase keepalive"
+              title="Free-tier pause prevention"
+              body="Daily health pings perform a real Supabase write/read in each product database, then record the result here for monitoring."
+            />
+            <Link href="/api/cron/supabase-keepalive" className="inline-flex items-center gap-2 rounded-xl border border-black/10 bg-[#fcfaf7] px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-white">
+              Run endpoint
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+
+          <div className="mt-6 grid gap-5 xl:grid-cols-2">
+            {supabaseKeepalive.map((item) => (
+              <SupabaseKeepaliveCard key={item.id} item={item} />
+            ))}
           </div>
         </section>
 

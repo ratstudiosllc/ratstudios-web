@@ -2,6 +2,7 @@ import Link from "next/link";
 import {
   Activity,
   Building2,
+  Globe2,
   Headphones,
   LayoutDashboard,
   Layers3,
@@ -15,7 +16,7 @@ function cn(...values: Array<string | false | null | undefined>) {
   return values.filter(Boolean).join(" ");
 }
 
-type AdminNavKey = "dashboard" | "current-apps" | "ideas" | "future-apps" | "issues" | "recommendations" | "customer-support" | "org-chart" | "agent-kpis" | "marketing" | "agent-runs";
+type AdminNavKey = "dashboard" | "current-apps" | "ideas" | "future-apps" | "issues" | "recommendations" | "customer-support" | "domains" | "org-chart" | "agent-kpis" | "marketing" | "agent-runs";
 
 const navItems: Array<{ key: AdminNavKey; href: string; label: string; icon: React.ReactNode }> = [
   { key: "dashboard", href: "/admin", label: "Dashboard", icon: <LayoutDashboard className="h-4 w-4 text-orange-500" /> },
@@ -25,6 +26,7 @@ const navItems: Array<{ key: AdminNavKey; href: string; label: string; icon: Rea
   { key: "issues", href: "/admin/issues", label: "Issues", icon: <Wrench className="h-4 w-4 text-orange-500" /> },
   { key: "recommendations", href: "/admin/recommendations", label: "Recommendations", icon: <ListTodo className="h-4 w-4 text-orange-500" /> },
   { key: "customer-support", href: "/admin/customer-support", label: "Customer Support", icon: <Headphones className="h-4 w-4 text-orange-500" /> },
+  { key: "domains", href: "/admin/domains", label: "Domains", icon: <Globe2 className="h-4 w-4 text-orange-500" /> },
   { key: "org-chart", href: "/admin/org-chart", label: "Org Chart", icon: <Building2 className="h-4 w-4 text-orange-500" /> },
   { key: "agent-kpis", href: "/admin/agent-kpis", label: "Agent KPIs", icon: <Activity className="h-4 w-4 text-orange-500" /> },
 ];

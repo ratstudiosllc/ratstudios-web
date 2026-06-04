@@ -7,6 +7,14 @@
     {
       "path": "/api/cron/daily-recommendations",
       "schedule": "0 12 * * *"
+    },
+    {
+      "path": "/api/cron/supabase-keepalive",
+      "schedule": "15 12 * * *"
+    },
+    {
+      "path": "/api/cron/cloudflare-registrar-sync",
+      "schedule": "30 12 * * *"
     }
   ]
 }
