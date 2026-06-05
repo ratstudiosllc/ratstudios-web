@@ -8,9 +8,10 @@ export async function syncRegistrarDomainsAction() {
   try {
     await syncCloudflareRegistrarRegistrations();
     revalidatePath("/admin/domains");
-    redirect("/admin/domains?sync=success");
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown sync error";
     redirect(`/admin/domains?sync=error&message=${encodeURIComponent(message)}`);
   }
+
+  redirect("/admin/domains?sync=success");
 }
