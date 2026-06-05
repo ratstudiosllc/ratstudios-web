@@ -41,13 +41,21 @@ export interface AppPlatformWorkstream {
   checklist: LaunchChecklistSection[];
 }
 
+export interface SupabaseAccountAccess {
+  accountName: string;
+  email: string;
+  role: string;
+  status: string;
+  note?: string;
+}
+
 export interface AppOperations {
   vercelWebLink: string;
   vercelProjectName?: string;
   supabaseProjectRef?: string;
   supabaseUrl?: string;
-  supabaseOwnerAccounts: string[];
-  supabasePermissionAccounts: string[];
+  supabaseOrgName?: string;
+  supabaseAccounts: SupabaseAccountAccess[];
 }
 
 export interface StudioApp {
@@ -159,8 +167,11 @@ export const studioApps: StudioApp[] = [
       vercelProjectName: "stitchlogic-web",
       supabaseProjectRef: "daprwnaehmwzdauojmsh",
       supabaseUrl: "https://daprwnaehmwzdauojmsh.supabase.co",
-      supabaseOwnerAccounts: ["RaT Studios / Topher Supabase workspace"],
-      supabasePermissionAccounts: ["Topher: admin", "Richard: access needs confirmation"],
+      supabaseOrgName: "RAT Software",
+      supabaseAccounts: [
+        { accountName: "RAT Software", email: "Needs confirmation", role: "Owner/admin", status: "Confirmed org via Supabase CLI", note: "CLI token can see StitchLogic in this org." },
+        { accountName: "Richard access", email: "rca81@yahoo.com", role: "Access unknown", status: "Needs confirmation", note: "Richard's known Apple/TestFlight email; verify Supabase membership before relying on it." },
+      ],
     },
     currentFocus: "Ship cleaner onboarding and tighten Pro conversion.",
     nextMilestone: "Next TestFlight push with conversion improvements.",
@@ -222,8 +233,11 @@ export const studioApps: StudioApp[] = [
       vercelProjectName: "agalmanac",
       supabaseProjectRef: "qysmyzxikbaslrjkhiyx",
       supabaseUrl: "https://qysmyzxikbaslrjkhiyx.supabase.co",
-      supabaseOwnerAccounts: ["RaT Studios / Topher Supabase workspace"],
-      supabasePermissionAccounts: ["Topher: admin", "Richard: access needs confirmation"],
+      supabaseOrgName: "RAT Software",
+      supabaseAccounts: [
+        { accountName: "RAT Software", email: "Needs confirmation", role: "Owner/admin", status: "Confirmed org via Supabase CLI", note: "CLI token can see AgAlmanac in this org." },
+        { accountName: "Richard access", email: "Needs confirmation", role: "Access unknown", status: "Needs confirmation" },
+      ],
     },
     currentFocus: "Tighten operator workflow and get more producers in the loop.",
     nextMilestone: "Operational field workflow and alerts worth showing live.",
@@ -285,8 +299,11 @@ export const studioApps: StudioApp[] = [
       vercelProjectName: "storagehq",
       supabaseProjectRef: "vijvlyxkhrkmohhojhww",
       supabaseUrl: "https://vijvlyxkhrkmohhojhww.supabase.co",
-      supabaseOwnerAccounts: ["RaT Studios / Topher Supabase workspace"],
-      supabasePermissionAccounts: ["Topher: admin", "Richard: access needs confirmation"],
+      supabaseOrgName: "RaT_Test #3",
+      supabaseAccounts: [
+        { accountName: "RaT_Test #3", email: "rca81@yahoo.com", role: "Owner", status: "Confirmed from Supabase screenshot", note: "Free/Nano Supabase account shown on StorageHQ project screen." },
+        { accountName: "Topher access", email: "Needs confirmation", role: "Access unknown", status: "Needs confirmation" },
+      ],
     },
     currentFocus: "Stabilize production on the renamed StorageHQ stack and finish Supabase schema reconciliation once Docker is available.",
     nextMilestone: "Complete Docker-backed Supabase db pull and verify the repo schema matches production.",
@@ -348,8 +365,11 @@ export const studioApps: StudioApp[] = [
       vercelProjectName: "mowpro",
       supabaseProjectRef: "nlpzynitzmrbtwfgjvlm",
       supabaseUrl: "https://nlpzynitzmrbtwfgjvlm.supabase.co",
-      supabaseOwnerAccounts: ["RaT Studios / Topher Supabase workspace"],
-      supabasePermissionAccounts: ["Topher: admin", "Richard: admin access reported; verify in Supabase"],
+      supabaseOrgName: "Needs confirmation",
+      supabaseAccounts: [
+        { accountName: "MowPro Supabase account", email: "Needs confirmation", role: "Owner", status: "Needs confirmation", note: "Project ref is confirmed; owning Supabase login email still needs to be recorded." },
+        { accountName: "Richard access", email: "Needs confirmation", role: "Admin reported", status: "Needs confirmation", note: "Richard was able to run SQL; verify exact Supabase account email." },
+      ],
     },
     currentFocus: "Finish launch QA now that RLS hardening, auth URLs, legal pages, email templates, and mowpro.app DNS/HTTPS are in place.",
     nextMilestone: "Complete provider/customer auth QA and manual launch checklist before public beta traffic.",
@@ -511,8 +531,11 @@ export const studioApps: StudioApp[] = [
       vercelProjectName: "expired-fda",
       supabaseProjectRef: "czyeqrrptufqlcbxnzxj",
       supabaseUrl: "https://czyeqrrptufqlcbxnzxj.supabase.co",
-      supabaseOwnerAccounts: ["RaT Studios / Topher Supabase workspace"],
-      supabasePermissionAccounts: ["Topher: admin", "Richard: access needs confirmation"],
+      supabaseOrgName: "Needs confirmation",
+      supabaseAccounts: [
+        { accountName: "MedTrack Supabase account", email: "Needs confirmation", role: "Owner", status: "Needs confirmation", note: "Project ref is confirmed; owning Supabase login email still needs to be recorded." },
+        { accountName: "Richard access", email: "Needs confirmation", role: "Access unknown", status: "Needs confirmation" },
+      ],
     },
     currentFocus: "Define and build the governed Item Master import and cleanup workflow without turning AI into a black-box data editor.",
     nextMilestone: "Stand up the Supabase-backed import foundation: batch ledger, raw row storage, mapping review, and batch health profile.",

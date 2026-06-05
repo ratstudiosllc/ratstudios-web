@@ -53,7 +53,7 @@ function OperationsTile({ product }: { product: StudioApp }) {
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">Ops access</p>
-          <p className="mt-2 text-sm text-neutral-600">Supabase ownership, permission visibility, and the live Vercel web link for this app.</p>
+          <p className="mt-2 text-sm text-neutral-600">Supabase account email, permission visibility, and the live Vercel web link for this app.</p>
         </div>
         <Link
           href={operations.vercelWebLink}
@@ -65,7 +65,7 @@ function OperationsTile({ product }: { product: StudioApp }) {
         </Link>
       </div>
 
-      <div className="mt-4 grid gap-3 lg:grid-cols-4">
+      <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,0.95fr)_minmax(0,1.4fr)]">
         <div className="rounded-xl border border-black/5 bg-white p-3">
           <p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">Vercel link</p>
           <Link href={operations.vercelWebLink} target="_blank" rel="noopener noreferrer" className="mt-1 block break-words text-sm font-semibold text-neutral-950 underline underline-offset-4">
@@ -83,15 +83,20 @@ function OperationsTile({ product }: { product: StudioApp }) {
           ) : null}
         </div>
         <div className="rounded-xl border border-black/5 bg-white p-3">
-          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">Supabase owner</p>
-          <div className="mt-1 space-y-1 text-sm text-neutral-700">
-            {operations.supabaseOwnerAccounts.map((account) => <p key={account}>• {account}</p>)}
-          </div>
-        </div>
-        <div className="rounded-xl border border-black/5 bg-white p-3">
-          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">Permissions</p>
-          <div className="mt-1 space-y-1 text-sm text-neutral-700">
-            {operations.supabasePermissionAccounts.map((account) => <p key={account}>• {account}</p>)}
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">Supabase accounts</p>
+          {operations.supabaseOrgName ? <p className="mt-1 text-sm font-semibold text-neutral-950">Org: {operations.supabaseOrgName}</p> : null}
+          <div className="mt-3 space-y-3">
+            {operations.supabaseAccounts.map((account) => (
+              <div key={`${account.accountName}-${account.email}`} className="rounded-lg border border-black/5 bg-[#fcfaf7] p-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="text-sm font-semibold text-neutral-950">{account.accountName}</p>
+                  <span className="rounded-full border border-black/5 bg-white px-2.5 py-1 text-xs font-semibold text-neutral-600">{account.status}</span>
+                </div>
+                <p className="mt-1 break-words text-sm text-neutral-700">Email: <span className="font-semibold text-neutral-950">{account.email}</span></p>
+                <p className="mt-1 text-sm text-neutral-600">Role: {account.role}</p>
+                {account.note ? <p className="mt-2 text-xs leading-5 text-neutral-500">{account.note}</p> : null}
+              </div>
+            ))}
           </div>
         </div>
       </div>
