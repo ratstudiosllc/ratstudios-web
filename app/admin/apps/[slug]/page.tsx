@@ -43,6 +43,62 @@ function Kpi({ label, value, helper }: { label: string; value: string; helper: s
   );
 }
 
+function OperationsTile({ product }: { product: StudioApp }) {
+  if (!product.operations) return null;
+
+  const operations = product.operations;
+
+  return (
+    <div className="mt-6 rounded-2xl border border-black/5 bg-[#fcfaf7] p-4">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">Ops access</p>
+          <p className="mt-2 text-sm text-neutral-600">Supabase ownership, permission visibility, and the live Vercel web link for this app.</p>
+        </div>
+        <Link
+          href={operations.vercelWebLink}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="rounded-xl bg-neutral-950 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800"
+        >
+          Open Vercel web link
+        </Link>
+      </div>
+
+      <div className="mt-4 grid gap-3 lg:grid-cols-4">
+        <div className="rounded-xl border border-black/5 bg-white p-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">Vercel link</p>
+          <Link href={operations.vercelWebLink} target="_blank" rel="noopener noreferrer" className="mt-1 block break-words text-sm font-semibold text-neutral-950 underline underline-offset-4">
+            {operations.vercelWebLink.replace(/^https?:\/\//, "")}
+          </Link>
+          {operations.vercelProjectName ? <p className="mt-1 text-xs text-neutral-500">Project: {operations.vercelProjectName}</p> : null}
+        </div>
+        <div className="rounded-xl border border-black/5 bg-white p-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">Supabase project</p>
+          <p className="mt-1 break-words text-sm font-semibold text-neutral-950">{operations.supabaseProjectRef ?? "Needs confirmation"}</p>
+          {operations.supabaseUrl ? (
+            <Link href={operations.supabaseUrl} target="_blank" rel="noopener noreferrer" className="mt-1 block break-words text-xs text-neutral-500 underline underline-offset-4">
+              {operations.supabaseUrl.replace(/^https?:\/\//, "")}
+            </Link>
+          ) : null}
+        </div>
+        <div className="rounded-xl border border-black/5 bg-white p-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">Supabase owner</p>
+          <div className="mt-1 space-y-1 text-sm text-neutral-700">
+            {operations.supabaseOwnerAccounts.map((account) => <p key={account}>• {account}</p>)}
+          </div>
+        </div>
+        <div className="rounded-xl border border-black/5 bg-white p-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">Permissions</p>
+          <div className="mt-1 space-y-1 text-sm text-neutral-700">
+            {operations.supabasePermissionAccounts.map((account) => <p key={account}>• {account}</p>)}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 
 const checklistStatusCopy: Record<LaunchChecklistItem["status"], { label: string; className: string }> = {
   done: { label: "Done", className: "border-emerald-200 bg-emerald-50 text-emerald-800" },
@@ -272,6 +328,8 @@ export default async function ProductAdminPage({
           </div>
 
           {renderAppSwitcher(product)}
+
+          <OperationsTile product={product} />
 
           <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
             <Kpi label="Total issues" value={String(issueMetrics.total)} helper="Tracked for this app" />

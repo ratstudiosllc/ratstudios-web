@@ -41,6 +41,15 @@ export interface AppPlatformWorkstream {
   checklist: LaunchChecklistSection[];
 }
 
+export interface AppOperations {
+  vercelWebLink: string;
+  vercelProjectName?: string;
+  supabaseProjectRef?: string;
+  supabaseUrl?: string;
+  supabaseOwnerAccounts: string[];
+  supabasePermissionAccounts: string[];
+}
+
 export interface StudioApp {
   slug: string;
   name: string;
@@ -51,6 +60,7 @@ export interface StudioApp {
   owner: string;
   href: string;
   summary: string;
+  operations?: AppOperations;
   currentFocus: string;
   nextMilestone: string;
   users: AppSectionSeed;
@@ -144,6 +154,14 @@ export const studioApps: StudioApp[] = [
     owner: "Topher",
     href: "/admin/apps/stitchlogic",
     summary: "Quilting software with active product work, TestFlight iteration, and conversion improvements in flight.",
+    operations: {
+      vercelWebLink: "https://www.stitchlogic.app",
+      vercelProjectName: "stitchlogic-web",
+      supabaseProjectRef: "daprwnaehmwzdauojmsh",
+      supabaseUrl: "https://daprwnaehmwzdauojmsh.supabase.co",
+      supabaseOwnerAccounts: ["RaT Studios / Topher Supabase workspace"],
+      supabasePermissionAccounts: ["Topher: admin", "Richard: access needs confirmation"],
+    },
     currentFocus: "Ship cleaner onboarding and tighten Pro conversion.",
     nextMilestone: "Next TestFlight push with conversion improvements.",
     users: {
@@ -199,6 +217,14 @@ export const studioApps: StudioApp[] = [
     owner: "Topher",
     href: "/admin/apps/agalmanac",
     summary: "Operational agriculture tooling with early validation and a need for tighter workflow proof.",
+    operations: {
+      vercelWebLink: "https://agalmanac.app",
+      vercelProjectName: "agalmanac",
+      supabaseProjectRef: "qysmyzxikbaslrjkhiyx",
+      supabaseUrl: "https://qysmyzxikbaslrjkhiyx.supabase.co",
+      supabaseOwnerAccounts: ["RaT Studios / Topher Supabase workspace"],
+      supabasePermissionAccounts: ["Topher: admin", "Richard: access needs confirmation"],
+    },
     currentFocus: "Tighten operator workflow and get more producers in the loop.",
     nextMilestone: "Operational field workflow and alerts worth showing live.",
     users: {
@@ -254,6 +280,14 @@ export const studioApps: StudioApp[] = [
     owner: "Topher",
     href: "/admin/apps/storagehq",
     summary: "Storage facility management SaaS for units, customers, leases, payments, maintenance records, and tenant portal workflows.",
+    operations: {
+      vercelWebLink: "https://storagehq.vercel.app",
+      vercelProjectName: "storagehq",
+      supabaseProjectRef: "vijvlyxkhrkmohhojhww",
+      supabaseUrl: "https://vijvlyxkhrkmohhojhww.supabase.co",
+      supabaseOwnerAccounts: ["RaT Studios / Topher Supabase workspace"],
+      supabasePermissionAccounts: ["Topher: admin", "Richard: access needs confirmation"],
+    },
     currentFocus: "Stabilize production on the renamed StorageHQ stack and finish Supabase schema reconciliation once Docker is available.",
     nextMilestone: "Complete Docker-backed Supabase db pull and verify the repo schema matches production.",
     users: {
@@ -309,6 +343,14 @@ export const studioApps: StudioApp[] = [
     owner: "Topher",
     href: "/admin/apps/mowpro",
     summary: "Lawn care operations SaaS for customers, jobs, invoices, service requests, expenses, settings, and customer portal workflows.",
+    operations: {
+      vercelWebLink: "https://mowpro.app",
+      vercelProjectName: "mowpro",
+      supabaseProjectRef: "nlpzynitzmrbtwfgjvlm",
+      supabaseUrl: "https://nlpzynitzmrbtwfgjvlm.supabase.co",
+      supabaseOwnerAccounts: ["RaT Studios / Topher Supabase workspace"],
+      supabasePermissionAccounts: ["Topher: admin", "Richard: admin access reported; verify in Supabase"],
+    },
     currentFocus: "Finish launch QA now that RLS hardening, auth URLs, legal pages, email templates, and mowpro.app DNS/HTTPS are in place.",
     nextMilestone: "Complete provider/customer auth QA and manual launch checklist before public beta traffic.",
     users: {
@@ -464,6 +506,14 @@ export const studioApps: StudioApp[] = [
     owner: "Topher",
     href: "/admin/apps/expired-fda",
     summary: "Hospital supply chain intelligence platform for item master cleanup, expiration monitoring, FDA recall matching, receiving workflows, reports, and RFID inventory operations.",
+    operations: {
+      vercelWebLink: "https://expired-fda-cyan.vercel.app",
+      vercelProjectName: "expired-fda",
+      supabaseProjectRef: "czyeqrrptufqlcbxnzxj",
+      supabaseUrl: "https://czyeqrrptufqlcbxnzxj.supabase.co",
+      supabaseOwnerAccounts: ["RaT Studios / Topher Supabase workspace"],
+      supabasePermissionAccounts: ["Topher: admin", "Richard: access needs confirmation"],
+    },
     currentFocus: "Define and build the governed Item Master import and cleanup workflow without turning AI into a black-box data editor.",
     nextMilestone: "Stand up the Supabase-backed import foundation: batch ledger, raw row storage, mapping review, and batch health profile.",
     users: {
