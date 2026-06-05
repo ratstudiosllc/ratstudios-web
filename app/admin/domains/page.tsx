@@ -119,7 +119,19 @@ function DomainCard({ domain }: { domain: DomainRegistrationRow }) {
   );
 }
 
-export default async function DomainsPage() {
+function getSearchValue(value: string | string[] | undefined) {
+  if (Array.isArray(value)) return value[0];
+  return value;
+}
+
+export default async function DomainsPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ sync?: string | string[]; message?: string | string[] }> | { sync?: string | string[]; message?: string | string[] };
+}) {
+  const resolvedSearchParams = searchParams ? await searchParams : {};
+  const syncStatus = getSearchValue(resolvedSearchParams.sync);
+  const syncMessage = getSearchValue(resolvedSearchParams.message);
   const dashboard = await getDomainRegistrationDashboard();
   const { summary, domains } = dashboard;
 
@@ -147,6 +159,20 @@ export default async function DomainsPage() {
             <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900">
               <p className="font-semibold">Cloudflare is not configured yet.</p>
               <p className="mt-2">Add `CLOUDFLARE_ACCOUNT_ID` and a read-only `CLOUDFLARE_API_TOKEN` to enable registrar sync. The page will show cached data here once the first sync succeeds.</p>
+            </div>
+          ) : null}
+
+          {syncStatus === "success" ? (
+            <div className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-sm text-emerald-900">
+              <p className="font-semibold">Cloudflare sync finished.</p>
+              <p className="mt-2">Registrar cache refreshed successfully.</p>
+            </div>
+          ) : null}
+
+          {syncStatus === "error" ? (
+            <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-5 text-sm text-red-900">
+              <p className="font-semibold">Cloudflare sync failed.</p>
+              <p className="mt-2">{syncMessage || "No error details were returned. Check the Vercel function logs."}</p>
             </div>
           ) : null}
         </section>
